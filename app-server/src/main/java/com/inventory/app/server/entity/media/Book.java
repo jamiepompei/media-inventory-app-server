@@ -1,4 +1,9 @@
 package com.inventory.app.server.entity.media;
 
-public class Book {
+import java.util.List;
+
+public class Book extends Media {
+    private List<String> authors;
+    private Integer copyrightYear;
+    private Integer edition;
 }
