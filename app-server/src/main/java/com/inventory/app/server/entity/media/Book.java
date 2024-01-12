@@ -1,9 +1,14 @@
 package com.inventory.app.server.entity.media;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.List;
 @Entity(name = "Book")
 @Table(name = "book")
+@Getter
+@Setter
 public class Book extends Media {
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> authors;

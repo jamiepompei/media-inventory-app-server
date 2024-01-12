@@ -1,6 +1,8 @@
 package com.inventory.app.server.entity.collection;
 
 import com.fasterxml.jackson.databind.ser.Serializers;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +10,8 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 @Entity(name = "Collection_Details")
 @Table(name = "collection_details")
+@Getter
+@Setter
 public class CollectionDetails extends BaseCollection {
     @Column(name = "created_by")
     private String createdBy;
@@ -19,4 +23,15 @@ public class CollectionDetails extends BaseCollection {
     private String modifiedBy;
     @Column(name = "description")
     private String description;
+
+    @Override
+    public String toString() {
+        return "CollectionDetails{" +
+                "createdBy='" + createdBy + '\'' +
+                ", createdOn=" + createdOn +
+                ", modifiedOn=" + modifiedOn +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

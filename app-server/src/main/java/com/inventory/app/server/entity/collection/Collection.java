@@ -1,12 +1,16 @@
 package com.inventory.app.server.entity.collection;
 
 import com.inventory.app.server.entity.media.Media;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
 @Entity(name = "Collection")
 @Table(name = "collection")
+@Getter
+@Setter
 public class Collection extends BaseCollection {
     @ManyToMany
             @JoinTable(
