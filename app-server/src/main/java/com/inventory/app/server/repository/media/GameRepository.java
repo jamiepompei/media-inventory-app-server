@@ -7,6 +7,6 @@ import java.util.List;
 @Repository
 public interface GameRepository {
     List<Game> findByNumberOfPlayers(Integer numberOfPlayers);
-    List<Game> findByCOnsole(String console);
+    List<Game> findByConsole(String console);
     List<Game> findByTitle(String title);
 }
