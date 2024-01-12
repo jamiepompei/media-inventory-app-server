@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity(name = "PermissionLevel")
-@Table(name = "perission_level")
+@Table(name = "permission_level")
 public class UserPermissions extends BaseUser {
     //TODO figure out how to implement this?
     @Column(name = "collection_id")
