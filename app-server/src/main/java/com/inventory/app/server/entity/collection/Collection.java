@@ -19,8 +19,6 @@ public class Collection extends BaseCollection {
                     inverseJoinColumns = @JoinColumn(name = "tag_id")
             )
     private Set<Tag> tags;
-    @Column(name = "title")
-    private String title;
     //derived from loading all of the media objects
     private List<Media> mediaList;
     @OneToOne(

@@ -21,6 +21,8 @@ public class CollectionDetails extends BaseCollection {
     private LocalDateTime modifiedOn;
     @Column(name = "modified_by")
     private String modifiedBy;
+    @Column(name = "title")
+    private String title;
     @Column(name = "description")
     private String description;
 
