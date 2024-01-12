@@ -19,7 +19,12 @@ public class Collection extends BaseCollection {
                     inverseJoinColumns = @JoinColumn(name = "tag_id")
             )
     private Set<Tag> tags;
-    //derived from loading all of the media objects
+    @OneToMany(
+            mappedBy = "collection",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch =  FetchType.LAZY
+    )
     private List<Media> mediaList;
     @OneToOne(
             mappedBy = "collection",
