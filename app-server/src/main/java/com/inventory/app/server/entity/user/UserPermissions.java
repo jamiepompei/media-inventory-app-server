@@ -5,7 +5,6 @@ import javax.persistence.*;
 @Entity(name = "PermissionLevel")
 @Table(name = "permission_level")
 public class UserPermissions extends BaseUser {
-    //TODO figure out how to implement this?
     @ManyToOne
     @JoinTable(
             name = "collection_details",
