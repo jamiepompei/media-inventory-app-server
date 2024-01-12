@@ -1,8 +1,8 @@
 package com.inventory.app.server.entity.user;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import org.hibernate.query.sqm.FetchClauseType;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 @Entity(name = "UserDetails")
 @Table(name = "user_details")
@@ -15,4 +15,9 @@ public class UserDetails {
     private String emailAddress;
     @Column(name = "created_on")
     private LocalDateTime createdOn;
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    private User user;
+
+
 }

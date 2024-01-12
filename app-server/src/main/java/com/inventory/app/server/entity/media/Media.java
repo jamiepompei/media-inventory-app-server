@@ -1,5 +1,6 @@
 package com.inventory.app.server.entity.media;
 
+import com.inventory.app.server.entity.collection.Collection;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,4 +19,7 @@ public class Media {
     private String title;
     @Column(name = "format")
     private String format;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Collection collection;
+
 }
