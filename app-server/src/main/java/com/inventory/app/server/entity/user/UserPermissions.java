@@ -1,14 +1,17 @@
 package com.inventory.app.server.entity.user;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity(name = "PermissionLevel")
 @Table(name = "permission_level")
 public class UserPermissions extends BaseUser {
     //TODO figure out how to implement this?
-    @Column(name = "collection_id")
+    @ManyToOne
+    @JoinTable(
+            name = "collection_details",
+            joinColumns = @JoinColumn(name = "created_by"),
+            inverseJoinColumns = @JoinColumn(name = "user_name")
+    )
     private Long collectionId;
     @Column(name = "user_name")
     private String userName;

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ser.Serializers;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 @Entity(name = "Collection_Details")
 @Table(name = "collection_details")
@@ -25,6 +23,9 @@ public class CollectionDetails extends BaseCollection {
     private String title;
     @Column(name = "description")
     private String description;
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    private Collection collection;
 
     @Override
     public String toString() {
