@@ -2,10 +2,9 @@ package com.inventory.app.server.entity.user;
 
 import org.hibernate.annotations.NaturalId;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 
 @Entity(name = "UserLogin")
 @Table(name = "user_login")
