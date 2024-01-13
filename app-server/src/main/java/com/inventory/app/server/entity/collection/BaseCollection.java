@@ -1,6 +1,7 @@
 package com.inventory.app.server.entity.collection;
 
-import javax.persistence.*;
+
+import jakarta.persistence.*;
 
 @MappedSuperclass
 public class BaseCollection {

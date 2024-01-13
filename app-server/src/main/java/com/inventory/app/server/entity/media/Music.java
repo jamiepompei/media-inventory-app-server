@@ -3,7 +3,12 @@ package com.inventory.app.server.entity.media;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+
 import java.time.LocalDate;
 import java.util.List;
 @Entity(name = "Music")
