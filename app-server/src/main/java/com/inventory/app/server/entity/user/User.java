@@ -1,6 +1,6 @@
 package com.inventory.app.server.entity.user;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity(name = "User")
 @Table(name = "user")

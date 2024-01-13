@@ -1,10 +1,11 @@
 package com.inventory.app.server.entity.collection;
 
 import com.inventory.app.server.entity.media.Media;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+
 import java.util.List;
 import java.util.Set;
 @Entity(name = "Collection")
@@ -33,7 +34,4 @@ public class Collection extends BaseCollection {
             fetch =  FetchType.LAZY
     )
     private CollectionDetails collectionDetails;
-
-
-
 }

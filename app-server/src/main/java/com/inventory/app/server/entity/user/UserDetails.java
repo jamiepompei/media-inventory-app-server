@@ -1,8 +1,8 @@
 package com.inventory.app.server.entity.user;
 
-import org.hibernate.query.sqm.FetchClauseType;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 @Entity(name = "UserDetails")
 @Table(name = "user_details")
