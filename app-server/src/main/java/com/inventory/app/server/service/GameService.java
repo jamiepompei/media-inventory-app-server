@@ -1,7 +1,7 @@
 package com.inventory.app.server.service;
 
 import com.inventory.app.server.entity.media.Game;
-import com.inventory.app.server.repository.media.GameRepository;
+import com.inventory.app.server.repository.IGenericExtendedDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,22 +9,23 @@ import java.util.List;
 
 @Service
 public class GameService {
-    private GameRepository gameRepository;
+    private IGenericExtendedDao<Game, Long> dao;
 
     @Autowired
-    public GameService(GameRepository gameRepository) {
-        this.gameRepository = gameRepository;
+    public void setDao(IGenericExtendedDao<Game, Long> daoToSet) {
+        dao = daoToSet;
+        dao.setClazz(Game.class);
     }
 
     List<Game> findAllByNumberOfPlayers(Integer numberOfPlayers){
-        return gameRepository.findByNumberOfPlayers(numberOfPlayers);
+        return dao.findByAttributeContainsText("number_of_players", String.valueOf(numberOfPlayers));
     }
 
     List<Game> findByConsole(String console){
-        return gameRepository.findByConsole(console);
+        return  dao.findByAttributeContainsText("console", console);
     }
 
     List<Game> findByTitle(String title){
-        return gameRepository.findByTitle(title);
+        return dao.findByAttributeContainsText("title", title);
     }
 }

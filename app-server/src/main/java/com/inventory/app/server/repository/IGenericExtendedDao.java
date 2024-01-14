@@ -7,7 +7,8 @@ import java.io.Serializable;
 import java.util.List;
 
 @NoRepositoryBean
-public interface ExtendedRepository <T, ID extends Serializable> extends JpaRepository<T, ID> {
+public interface IGenericExtendedDao<T, ID extends Serializable> extends JpaRepository<T, ID> {
+    void setClazz(Class< T > clazzToSet);
 
     public List<T> findByAttributeContainsText(String attributeName, String text);
 }

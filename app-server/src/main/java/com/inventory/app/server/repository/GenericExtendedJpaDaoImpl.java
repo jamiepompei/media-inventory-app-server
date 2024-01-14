@@ -8,16 +8,15 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 
 import java.io.Serializable;
 import java.util.List;
 
-public class ExtendedRespositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID> implements ExtendedRepository<T, ID> {
+public class GenericExtendedJpaDaoImpl<T, ID extends Serializable> extends AbstractJpaDao<T, ID> implements IGenericExtendedDao<T, ID> {
     private EntityManager entityManager;
 
-    public ExtendedRespositoryImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
+    public GenericExtendedJpaDaoImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         super((JpaEntityInformation<T, ?>) entityInformation, (jakarta.persistence.EntityManager) entityManager);
         this.entityManager = entityManager;
     }
