@@ -1,4 +1,4 @@
-package com.inventory.app.server.service;
+package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Game;
 import com.inventory.app.server.repository.IGenericExtendedDao;
