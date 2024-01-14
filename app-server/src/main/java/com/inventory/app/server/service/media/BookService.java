@@ -1,5 +1,6 @@
 package com.inventory.app.server.service.media;
 
+import com.google.common.base.Preconditions;
 import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.repository.IGenericExtendedDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,22 @@ public class BookService {
 
     @Transactional
     public List<Book> getAllBooksByAuthor(String author){
+        Preconditions.checkNotNull(author);
         return dao.findByAttributeContainsText("author", author);
     }
 
     @Transactional
     public List<Book> getAllBooksByGenre(String genre){
+        Preconditions.checkNotNull(genre);
         return dao.findByAttributeContainsText("genre", genre);
+    }
+
+    public List<Book> getAllBooks() {
+        return dao.findAll();
+    }
+
+    public Book create(Book book){
+        Preconditions.checkNotNull(book);
+        return  dao.create(book);
     }
 }
