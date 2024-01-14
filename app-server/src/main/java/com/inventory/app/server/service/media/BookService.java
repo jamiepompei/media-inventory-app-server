@@ -1,7 +1,7 @@
-package com.inventory.app.server.service;
+package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Book;
-import com.inventory.app.server.repository.media.BookRepository;
+import com.inventory.app.server.repository.IGenericExtendedDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,24 +10,26 @@ import java.util.List;
 
 @Service
 public class BookService {
-    private BookRepository bookRepository;
+    private IGenericExtendedDao<Book, Long> dao;
 
     @Autowired
-    public BookService(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
+    public void setDao(IGenericExtendedDao<Book, Long> daoToSet) {
+        dao = daoToSet;
+        dao.setClazz(Book.class);
     }
+
     @Transactional
     public List<Book> getAllBooksByCollectionTitle(String collectionTitle) {
-      return  getAllBooksByCollectionTitle(collectionTitle);
+      return  dao.findByAttributeContainsText("title", collectionTitle);
     }
 
     @Transactional
     public List<Book> getAllBooksByAuthor(String author){
-        return bookRepository.findByAuthor(author);
+        return dao.findByAttributeContainsText("author", author);
     }
 
     @Transactional
     public List<Book> getAllBooksByGenre(String genre){
-        return bookRepository.findByGenre(genre);
+        return dao.findByAttributeContainsText("genre", genre);
     }
 }
