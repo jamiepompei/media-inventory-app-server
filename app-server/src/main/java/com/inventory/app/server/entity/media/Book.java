@@ -9,12 +9,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Column;
 
 
+import java.io.Serializable;
 import java.util.List;
 @Entity(name = "Book")
 @Table(name = "book")
 @Getter
 @Setter
-public class Book extends Media {
+public class Book extends Media implements Serializable {
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> authors;
     @Column(name = "copyright_year")
