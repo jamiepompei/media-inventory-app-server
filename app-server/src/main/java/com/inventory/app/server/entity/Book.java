@@ -1,4 +1,4 @@
-package com.inventory.app.server.entity.media;
+package com.inventory.app.server.entity;
 
 import lombok.Getter;
 import lombok.Setter;
