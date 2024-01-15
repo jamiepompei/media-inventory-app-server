@@ -1,6 +1,5 @@
-package com.inventory.app.server.entity.media;
+package com.inventory.app.server.entity;
 
-import com.inventory.app.server.entity.collection.Collection;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +17,8 @@ public class Media {
     private String title;
     @Column(name = "format")
     private String format;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Collection collection;
-
+    @Column
+    private String genre;
+    @Column
+    private Long collectionId;
 }

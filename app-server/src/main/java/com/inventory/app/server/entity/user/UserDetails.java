@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 @Entity(name = "UserDetails")
 @Table(name = "user_details")
-public class UserDetails {
+public class UserDetails extends BaseUser {
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "last_name")
