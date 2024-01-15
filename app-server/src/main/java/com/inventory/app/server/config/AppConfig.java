@@ -37,7 +37,7 @@ public class AppConfig {
     private String username;
     @Value("${spring.datasource.password}")
     private String password;
-    @Value("${spring.jpa.show-sql")
+    @Value("${spring.jpa.show-sql}")
     private String showSql;
 
 
