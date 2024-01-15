@@ -13,14 +13,14 @@ import java.util.List;
 @Service
 public class BookService {
 
-    private IGenericDao<Book, Long> dao;
+    private IBaseDao<Book, Long> dao;
 
-    public BookService(IGenericDao<Book, Long> dao) {
+    public BookService(IBaseDao<Book, Long> dao) {
         this.dao = dao;
     }
 
     @Autowired
-    public void setDao(@Qualifier("genericDaoImpl") IGenericDao<Book, Long> daoToSet) {
+    public void setDao(@Qualifier("genericDaoImpl") IBaseDao<Book, Long> daoToSet) {
         dao = daoToSet;
         dao.setClazz(Book.class);
     }

@@ -1,7 +1,7 @@
 package com.inventory.app.server.config;
 
 import com.google.common.base.Preconditions;
-import com.inventory.app.server.repository.repositoryTwo.BaseRepositoryImpl;
+import com.inventory.app.server.repository.BaseDaoImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +21,7 @@ import javax.sql.DataSource;
 @EnableTransactionManagement
 @PropertySource("classpath:application.properties")
 @EnableJpaRepositories(basePackages = {"com.inventory.app.server.entity"},
-        repositoryBaseClass = BaseRepositoryImpl.class
+        repositoryBaseClass = BaseDaoImpl.class
 )
 public class AppConfig {
     @Value("${spring.jpa.hibernate.ddl-auto}")
@@ -59,7 +59,7 @@ public class AppConfig {
     public DataSource dataSource() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(Preconditions.checkNotNull(getDatasourceDriverClassName()));
-        dataSource.setUrl(Preconditions.checkNotNull(getUsername()));
+        dataSource.setUrl(Preconditions.checkNotNull(getDatasourceUrl()));
         dataSource.setUsername(Preconditions.checkNotNull(getUsername()));
         dataSource.setPassword(Preconditions.checkNotNull(getPassword()));
 

@@ -11,13 +11,13 @@ import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class AbstractJpaDao<T, ID extends Serializable>  implements IGenericDao< T, ID > {
+public abstract class BaseDao<T, ID extends Serializable>  implements IBaseDao< T, ID > {
     private Class<T> clazz;
 
     @PersistenceContext(unitName = "entityManagerFactory")
     private final EntityManager entityManager;
 
-    public AbstractJpaDao(EntityManager entityManager) {
+    public BaseDao(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
