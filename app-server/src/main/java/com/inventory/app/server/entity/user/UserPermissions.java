@@ -2,18 +2,17 @@ package com.inventory.app.server.entity.user;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity(name = "PermissionLevel")
 @Table(name = "permission_level")
 public class UserPermissions extends BaseUser {
-    @ManyToOne
-    @JoinTable(
-            name = "collection_details",
-            joinColumns = @JoinColumn(name = "created_by"),
-            inverseJoinColumns = @JoinColumn(name = "user_name")
-    )
-    private Long collectionId;
+    @ElementCollection
+    private List<Long> collectionId;
     @Column(name = "user_name")
     private String userName;
     @Column(name = "permission_level")
     private Enum permissionLevel;
+    @OneToOne
+    private User user;
 }

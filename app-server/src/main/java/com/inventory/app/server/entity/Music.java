@@ -1,6 +1,5 @@
-package com.inventory.app.server.entity.media;
+package com.inventory.app.server.entity;
 
-import jdk.jfr.Enabled;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,15 +11,15 @@ import jakarta.persistence.FetchType;
 
 import java.time.LocalDate;
 import java.util.List;
-@Entity(name = "TelevisionShow")
-@Table(name = "televisiion_show")
+@Entity(name = "Music")
+@Table(name = "music")
 @Getter
 @Setter
-public class TelevisionShow {
+public class Music extends Media {
     @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> writers;
-    @Column(name = "season")
-    private Integer season;
+    private List<String> artists;
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<String> songList;
     @Column(name = "release_date")
     private LocalDate releaseDate;
 }

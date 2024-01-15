@@ -1,12 +1,11 @@
 package com.inventory.app.server.controller;
 
 import com.google.common.base.Preconditions;
-import com.inventory.app.server.entity.media.Book;
+import com.inventory.app.server.entity.Book;
 import com.inventory.app.server.service.media.BookService;
 import com.inventory.app.server.utility.RestPreConditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

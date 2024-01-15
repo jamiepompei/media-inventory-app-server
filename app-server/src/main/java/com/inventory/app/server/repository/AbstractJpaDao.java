@@ -3,42 +3,42 @@ package com.inventory.app.server.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
+import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
 
 
+import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class AbstractJpaDao<T, ID extends Serializable> extends SimpleJpaRepository< T, ID > implements IGenericExtendedDao< T, ID> {
+public abstract class AbstractJpaDao<T, ID extends Serializable>  implements IGenericDao< T, ID > {
     private Class<T> clazz;
 
     @PersistenceContext(unitName = "entityManagerFactory")
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
-    public AbstractJpaDao(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
-        super(entityInformation, entityManager);
+    public AbstractJpaDao(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    @Transactional
+    @Override
+    public List<T> findByField(String field, Object value, Class<T> clazz) {
+        return createQuery(field, value, clazz);
+    }
+
+    private List<T> createQuery(String fieldName, Object fieldValue, Class<T> clazz) {
+        JpaEntityInformation<T, ?> entityInformation = JpaEntityInformationSupport.getEntityInformation(clazz, entityManager);
+        String entityName = entityInformation.getEntityName();
+        Class<T> entityType = entityInformation.getJavaType();
+
+        String queryString = String.format("FROM %s WHERE %s = :value", entityName, fieldName);
+        TypedQuery<T> query = entityManager.createQuery(queryString, entityType);
+        return query.setParameter("value", fieldValue).getResultList();
     }
 
     public final void setClazz(final Class<T> clazzToSet){
         this.clazz = clazzToSet;
-    }
-
-    @Transactional
-    public List<T> findByAttributeContainsText(String attributeName, String text) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(getDomainClass());
-        Root<T> root = criteriaQuery.from(getDomainClass());
-        criteriaQuery
-                .select(root)
-                .where(criteriaBuilder
-                        .like(root.get(attributeName), "%" + text + "%"));
-        TypedQuery<T> query = entityManager.createQuery(criteriaQuery);
-        return query.getResultList();
     }
 
     public T findOne(final long id) {
@@ -68,4 +68,7 @@ public abstract class AbstractJpaDao<T, ID extends Serializable> extends SimpleJ
         delete(entity);
     }
 
+    public Class<T> getClazz() {
+        return clazz;
+    }
 }

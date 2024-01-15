@@ -1,4 +1,4 @@
-package com.inventory.app.server.entity.collection;
+package com.inventory.app.server.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
