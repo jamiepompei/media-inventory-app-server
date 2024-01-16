@@ -7,7 +7,7 @@ import lombok.Setter;
 @MappedSuperclass
 @Getter
 @Setter
-public class Media {
+public abstract class Media {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
@@ -19,6 +19,6 @@ public class Media {
     private String format;
     @Column
     private String genre;
-    @Column
-    private Long collectionId;
+    @Column(name = "collection_name")
+    private String collectionName;
 }
