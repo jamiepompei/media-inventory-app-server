@@ -13,7 +13,7 @@ public interface IBaseDao<T, ID extends Serializable>  {
 
     Class<T> getClazz();
 
-    List<T> findByField(String field, Object value, Class<T> clazz);
+    List<T> findByField(String field, Object value);
 
     T findOne(final long id);
 

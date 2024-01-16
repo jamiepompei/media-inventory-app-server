@@ -33,15 +33,13 @@ public class BookService {
     @Transactional
     public List<Book> getAllBooksByAuthor(String author){
         Preconditions.checkNotNull(author);
-        return null;
-      //  return dao.findByAttributeContainsText("author", author);
+        return dao.findByField("author", author);
     }
 
     @Transactional
     public List<Book> getAllBooksByGenre(String genre){
         Preconditions.checkNotNull(genre);
-        return null;
-      //  return dao.findByAttributeContainsText("genre", genre);
+        return dao.findByField("genre", genre);
     }
 
     public List<Book> getAllBooks() {
@@ -51,5 +49,10 @@ public class BookService {
     public Book create(Book book){
         Preconditions.checkNotNull(book);
         return  dao.create(book);
+    }
+
+    public Book update(Book book) {
+        Preconditions.checkNotNull(book);
+        return dao.update(book);
     }
 }

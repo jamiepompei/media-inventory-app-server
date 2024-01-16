@@ -23,12 +23,12 @@ public abstract class BaseDao<T, ID extends Serializable>  implements IBaseDao< 
 
     @Transactional
     @Override
-    public List<T> findByField(String field, Object value, Class<T> clazz) {
-        return createQuery(field, value, clazz);
+    public List<T> findByField(String field, Object value) {
+        return createQuery(field, value);
     }
 
-    private List<T> createQuery(String fieldName, Object fieldValue, Class<T> clazz) {
-        JpaEntityInformation<T, ?> entityInformation = JpaEntityInformationSupport.getEntityInformation(clazz, entityManager);
+    private List<T> createQuery(String fieldName, Object fieldValue) {
+        JpaEntityInformation<T, ?> entityInformation = JpaEntityInformationSupport.getEntityInformation(getClazz(), entityManager);
         String entityName = entityInformation.getEntityName();
         Class<T> entityType = entityInformation.getJavaType();
 
