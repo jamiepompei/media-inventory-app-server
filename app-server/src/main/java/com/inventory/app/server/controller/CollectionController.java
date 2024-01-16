@@ -1,10 +1,10 @@
 package com.inventory.app.server.controller;
 
 import com.google.common.base.Preconditions;
-import com.inventory.app.server.entity.Book;
 import com.inventory.app.server.entity.CollectionDetails;
 import com.inventory.app.server.entity.Media;
-import com.inventory.app.server.service.CollectionService;
+import com.inventory.app.server.error.ResourceNotFoundException;
+import com.inventory.app.server.service.collection.CollectionDetailsService;
 import com.inventory.app.server.utility.RestPreConditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,15 +17,15 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/collection")
 public class CollectionController {
-    private CollectionService collectionService;
+    private CollectionDetailsService collectionService;
 
     @Autowired
-    public CollectionController(CollectionService collectionService) {
+    public CollectionController(CollectionDetailsService collectionService) {
         this.collectionService = collectionService;
     }
 
     @GetMapping
-    ResponseEntity<List<String>> findAllCollections(){
+    ResponseEntity<List<CollectionDetails>> findAllCollections(){
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getAllCollections());
     }
 
@@ -36,10 +36,12 @@ public class CollectionController {
 
     @GetMapping
     ResponseEntity<String> findByCollectionName(@PathVariable("collection_name") final String collectionName){
-        List<Book> collectionByName = RestPreConditions.checkFound(collectionService.getAllBooksByAuthor(collectionName));
-        if(collectionByName.isEmpty()){
+        try{
+        RestPreConditions.checkFound(collectionService.findByTitle(collectionName));
+        } catch (ResourceNotFoundException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + collectionName);
-        } else return ResponseEntity.status(HttpStatus.OK).body(collectionName);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(collectionName);
     }
 
     @PostMapping
@@ -55,7 +57,7 @@ public class CollectionController {
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Book> updateCollection(@RequestBody CollectionDetails resource){
+    public ResponseEntity<CollectionDetails> updateCollection(@RequestBody CollectionDetails resource){
         try{
             Preconditions.checkNotNull(resource);
         } catch (NullPointerException e){
