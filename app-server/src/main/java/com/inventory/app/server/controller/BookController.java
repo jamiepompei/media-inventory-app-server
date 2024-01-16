@@ -48,7 +48,7 @@ public class BookController {
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Book> updateBook(@RequestBody Book resource){
         try{
             Preconditions.checkNotNull(resource);
