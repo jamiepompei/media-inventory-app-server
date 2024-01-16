@@ -17,7 +17,7 @@ public abstract class Media {
     private String title;
     @Column(name = "format")
     private String format;
-    @Column
+    @Column(name = "genre")
     private String genre;
     @Column(name = "collection_name")
     private String collectionName;
