@@ -1,6 +1,6 @@
 package com.inventory.app.server.entity;
 
-import com.inventory.app.server.config.StringListConverter;
+import com.inventory.app.server.config.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +10,6 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 
 @Entity(name = "book")
 @Table(name = "book")

@@ -1,4 +1,4 @@
-package com.inventory.app.server.config;
+package com.inventory.app.server.config.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
