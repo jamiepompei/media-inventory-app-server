@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @MappedSuperclass
 @Getter
 @Setter
-public abstract class Media {
+public class Media implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Version
     private Integer version;
@@ -21,4 +23,16 @@ public abstract class Media {
     private String genre;
     @Column(name = "collection_name")
     private String collectionName;
+
+    @Override
+    public String toString() {
+        return "Media{" +
+                "id=" + id +
+                ", version=" + version +
+                ", title='" + title + '\'' +
+                ", format='" + format + '\'' +
+                ", genre='" + genre + '\'' +
+                ", collectionName='" + collectionName + '\'' +
+                '}';
+    }
 }

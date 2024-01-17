@@ -14,10 +14,10 @@ import java.util.Optional;
 
 @Service
 public class CollectionDetailsService {
-    private IBaseDao<CollectionDetails, Long> dao;
+    private IBaseDao<CollectionDetails> dao;
 
     @Autowired
-    public void setDao(IBaseDao<CollectionDetails, Long> daoToSet) {
+    public void setDao(IBaseDao<CollectionDetails> daoToSet) {
         dao = daoToSet;
         dao.setClazz(daoToSet.getClazz());
     }
@@ -34,17 +34,17 @@ public class CollectionDetailsService {
 
     public CollectionDetails create(CollectionDetails resource) {
         Preconditions.checkNotNull(resource);
-        return  dao.create(resource);
+        return  dao.createOrUpdate(resource);
     }
 
 
     public CollectionDetails update(CollectionDetails resource) {
         Preconditions.checkNotNull(resource);
-        return  dao.create(resource);
+        return  dao.createOrUpdate(resource);
     }
 
     public List<CollectionDetails> getAllCollections() {
-        //TODO get the currentuser
+        //TODO get the current user
         User user = new User();
         return findCollectionsByCreatedBy(user.getUserLogin().getUsername());
     }

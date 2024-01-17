@@ -29,12 +29,12 @@ public class CollectionController {
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getAllCollections());
     }
 
-    @GetMapping
+    @GetMapping(value = "/collection/all/{collection_name}")
     ResponseEntity<List<Media>> findAllMediaByCollectionName(@PathVariable("collection_name") final String collectionName){
         return ResponseEntity.status(HttpStatus.OK).body(collectionService.getAllMediaByCollectionName());
     }
 
-    @GetMapping
+    @GetMapping(value = "/collection/{collection_name}")
     ResponseEntity<String> findByCollectionName(@PathVariable("collection_name") final String collectionName){
         try{
         RestPreConditions.checkFound(collectionService.findByTitle(collectionName));
