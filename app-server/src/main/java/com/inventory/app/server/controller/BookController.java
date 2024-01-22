@@ -54,6 +54,7 @@ public class BookController {
     public ResponseEntity<Book> createBook(@RequestBody Book resource){
         try{
        // Preconditions.checkNotNull(resource);
+            //todo check that resource doesnt already exist
         log.info("received request to create resource: " + resource);
        } catch (NullPointerException e){
             throw new ResponseStatusException((HttpStatus.BAD_REQUEST), "Bad request resource: " + resource);
