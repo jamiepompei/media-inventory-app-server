@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import java.io.Serializable;
 
-@Repository
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 @Qualifier(value = "genericDaoImpl")
-public class BaseDaoImpl<T, ID extends Serializable> extends BaseDao<T, ID> implements IBaseDao<T, ID> {
+@Repository
+@Scope( BeanDefinition.SCOPE_PROTOTYPE )
+public class BaseDaoImpl<T extends Serializable> extends BaseDao<T> implements IBaseDao<T> {
 
     public BaseDaoImpl(EntityManager entityManager) {
         super(entityManager);

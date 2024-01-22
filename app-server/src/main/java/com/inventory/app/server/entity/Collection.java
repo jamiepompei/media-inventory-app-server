@@ -25,4 +25,7 @@ public class Collection extends BaseCollection {
             fetch =  FetchType.LAZY
     )
     private CollectionDetails collectionDetails;
+    //todo how to implement this? saving the collection name from collection details on the media table. join on names?
+    //private List<Media> media;
+
 }
