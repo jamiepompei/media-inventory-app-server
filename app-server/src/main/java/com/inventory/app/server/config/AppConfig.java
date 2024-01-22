@@ -1,30 +1,25 @@
 package com.inventory.app.server.config;
 
 import com.google.common.base.Preconditions;
-import com.inventory.app.server.repository.BaseDaoImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.*;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
 @PropertySource("classpath:application.properties")
-@EnableJpaRepositories(basePackages = {"com.inventory.app.server.entity"},
-        repositoryBaseClass = BaseDaoImpl.class
-)
 public class AppConfig {
-    @Value("${spring.jpa.hibernate.ddl-auto}")
+    @Value("${spring.jpa.generate-ddl}")
     private String ddlAuto;
 
     @Value("${spring.jpa.database-platform}")
@@ -45,7 +40,9 @@ public class AppConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
-        em.setPackagesToScan("com.baeldung.persistence.model");
+        em.setPackagesToScan("com.inventory.app.server.entity");
+        Properties jpaProperties = getAdditionalProperties();
+        em.setJpaProperties(jpaProperties);
 
         final HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
         hibernateJpaVendorAdapter.setDatabasePlatform(getHibernateDialect());
@@ -78,14 +75,12 @@ public class AppConfig {
         return new PersistenceExceptionTranslationPostProcessor();
     }
 
-//    final Properties additionalProperties() {
-//        final Properties hibernateProperties = new Properties();
-//        hibernateProperties.setProperty("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
-//        hibernateProperties.setProperty("hibernate.dialect", env.getProperty("hibernate.dialect"));
-//        hibernateProperties.setProperty("hibernate.cache.use_second_level_cache", "false");
-//
-//        return hibernateProperties;
-//    }
+    final Properties getAdditionalProperties() {
+        final Properties jpaProperties = new Properties();
+       jpaProperties.setProperty("spring.jpa.hibernate.ddl-auto", getDdlAuto());
+
+        return jpaProperties;
+    }
 
     public String getDdlAuto() {
         return ddlAuto;

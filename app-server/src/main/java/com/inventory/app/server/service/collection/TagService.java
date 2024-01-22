@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TagService {
-    private IBaseDao<Tag, Long> dao;
+    private IBaseDao<Tag> dao;
 
     @Autowired
-    public void setDao(IBaseDao<Tag, Long> daoToSet) {
+    public void setDao(IBaseDao<Tag> daoToSet) {
         dao = daoToSet;
         dao.setClazz(Tag.class);
     }
