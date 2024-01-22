@@ -1,27 +1,16 @@
 package com.inventory.app.server.controller;
 
-import com.google.common.base.Preconditions;
 import com.inventory.app.server.entity.Book;
-import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.service.media.BookService;
 import com.inventory.app.server.utility.RestPreConditions;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.logging.Log;
-import org.apache.juli.logging.LogFactory;
-import org.apache.logging.log4j.message.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-
-import static org.springframework.boot.logging.LogLevel.*;
 
 @RestController
 @RequestMapping(value = "/books")
