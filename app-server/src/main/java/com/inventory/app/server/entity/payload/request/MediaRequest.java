@@ -14,15 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MediaRequest {
 
     private MediaId mediaId;
-    private Long number;
     /**
      * This map contains additional media attributes that correspond to a specific media bean.
      * The enum class MediaInventoryAdditionalAttributes defines the keys that could be
      * available in this map.
      */
     private ConcurrentHashMap<String, Object> additionalAttributes;
-
-
 }
 
 
