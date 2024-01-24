@@ -34,20 +34,20 @@ public interface BookMapper {
 
     @Named("mapAuthors")
     default List<String> mapAuthors(Map<String, Object> additionalAttributes) {
-      Object authorsValue = additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), Collections.emptyList());
-      @SuppressWarnings("unchecked")
-      List<String> authorsList = authorsValue instanceof List<?> ? (List<String>) authorsValue : Collections.emptyList();
-      return authorsList;
+        Object authorsValue = additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), Collections.emptyList());
+        @SuppressWarnings("unchecked")
+        List<String> authorsList = authorsValue instanceof List<?> ? (List<String>) authorsValue : Collections.emptyList();
+        return authorsList;
     }
 
     @Named("mapCopyrightYear")
     default Integer mapCopyrightYear(Map<String, Object> additionalAttributes) {
-        return  additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) : null;
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) : null;
     }
 
     @Named("mapEdition")
     default Integer mapEdition(Map<String, Object> additionalAttributes) {
-        return  additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) : null;
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) : null;
     }
 
     default MediaResponse mapBookToMediaResponseWithAdditionalAttributes(Book book) {
@@ -80,7 +80,7 @@ public interface BookMapper {
         }
 
         // Map copyright year if available
-        if (book.getCopyrightYear() != null){
+        if (book.getCopyrightYear() != null) {
             additionalAttributes.put(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey(), book.getCopyrightYear());
         }
 

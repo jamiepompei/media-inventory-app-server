@@ -1,8 +1,8 @@
 package com.inventory.app.server.config;
 
 public enum MediaInventoryAdditionalAttributes {
-   CONSOLES("consoles"),
-   NUMBER_OF_PLAYERS("numberOfPlayers"),
+    CONSOLES("consoles"),
+    NUMBER_OF_PLAYERS("numberOfPlayers"),
     RELEASE_DATE("releaseDate"),
     AUTHORS("authors"),
     COPYRIGHT_YEAR("copyright_year"),
