@@ -2,7 +2,7 @@ package com.inventory.app.server.controller;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.Book;
-import com.inventory.app.server.entity.payload.MediaRequest;
+import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.mapper.BookMapper;
 import com.inventory.app.server.service.media.BookService;
 import com.inventory.app.server.utility.RestPreConditions;
@@ -54,6 +54,7 @@ public class BookController {
                 Object authorsObject = bookRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey());
 
                 if (authorsObject instanceof List<?>) {
+                    @SuppressWarnings("unchecked")
                     List<String> authorsList = (List<String>) authorsObject;
                     if (authorsList.isEmpty()){
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Request must contain an author.");

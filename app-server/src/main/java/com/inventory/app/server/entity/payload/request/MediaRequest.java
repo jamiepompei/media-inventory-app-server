@@ -1,4 +1,4 @@
-package com.inventory.app.server.entity.payload;
+package com.inventory.app.server.entity.payload.request;
 
 import lombok.Builder;
 import lombok.Data;
