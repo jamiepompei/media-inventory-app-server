@@ -1,6 +1,6 @@
 //package com.inventory.app.server.service.media;
 //
-//import com.inventory.app.server.entity.TelevisionShow;
+//import com.inventory.app.server.entity.media.TelevisionShow;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Service;
 //

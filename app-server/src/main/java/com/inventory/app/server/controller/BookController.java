@@ -1,7 +1,7 @@
 package com.inventory.app.server.controller;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
-import com.inventory.app.server.entity.Book;
+import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.BookMapper;
@@ -53,7 +53,7 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    //add validation check that authors is not empty
+    //TODO input validation for fields in additional attributes
     public ResponseEntity<MediaResponse> createBook(@RequestBody MediaRequest bookRequest){
         try {
             // Input validation
@@ -74,6 +74,7 @@ public class BookController {
 
             log.info("Received request to create resource: " + bookRequest);
             Book book = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
+            //check if exists already? check by title and author i suppose...
             MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book));
             log.info("Created new book: " + response);
             return new ResponseEntity<>(response, HttpStatus.CREATED);

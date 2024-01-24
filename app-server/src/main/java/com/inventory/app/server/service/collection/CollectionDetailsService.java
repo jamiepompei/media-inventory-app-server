@@ -1,8 +1,8 @@
 package com.inventory.app.server.service.collection;
 
 import com.google.common.base.Preconditions;
-import com.inventory.app.server.entity.CollectionDetails;
-import com.inventory.app.server.entity.Media;
+import com.inventory.app.server.entity.collection.CollectionDetails;
+import com.inventory.app.server.entity.media.Media;
 import com.inventory.app.server.entity.user.User;
 import com.inventory.app.server.repository.IBaseDao;
 import org.springframework.beans.factory.annotation.Autowired;
