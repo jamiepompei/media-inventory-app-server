@@ -1,7 +1,7 @@
 package com.inventory.app.server.service.media;
 
 import com.google.common.base.Preconditions;
-import com.inventory.app.server.entity.Book;
+import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

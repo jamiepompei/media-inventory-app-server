@@ -1,5 +1,6 @@
-package com.inventory.app.server.entity;
+package com.inventory.app.server.entity.collection;
 
+import com.inventory.app.server.entity.media.Tag;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

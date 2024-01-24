@@ -1,6 +1,6 @@
 //package com.inventory.app.server.service.media;
 //
-//import com.inventory.app.server.entity.Music;
+//import com.inventory.app.server.entity.media.Music;
 //import com.inventory.app.server.repository.IGenericDao;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Service;

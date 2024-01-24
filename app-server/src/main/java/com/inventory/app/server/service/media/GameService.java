@@ -1,6 +1,6 @@
 //package com.inventory.app.server.service.media;
 //
-//import com.inventory.app.server.entity.Game;
+//import com.inventory.app.server.entity.media.Game;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Service;
 //

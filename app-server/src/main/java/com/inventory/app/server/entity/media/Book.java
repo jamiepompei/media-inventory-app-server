@@ -1,6 +1,7 @@
-package com.inventory.app.server.entity;
+package com.inventory.app.server.entity.media;
 
 import com.inventory.app.server.config.converter.StringListConverter;
+import com.inventory.app.server.entity.media.Media;
 import jakarta.persistence.*;
 import lombok.*;
 

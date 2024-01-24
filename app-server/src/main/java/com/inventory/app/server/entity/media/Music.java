@@ -1,5 +1,4 @@
-package com.inventory.app.server.entity;
-
+package com.inventory.app.server.entity.media;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,17 +6,20 @@ import lombok.Setter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.ElementCollection;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+
 import java.time.LocalDate;
 import java.util.List;
-@Entity(name = "Media")
-@Table(name = "movie")
+@Entity(name = "Music")
+@Table(name = "music")
 @Getter
 @Setter
-public class Movie extends Media {
+public class Music extends Media {
     @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> directors;
+    private List<String> artists;
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<String> songList;
     @Column(name = "release_date")
     private LocalDate releaseDate;
 }
