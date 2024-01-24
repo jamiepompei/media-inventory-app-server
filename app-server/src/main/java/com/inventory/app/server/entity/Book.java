@@ -4,7 +4,6 @@ import com.inventory.app.server.config.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,8 +15,7 @@ public class Book extends Media implements Serializable {
     @Column(name = "authors")
     private List<String> authors;
     @Column(name = "copyright_year")
-    private int copyrightYear;
+    private Integer copyrightYear;
     @Column(name = "edition")
-    private int edition;
-
+    private Integer edition;
 }
