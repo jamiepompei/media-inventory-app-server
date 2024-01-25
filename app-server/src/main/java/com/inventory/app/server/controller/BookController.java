@@ -86,20 +86,33 @@ public class BookController {
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateBook(@RequestBody Book resource, @PathVariable Long id){
+    public ResponseEntity<MediaResponse> updateBook(@RequestBody MediaRequest bookRequest, @PathVariable Long id){
         try{
-            log.info("received request to update resource: " + resource);
-        } catch (NullPointerException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request resource: " + resource);
+            if (bookRequest.getMediaId() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Media request must contain a valid id.");
+            }
+            log.info("received request to update resource: " + bookRequest);
+            Book existingBook = bookService.getBookById(id);
+            if (existingBook == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found, could not update " + bookRequest);
+            }
+            //TODO validations on updated book?
+            Book updatedBook = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
+            //TODO move this to the service layer
+            if (!existingBook.equals(updatedBook)){
+                existingBook.setAuthors(updatedBook.getAuthors());
+                existingBook.setEdition(updatedBook.getEdition());
+                existingBook.setFormat(updatedBook.getFormat());
+                existingBook.setTitle(updatedBook.getTitle());
+                existingBook.setGenre(updatedBook.getGenre());
+                existingBook.setCopyrightYear(updatedBook.getCopyrightYear());
+                existingBook.setCollectionName(updatedBook.getCollectionName());
+                existingBook.setVersion(existingBook.getVersion() + 1);
+            }
+            MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(existingBook));
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
         }
-        Book existingBook = bookService.getBookById(id);
-
-        if (existingBook == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found, could not update " + resource);
-        }
-        //TODO there has to be a more centralized place to do the version increment
-        existingBook.setVersion(existingBook.getVersion() + 1);
-        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(existingBook));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
