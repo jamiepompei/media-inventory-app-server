@@ -31,34 +31,30 @@ public class Book extends Media implements Serializable {
                 ", edition=" + edition +
                 " " +
                 super.toString() +
-                "} ";
+                "}";
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-
-        Book other = (Book) obj;
+        if (!(obj instanceof Book book)) return false;
 
         // Compare fields from the superclass (Media)
         if (!super.equals(obj)) return false;
 
         // Compare fields specific to Book
-        if (!Objects.equals(authors, other.authors)) return false;
-        if (!Objects.equals(copyrightYear, other.copyrightYear)) return false;
-        if (!Objects.equals(edition, other.edition)) return false;
-
-        return true;
+        return Objects.equals(getAuthors(), book.getAuthors()) &&
+                Objects.equals(getCopyrightYear(), book.getCopyrightYear()) &&
+                Objects.equals(getEdition(), book.getEdition());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
                 super.hashCode(),
-                authors,
-                copyrightYear,
-                edition
+                getAuthors(),
+                getCopyrightYear(),
+                getEdition()
         );
     }
 }
