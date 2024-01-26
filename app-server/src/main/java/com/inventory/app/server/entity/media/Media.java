@@ -9,7 +9,7 @@ import java.io.Serializable;
 @MappedSuperclass
 @Getter
 @Setter
-public class Media implements Serializable {
+public abstract class Media implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,13 +26,11 @@ public class Media implements Serializable {
 
     @Override
     public String toString() {
-        return "Media{" +
-                "id=" + id +
+        return "id=" + id +
                 ", version=" + version +
                 ", title='" + title + '\'' +
                 ", format='" + format + '\'' +
                 ", genre='" + genre + '\'' +
-                ", collectionName='" + collectionName + '\'' +
-                '}';
+                ", collectionName='" + collectionName;
     }
 }
