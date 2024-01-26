@@ -70,6 +70,11 @@ public class BookService {
         return dao.createOrUpdate(updatedBook);
     }
 
+    public void deleteById(Long id){
+        RestPreConditions.checkFound(getBookById(id));
+        dao.deleteById(id);
+    }
+
     private Book cloneBook(Book book) {
         Book clonedBook = new Book();
         BeanUtils.copyProperties(book, clonedBook);

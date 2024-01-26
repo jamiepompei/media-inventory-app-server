@@ -98,6 +98,21 @@ public class BookController {
         }
     }
 
+    @DeleteMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<MediaResponse> deleteBook(@PathVariable("id") Long id){
+        try{
+            if (id == null){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
+            }
+            bookService.deleteById(id);
+            MediaResponse response = MediaResponse.builder().mediaId(MediaId.builder().id(id).build()).build();
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
+        }
+    }
+
     private void validatedAdditionalAttributes(MediaRequest bookRequest) {
         @SuppressWarnings("unchecked")
         List<String> authors = (List<String>) bookRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey());
