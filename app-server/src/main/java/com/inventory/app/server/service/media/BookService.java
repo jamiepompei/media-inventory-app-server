@@ -1,13 +1,14 @@
 package com.inventory.app.server.service.media;
 
-import com.google.common.base.Preconditions;
+import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Book;
-import com.inventory.app.server.repository.*;
+import com.inventory.app.server.repository.IBaseDao;
+import com.inventory.app.server.utility.RestPreConditions;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
 
 import java.util.List;
 
@@ -27,50 +28,62 @@ public class BookService {
         dao.setClazz(Book.class);
     }
 
-
     public List<Book> getAllBooksByCollectionTitle(String collectionTitle) {
-     return  dao.findAll();
+        return dao.findByField("collection_name", collectionTitle);
     }
 
-
-    public List<Book> getAllBooksByAuthor(String author){
-        Preconditions.checkNotNull(author);
-        return dao.findByField("author", author);
+    public List<Book> getAllBooksByAuthor(List<String> author) {
+        return dao.findByField(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), author);
     }
 
-
-    public List<Book> getAllBooksByGenre(String genre){
-        Preconditions.checkNotNull(genre);
+    public List<Book> getAllBooksByGenre(String genre) {
         return dao.findByField("genre", genre);
     }
-
 
     public List<Book> getAllBooks() {
         return dao.findAll();
     }
 
-    public Book getBookById(Long id){
+    public Book getBookById(Long id) {
         return dao.findOne(id);
     }
 
+    public Book create(Book book) {
+        // validations before performing create
+        RestPreConditions.checkAlreadyExists(bookAlreadyExists(book), book);
 
-    public Book create(Book book){
-       // Preconditions.checkNotNull(book);
-        Book bookToSave = new Book();
-        bookToSave.setAuthors(book.getAuthors());
-        bookToSave.setTitle(book.getTitle());
-        bookToSave.setEdition(book.getEdition());
-        bookToSave.setFormat(book.getFormat());
-        bookToSave.setCopyrightYear(book.getCopyrightYear());
-        bookToSave.setCollectionName(book.getCollectionName());
-        bookToSave.setVersion(1);
-        bookToSave.setGenre(book.getGenre());
+        Book bookToSave = cloneBook(book);
         bookToSave.setId(null);
-        return  dao.createOrUpdate(bookToSave);
+        bookToSave.setVersion(1);
+
+        return dao.createOrUpdate(bookToSave);
     }
 
-    public Book update(Book book) {
-        Preconditions.checkNotNull(book);
-        return dao.createOrUpdate(book);
+    public Book update(Book updatedBook) {
+        //validations before performing the update
+        Book existingBook = RestPreConditions.checkFound(getBookById(updatedBook.getId()));
+        RestPreConditions.checkEquals(existingBook, updatedBook);
+
+        updatedBook = cloneBook(existingBook, updatedBook);
+        updatedBook.setVersion(existingBook.getVersion() + 1);
+
+        return dao.createOrUpdate(updatedBook);
+    }
+
+    private Book cloneBook(Book book) {
+        Book clonedBook = new Book();
+        BeanUtils.copyProperties(book, clonedBook);
+        return clonedBook;
+    }
+
+    private Book cloneBook(Book existingBook, Book updatedBook) {
+        BeanUtils.copyProperties(updatedBook, existingBook);
+        return existingBook;
+    }
+
+    private boolean bookAlreadyExists(Book book) {
+        return getAllBooksByAuthor(book.getAuthors())
+                .stream()
+                .anyMatch(b -> book.getTitle().equals(b.getTitle()));
     }
 }
