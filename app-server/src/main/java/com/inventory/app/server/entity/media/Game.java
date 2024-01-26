@@ -1,5 +1,6 @@
 package com.inventory.app.server.entity.media;
 
+import com.inventory.app.server.config.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,7 +12,8 @@ import java.util.Objects;
 @Table(name = "game")
 @Data
 public class Game extends Media {
-    @ElementCollection(fetch = FetchType.LAZY)
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "consoles")
     private List<String> consoles;
     @Column(name = "num_of_players")
     private Integer numberOfPlayers;

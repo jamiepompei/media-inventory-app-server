@@ -1,5 +1,6 @@
 package com.inventory.app.server.entity.media;
 
+import com.inventory.app.server.config.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,7 +12,8 @@ import java.util.Objects;
 @Table(name = "televisiion_show")
 @Data
 public class TelevisionShow extends Media {
-    @ElementCollection(fetch = FetchType.LAZY)
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "writers")
     private List<String> writers;
     @Column(name = "season")
     private Integer season;
