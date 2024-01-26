@@ -6,7 +6,6 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.Objects;
 @Entity(name = "book")
 @Table(name = "book")
 @Data
-@EqualsAndHashCode(callSuper = true)
 public class Book extends Media implements Serializable {
     @Convert(converter = StringListConverter.class)
     @Column(name = "authors")
