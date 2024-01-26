@@ -6,6 +6,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Objects;
 @Entity(name = "book")
 @Table(name = "book")
 @Data
+@Slf4j
 public class Book extends Media implements Serializable {
     @Convert(converter = StringListConverter.class)
     @Column(name = "authors")
