@@ -1,6 +1,6 @@
 package com.inventory.app.server.service.collection;
 
-import com.inventory.app.server.entity.media.Tag;
+import com.inventory.app.server.entity.collection.Tag;
 import com.inventory.app.server.repository.IBaseDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
