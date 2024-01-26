@@ -3,13 +3,12 @@ package com.inventory.app.server.service.media;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.repository.IBaseDao;
+import com.inventory.app.server.utility.RestPreConditions;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -50,9 +49,8 @@ public class BookService {
     }
 
     public Book create(Book book) {
-        if (bookAlreadyExists(book)) {
-            //todo throw exception
-        }
+        // validations before performing create
+        RestPreConditions.checkAlreadyExists(bookAlreadyExists(book), book);
 
         Book bookToSave = cloneBook(book);
         bookToSave.setId(null);
@@ -62,13 +60,10 @@ public class BookService {
     }
 
     public Book update(Book updatedBook) {
-        Book existingBook = getBookById(updatedBook.getId());
-        if (existingBook == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found, could not update " + updatedBook);
-        }
-        if (existingBook.equals(updatedBook)) {
-            //throw an exception here
-        }
+        //validations before performing the update
+        Book existingBook = RestPreConditions.checkFound(getBookById(updatedBook.getId()));
+        RestPreConditions.checkEquals(existingBook, updatedBook);
+
         updatedBook = cloneBook(existingBook, updatedBook);
         updatedBook.setVersion(existingBook.getVersion() + 1);
 

@@ -32,24 +32,35 @@ public class BookController {
 
     @GetMapping
     ResponseEntity<List<MediaResponse>> findAllBooks() {
-        log.info("Received a request to get all books");
-        List<MediaResponse> responseList = bookService.getAllBooks().stream()
-                .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
+        try {
+            log.info("Received a request to get all books");
+            List<MediaResponse> responseList = bookService.getAllBooks().stream()
+                    .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.OK).body(responseList);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e);
+        }
     }
 
     @GetMapping(value = "/{author}")
     ResponseEntity<List<MediaResponse>> findByAuthor(@PathVariable("author") final List<String> author) {
-        List<Book> booksByAuthor = bookService.getAllBooksByAuthor(author);
-        if (booksByAuthor.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + author);
-        }
-        List<MediaResponse> responseList = booksByAuthor.stream()
-                .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
-                .collect(Collectors.toList());
+        try {
+            if (author.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
+            }
+            List<Book> booksByAuthor = bookService.getAllBooksByAuthor(author);
+            if (booksByAuthor.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + author);
+            }
+            List<MediaResponse> responseList = booksByAuthor.stream()
+                    .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
+                    .collect(Collectors.toList());
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
+            return ResponseEntity.status(HttpStatus.OK).body(responseList);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e);
+        }
     }
 
     @PostMapping
@@ -66,8 +77,7 @@ public class BookController {
             log.info("Created new book: " + response);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
-            // todo fix with custom exception
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error: " + e);
         }
     }
 
@@ -84,7 +94,6 @@ public class BookController {
             MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(updatedBook));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
-            //TODo fix controller error handling with custom error messages
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
         }
     }
