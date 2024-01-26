@@ -1,5 +1,7 @@
 package com.inventory.app.server.utility;
 
+import com.inventory.app.server.error.NoChangesToUpdateException;
+import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 
 public final class RestPreConditions {
@@ -30,9 +32,22 @@ public final class RestPreConditions {
      */
     public static <T> T checkFound(final T resource) {
         if (resource == null) {
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException("Resource not found.");
         }
         return resource;
     }
 
+    public static <T> T checkEquals(final T existingResource, final T updatedResource) {
+        if (updatedResource.equals(existingResource)) {
+            throw new NoChangesToUpdateException("No updates in resource to save. Will not proceed with update. Existing Resource: " + existingResource + "Updated Resource: " + updatedResource);
+        }
+        return updatedResource;
+    }
+
+    public static <T> T checkAlreadyExists(final boolean expression, final T resource) {
+        if (expression) {
+            throw new ResourceAlreadyExistsException("Resource already exists. Will not proceed with create. Resource: " + resource.toString());
+        }
+        return resource;
+    }
 }

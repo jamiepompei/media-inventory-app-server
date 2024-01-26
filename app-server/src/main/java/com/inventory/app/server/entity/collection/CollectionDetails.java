@@ -1,10 +1,9 @@
-package com.inventory.app.server.entity;
+package com.inventory.app.server.entity.collection;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 @Entity(name = "Collection_Details")
 @Table(name = "collection_details")

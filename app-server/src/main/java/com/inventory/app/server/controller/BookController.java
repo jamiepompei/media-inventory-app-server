@@ -1,9 +1,14 @@
 package com.inventory.app.server.controller;
 
-import com.inventory.app.server.entity.Book;
+import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
+import com.inventory.app.server.entity.media.Book;
+import com.inventory.app.server.entity.payload.request.MediaId;
+import com.inventory.app.server.entity.payload.request.MediaRequest;
+import com.inventory.app.server.entity.payload.response.MediaResponse;
+import com.inventory.app.server.mapper.BookMapper;
 import com.inventory.app.server.service.media.BookService;
-import com.inventory.app.server.utility.RestPreConditions;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/books")
@@ -25,52 +31,110 @@ public class BookController {
     }
 
     @GetMapping
-    ResponseEntity<List<Book>> findAllBooks(){
-        log.info("Received a request to get all books");
-        return ResponseEntity.status(HttpStatus.OK).body(bookService.getAllBooks());
+    ResponseEntity<List<MediaResponse>> findAllBooks() {
+        try {
+            log.info("Received a request to get all books");
+            List<MediaResponse> responseList = bookService.getAllBooks().stream()
+                    .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.OK).body(responseList);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e);
+        }
     }
 
     @GetMapping(value = "/{author}")
-    ResponseEntity<List<Book>> findByAuthor(@PathVariable("author") final String author){
-       List<Book> booksByAuthor = RestPreConditions.checkFound(bookService.getAllBooksByAuthor(author));
-        if(booksByAuthor.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + author);
-        } else return ResponseEntity.status(HttpStatus.OK).body(booksByAuthor);
+    ResponseEntity<List<MediaResponse>> findByAuthor(@PathVariable("author") final List<String> author) {
+        try {
+            if (author.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
+            }
+            List<Book> booksByAuthor = bookService.getAllBooksByAuthor(author);
+            if (booksByAuthor.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + author);
+            }
+            List<MediaResponse> responseList = booksByAuthor.stream()
+                    .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.status(HttpStatus.OK).body(responseList);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e);
+        }
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Book> createBook(@RequestBody Book resource){
-        try{
-       // Preconditions.checkNotNull(resource);
-            //todo check that resource doesnt already exist
-        log.info("received request to create resource: " + resource);
-       } catch (NullPointerException e){
-            throw new ResponseStatusException((HttpStatus.BAD_REQUEST), "Bad request resource: " + resource);
+    public ResponseEntity<MediaResponse> createBook(@RequestBody MediaRequest bookRequest) {
+        try {
+            // Validate mediaId input
+            validateCreateMediaId(bookRequest.getMediaId());
+            // Validate additional attributes
+            validatedAdditionalAttributes(bookRequest);
+            log.info("Received request to create resource: " + bookRequest);
+            Book book = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
+            MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book));
+            log.info("Created new book: " + response);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error: " + e);
         }
-        log.info("Created new book: " + resource);
-           return new ResponseEntity<>(bookService.create(resource), HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Book> updateBook(@RequestBody Book resource, @PathVariable Long id){
-        try{
-            log.info("received request to update resource: " + resource);
-           // Preconditions.checkNotNull(resource);
-        } catch (NullPointerException e){
-            throw new ResponseStatusException((HttpStatus.BAD_REQUEST), "Bad request resource: " + resource);
+    public ResponseEntity<MediaResponse> updateBook(@RequestBody MediaRequest bookRequest) {
+        try {
+            // Validate MediaId
+            validateUpdateMediaId(bookRequest.getMediaId());
+            // Validate authors, copyright year, and edition
+            validatedAdditionalAttributes(bookRequest);
+            log.info("received request to update resource: " + bookRequest);
+            Book updatedBook = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
+            MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(updatedBook));
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
         }
-        Book existingBook = bookService.getBookById(id);
-        //TODO clean up mapping logic
-        existingBook.setVersion(existingBook.getVersion() + 1);
-        existingBook.setAuthors(resource.getAuthors());
-        existingBook.setTitle(resource.getTitle());
-        existingBook.setGenre(resource.getGenre());
-        existingBook.setFormat(resource.getFormat());
-        existingBook.setEdition(resource.getEdition());
-        existingBook.setCopyrightYear(resource.getCopyrightYear());
-        existingBook.setCollectionName(resource.getCollectionName());
-        return ResponseEntity.status(HttpStatus.OK).body(bookService.update(existingBook));
+    }
+
+    @DeleteMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<MediaResponse> deleteBook(@PathVariable("id") Long id){
+        try{
+            if (id == null){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
+            }
+            bookService.deleteById(id);
+            MediaResponse response = MediaResponse.builder().mediaId(MediaId.builder().id(id).build()).build();
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
+        }
+    }
+
+    private void validatedAdditionalAttributes(MediaRequest bookRequest) {
+        @SuppressWarnings("unchecked")
+        List<String> authors = (List<String>) bookRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey());
+        Integer copyrightYear = (Integer) bookRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey());
+        Integer edition = (Integer) bookRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.EDITION.getJsonKey());
+
+        if (authors == null || authors.isEmpty() || copyrightYear == null || edition == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors, copyrightYear, and edition must not be null or empty.");
+        }
+    }
+
+    private void validateUpdateMediaId(MediaId mediaId) {
+        if (mediaId == null || mediaId.getId() == null || StringUtils.isEmpty(mediaId.getTitle()) || StringUtils.isEmpty(mediaId.getFormat())
+                || StringUtils.isEmpty(mediaId.getGenre()) || StringUtils.isEmpty(mediaId.getCollectionName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. MediaId must have all non-null and non-empty fields.");
+        }
+    }
+
+    private void validateCreateMediaId(MediaId mediaId) {
+        if (mediaId == null || StringUtils.isEmpty(mediaId.getTitle()) || StringUtils.isEmpty(mediaId.getFormat())
+                || StringUtils.isEmpty(mediaId.getGenre()) || StringUtils.isEmpty(mediaId.getCollectionName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. MediaId must have all non-null and non-empty fields.");
+        }
     }
 }
