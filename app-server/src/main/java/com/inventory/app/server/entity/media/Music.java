@@ -1,22 +1,15 @@
 package com.inventory.app.server.entity.media;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-@Entity(name = "Music")
+@Entity(name = "music")
 @Table(name = "music")
-@Getter
-@Setter
+@Data
 public class Music extends Media {
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> artists;
