@@ -32,7 +32,7 @@ public final class RestPreConditions {
      */
     public static <T> T checkFound(final T resource) {
         if (resource == null) {
-            throw new ResourceNotFoundException("Resource not found: " + resource);
+            throw new ResourceNotFoundException("Resource not found.");
         }
         return resource;
     }
@@ -50,5 +50,4 @@ public final class RestPreConditions {
         }
         return resource;
     }
-
 }
