@@ -106,7 +106,7 @@ public class BookController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
             }
             bookService.deleteById(id);
-            MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.getBookById(id));
+            MediaResponse response = MediaResponse.builder().mediaId(MediaId.builder().id(id).build()).build();
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
