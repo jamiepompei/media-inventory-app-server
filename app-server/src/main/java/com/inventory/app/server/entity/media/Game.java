@@ -36,7 +36,7 @@ public class Game extends Media {
 
         // Compare fields from the superclass (Media)
         if(!super.equals(o)) return false;
-
+        // Compare fields specific to Game
         return Objects.equals(getConsoles(), game.getConsoles()) &&
                 Objects.equals(getNumberOfPlayers(), game.getNumberOfPlayers()) &&
                 Objects.equals(getReleaseDate(), game.getReleaseDate());

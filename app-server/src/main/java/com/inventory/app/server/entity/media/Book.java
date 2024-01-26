@@ -41,7 +41,6 @@ public class Book extends Media implements Serializable {
 
         // Compare fields from the superclass (Media)
         if (!super.equals(obj)) return false;
-
         // Compare fields specific to Book
         return Objects.equals(getAuthors(), book.getAuthors()) &&
                 Objects.equals(getCopyrightYear(), book.getCopyrightYear()) &&
