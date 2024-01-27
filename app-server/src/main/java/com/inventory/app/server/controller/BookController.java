@@ -7,8 +7,8 @@ import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.BookMapper;
 import com.inventory.app.server.service.media.BookService;
+import com.inventory.app.server.utility.RestPreConditions;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,19 +39,19 @@ public class BookController {
                     .collect(Collectors.toList());
             return ResponseEntity.status(HttpStatus.OK).body(responseList);
         } catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error " + e);
         }
     }
 
-    @GetMapping(value = "/{author}")
-    ResponseEntity<List<MediaResponse>> findByAuthor(@PathVariable("author") final List<String> author) {
+    @GetMapping(value = "/{authors}")
+    ResponseEntity<List<MediaResponse>> findByAuthor(@PathVariable("author") final List<String> authors) {
         try {
-            if (author.isEmpty()) {
+            if (authors.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
             }
-            List<Book> booksByAuthor = bookService.getAllBooksByAuthor(author);
+            List<Book> booksByAuthor = bookService.getAllBooksByAuthor(authors);
             if (booksByAuthor.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + author);
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + authors);
             }
             List<MediaResponse> responseList = booksByAuthor.stream()
                     .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
@@ -65,10 +65,10 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createBook(@RequestBody MediaRequest bookRequest) {
+    public ResponseEntity<MediaResponse> createBook(@RequestBody final MediaRequest bookRequest) {
         try {
             // Validate mediaId input
-            validateCreateMediaId(bookRequest.getMediaId());
+            RestPreConditions.validateCreateMediaId(bookRequest.getMediaId());
             // Validate additional attributes
             validatedAdditionalAttributes(bookRequest);
             log.info("Received request to create resource: " + bookRequest);
@@ -83,10 +83,10 @@ public class BookController {
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateBook(@RequestBody MediaRequest bookRequest) {
+    public ResponseEntity<MediaResponse> updateBook(@RequestBody final MediaRequest bookRequest) {
         try {
             // Validate MediaId
-            validateUpdateMediaId(bookRequest.getMediaId());
+            RestPreConditions.validateUpdateMediaId(bookRequest.getMediaId());
             // Validate authors, copyright year, and edition
             validatedAdditionalAttributes(bookRequest);
             log.info("received request to update resource: " + bookRequest);
@@ -100,7 +100,7 @@ public class BookController {
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> deleteBook(@PathVariable("id") Long id){
+    public ResponseEntity<MediaResponse> deleteBook(@PathVariable("id") final Long id){
         try{
             if (id == null){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
@@ -121,20 +121,6 @@ public class BookController {
 
         if (authors == null || authors.isEmpty() || copyrightYear == null || edition == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors, copyrightYear, and edition must not be null or empty.");
-        }
-    }
-
-    private void validateUpdateMediaId(MediaId mediaId) {
-        if (mediaId == null || mediaId.getId() == null || StringUtils.isEmpty(mediaId.getTitle()) || StringUtils.isEmpty(mediaId.getFormat())
-                || StringUtils.isEmpty(mediaId.getGenre()) || StringUtils.isEmpty(mediaId.getCollectionName())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. MediaId must have all non-null and non-empty fields.");
-        }
-    }
-
-    private void validateCreateMediaId(MediaId mediaId) {
-        if (mediaId == null || StringUtils.isEmpty(mediaId.getTitle()) || StringUtils.isEmpty(mediaId.getFormat())
-                || StringUtils.isEmpty(mediaId.getGenre()) || StringUtils.isEmpty(mediaId.getCollectionName())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. MediaId must have all non-null and non-empty fields.");
         }
     }
 }
