@@ -41,7 +41,7 @@ public interface MovieMapper {
 
     @Named("mapReleaseDate")
     default Integer mapReleaseDate(Map<String, Object> additionalAttributes) {
-        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) : null;
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) : null;
     }
 
     default MediaResponse mapMovieToMediaResponseWithAdditionalAttributes(Movie movie) {
