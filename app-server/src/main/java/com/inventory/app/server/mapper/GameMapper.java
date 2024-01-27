@@ -1,7 +1,6 @@
 package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
-import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.entity.media.Game;
 import com.inventory.app.server.entity.payload.request.MediaId;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
@@ -31,7 +30,7 @@ public interface GameMapper {
     @Mapping(source = "additionalAttributes", target = "consoles", qualifiedByName = "mapConsoles")
     @Mapping(source = "additionalAttributes", target = "numberOfPlayers", qualifiedByName = "mapNumberOfPlayers")
     @Mapping(source = "additionalAttributes", target = "releaseDate", qualifiedByName = "mapReleaseDate")
-    Book mapMediaRequestToBook(MediaRequest mediaRequest);
+    Game mapMediaRequestToGame(MediaRequest mediaRequest);
 
 
     @Named("mapConsoles")
@@ -88,5 +87,4 @@ public interface GameMapper {
 
         return additionalAttributes;
     }
-
 }

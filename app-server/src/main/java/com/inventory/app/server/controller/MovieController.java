@@ -114,14 +114,13 @@ public class MovieController {
         }
     }
 
-    private void validatedAdditionalAttributes(MediaRequest musicRequest) {
+    private void validatedAdditionalAttributes(MediaRequest movieRequest) {
         @SuppressWarnings("unchecked")
-        List<String> artists = (List<String>) musicRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.ARTISTS.getJsonKey());
-        List<String> songList = (List<String>) musicRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.SONG_LIST.getJsonKey());
-        LocalDate releaseDate = (LocalDate) musicRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey());
+        List<String> directors = (List<String>) movieRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.DIRECTORS.getJsonKey());
+        LocalDate releaseDate = (LocalDate) movieRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey());
 
-        if (artists == null || artists.isEmpty() || songList == null || songList.isEmpty() || releaseDate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Artists, songlist, and release date must not be null or empty.");
+        if (directors == null || directors.isEmpty() || releaseDate == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Directors and release date must not be null or empty.");
         }
     }
 }
