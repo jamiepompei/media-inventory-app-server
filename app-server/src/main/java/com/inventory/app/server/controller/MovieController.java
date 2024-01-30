@@ -2,7 +2,6 @@ package com.inventory.app.server.controller;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Movie;
-import com.inventory.app.server.entity.payload.request.MediaId;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.MovieMapper;
@@ -106,8 +105,8 @@ public class MovieController {
             if (id == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
             }
-            movieService.deleteById(id);
-            MediaResponse response = MediaResponse.builder().mediaId(MediaId.builder().id(id).build()).build();
+            Movie movie = movieService.deleteById(id);
+            MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movie);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);

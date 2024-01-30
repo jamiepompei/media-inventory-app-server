@@ -63,9 +63,10 @@ public class MovieService {
         return dao.createOrUpdate(updatedMovie);
     }
 
-    public void deleteById(Long id){
-        RestPreConditions.checkFound(getMovieById(id));
+    public Movie deleteById(Long id){
+        Movie movie = RestPreConditions.checkFound(getMovieById(id));
         dao.deleteById(id);
+        return movie;
     }
 
     private boolean movieAlreadyExists(Movie movie) {
