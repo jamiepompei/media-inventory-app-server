@@ -64,9 +64,10 @@ public class MusicService {
         return dao.createOrUpdate(updatedMusic);
     }
 
-    public void deleteById(Long id){
-        RestPreConditions.checkFound(getMusicById(id));
+    public Music deleteById(Long id){
+        Music music = RestPreConditions.checkFound(getMusicById(id));
         dao.deleteById(id);
+        return music;
     }
 
     private boolean musicAlreadyExists(Music music) {

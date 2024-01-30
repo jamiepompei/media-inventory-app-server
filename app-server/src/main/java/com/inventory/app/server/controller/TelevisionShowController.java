@@ -105,7 +105,7 @@ public class TelevisionShowController {
             if (id == null){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
             }
-            televisionService.deleteById(id);
+            TelevisionShow televisionShow = televisionService.deleteById(id);
             MediaResponse response = MediaResponse.builder().mediaId(MediaId.builder().id(id).build()).build();
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){

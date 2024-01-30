@@ -69,9 +69,10 @@ public class GameService {
         return dao.createOrUpdate(updatedGame);
     }
 
-    public void deleteById(Long id){
-        RestPreConditions.checkFound(getGameById(id));
+    public Game deleteById(Long id){
+       Game game = RestPreConditions.checkFound(getGameById(id));
         dao.deleteById(id);
+        return game;
     }
 
     private Game cloneGame(Game game) {

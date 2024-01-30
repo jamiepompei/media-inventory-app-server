@@ -64,9 +64,10 @@ public class TelevisionService {
         return dao.createOrUpdate(updatedTelevisionShow);
     }
 
-    public void deleteById(Long id){
-        RestPreConditions.checkFound(getTelevisionShowById(id));
+    public TelevisionShow deleteById(Long id){
+        TelevisionShow televisionShow = RestPreConditions.checkFound(getTelevisionShowById(id));
         dao.deleteById(id);
+        return televisionShow;
     }
 
     private TelevisionShow cloneTelevisionShow(TelevisionShow televisionShow) {
