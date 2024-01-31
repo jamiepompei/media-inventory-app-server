@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "televisionShow")
-@Table(name = "televisiion_show")
+@Table(name = "television_show")
 @Data
 public class TelevisionShow extends Media {
     @Convert(converter = StringListConverter.class)
@@ -26,9 +26,9 @@ public class TelevisionShow extends Media {
                 "writers=" + writers +
                 ", season=" + season +
                 ", releaseDate=" + releaseDate +
-                " " +
+                ", " +
                 super.toString() +
-                "} ";
+                "}";
     }
 
     @Override

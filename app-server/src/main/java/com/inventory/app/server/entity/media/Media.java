@@ -30,9 +30,9 @@ public abstract class Media implements Serializable {
         return "id=" + id +
                 ", version=" + version +
                 ", title='" + title + '\'' +
-                ", format='" + format + '\'' +
-                ", genre='" + genre + '\'' +
-                ", collectionName='" + collectionName;
+                ", format=" + format +
+                ", genre=" + genre +
+                ", collectionName=" + collectionName;
     }
 
     @Override
