@@ -42,12 +42,12 @@ public interface BookMapper {
 
     @Named("mapCopyrightYear")
     default Integer mapCopyrightYear(Map<String, Object> additionalAttributes) {
-        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) : null;
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey()) : null;
     }
 
     @Named("mapEdition")
     default Integer mapEdition(Map<String, Object> additionalAttributes) {
-        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) : null;
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) : null;
     }
 
     default MediaResponse mapBookToMediaResponseWithAdditionalAttributes(Book book) {

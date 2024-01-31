@@ -24,7 +24,7 @@ public class Movie extends Media {
         return "Movie{" +
                 "directors=" + directors +
                 ", releaseDate=" + releaseDate +
-                " " +
+                ", " +
                 super.toString() +
                 "}";
     }

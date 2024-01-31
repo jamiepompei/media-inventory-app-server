@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +41,8 @@ public interface MovieMapper {
     }
 
     @Named("mapReleaseDate")
-    default Integer mapReleaseDate(Map<String, Object> additionalAttributes) {
-        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) ? (int) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) : null;
+    default LocalDate mapReleaseDate(Map<String, Object> additionalAttributes) {
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) ? (LocalDate) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) : null;
     }
 
     default MediaResponse mapMovieToMediaResponseWithAdditionalAttributes(Movie movie) {

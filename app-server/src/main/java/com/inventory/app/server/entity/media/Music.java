@@ -27,7 +27,7 @@ public class Music extends Media {
                 "artists=" + artists +
                 ", songList=" + songList +
                 ", releaseDate=" + releaseDate +
-                " " +
+                ", " +
                 super.toString() +
                 "}";
     }
