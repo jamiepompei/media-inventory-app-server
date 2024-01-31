@@ -1,8 +1,12 @@
 package com.inventory.app.server.utility;
 
+import com.inventory.app.server.entity.payload.request.MediaId;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public final class RestPreConditions {
 
@@ -49,5 +53,19 @@ public final class RestPreConditions {
             throw new ResourceAlreadyExistsException("Resource already exists. Will not proceed with create. Resource: " + resource.toString());
         }
         return resource;
+    }
+
+    public static void validateUpdateMediaId(MediaId mediaId) {
+        if (mediaId == null || mediaId.getId() == null || StringUtils.isEmpty(mediaId.getTitle()) || StringUtils.isEmpty(mediaId.getFormat())
+                || StringUtils.isEmpty(mediaId.getGenre()) || StringUtils.isEmpty(mediaId.getCollectionName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. MediaId must have all non-null and non-empty fields.");
+        }
+    }
+
+    public static void validateCreateMediaId(MediaId mediaId) {
+        if (mediaId == null || StringUtils.isEmpty(mediaId.getTitle()) || StringUtils.isEmpty(mediaId.getFormat())
+                || StringUtils.isEmpty(mediaId.getGenre()) || StringUtils.isEmpty(mediaId.getCollectionName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. MediaId must have all non-null and non-empty fields.");
+        }
     }
 }

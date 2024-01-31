@@ -1,5 +1,6 @@
 package com.inventory.app.server.entity.media;
 
+import com.inventory.app.server.config.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,10 +9,11 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "televisionShow")
-@Table(name = "televisiion_show")
+@Table(name = "television_show")
 @Data
 public class TelevisionShow extends Media {
-    @ElementCollection(fetch = FetchType.LAZY)
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "writers")
     private List<String> writers;
     @Column(name = "season")
     private Integer season;
@@ -24,9 +26,9 @@ public class TelevisionShow extends Media {
                 "writers=" + writers +
                 ", season=" + season +
                 ", releaseDate=" + releaseDate +
-                " " +
+                ", " +
                 super.toString() +
-                "} ";
+                "}";
     }
 
     @Override
