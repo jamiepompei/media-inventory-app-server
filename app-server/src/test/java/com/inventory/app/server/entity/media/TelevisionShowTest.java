@@ -38,7 +38,7 @@ class TelevisionShowTest {
         show2.setReleaseDate(LocalDate.of(2022, 1, 30));
         show2.setGenre("Comedy");
         show2.setFormat("DVD");
-        show2.setCollectionName("Jamie Stuff");
+        show2.setCollectionName("Jamie's Stuff");
     }
 
     @AfterEach
