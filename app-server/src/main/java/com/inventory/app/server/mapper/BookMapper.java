@@ -2,7 +2,6 @@ package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Book;
-import com.inventory.app.server.entity.payload.request.MediaId;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
@@ -20,12 +19,12 @@ public interface BookMapper {
 
     BookMapper INSTANCE = Mappers.getMapper(BookMapper.class);
 
-    @Mapping(source = "mediaId.id", target = "id")
-    @Mapping(source = "mediaId.version", target = "version")
-    @Mapping(source = "mediaId.title", target = "title")
-    @Mapping(source = "mediaId.format", target = "format")
-    @Mapping(source = "mediaId.genre", target = "genre")
-    @Mapping(source = "mediaId.collectionName", target = "collectionName")
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "version", target = "version")
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "format", target = "format")
+    @Mapping(source = "genre", target = "genre")
+    @Mapping(source = "collectionName", target = "collectionName")
     @Mapping(source = "additionalAttributes", target = "authors", qualifiedByName = "mapAuthors")
     @Mapping(source = "additionalAttributes", target = "copyrightYear", qualifiedByName = "mapCopyrightYear")
     @Mapping(source = "additionalAttributes", target = "edition", qualifiedByName = "mapEdition")
@@ -51,8 +50,7 @@ public interface BookMapper {
     }
 
     default MediaResponse mapBookToMediaResponseWithAdditionalAttributes(Book book) {
-        MediaResponse mediaResponse = new MediaResponse();
-        mediaResponse.setMediaId(mapBookIdToMediaId(book));
+        MediaResponse mediaResponse = mapBookToMediaResponse(book);
         mediaResponse.setAdditionalAttributes(mapBookToAdditionalAttributes(book));
         return mediaResponse;
     }
@@ -63,7 +61,7 @@ public interface BookMapper {
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionName", target = "collectionName")
-    MediaId mapBookIdToMediaId(Book book);
+    MediaResponse mapBookToMediaResponse(Book book);
 
     @Named("mapBookToAdditionalAttributes")
     default ConcurrentHashMap<String, Object> mapBookToAdditionalAttributes(Book book) {

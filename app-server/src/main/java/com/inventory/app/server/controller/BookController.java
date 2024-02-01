@@ -39,6 +39,9 @@ public class BookController {
             List<MediaResponse> responseList = bookService.getAllBooks().stream()
                     .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
                     .collect(Collectors.toList());
+            if (responseList.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No book data exists.");
+            }
             return ResponseEntity.status(HttpStatus.OK).body(responseList);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error " + e);
@@ -46,7 +49,7 @@ public class BookController {
     }
 
     @GetMapping(value = "/{authors}")
-    ResponseEntity<List<MediaResponse>> findByAuthor(@Valid @PathVariable("author") final List<String> authors) {
+    ResponseEntity<List<MediaResponse>> findByAuthor(@Valid @PathVariable("authors") final List<String> authors) {
         try {
             if (authors.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
