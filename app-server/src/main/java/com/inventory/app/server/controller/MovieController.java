@@ -1,21 +1,23 @@
 package com.inventory.app.server.controller;
 
-import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Movie;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.MovieMapper;
 import com.inventory.app.server.service.media.MovieService;
-import com.inventory.app.server.utility.RestPreConditions;
+import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -65,12 +67,8 @@ public class MovieController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createMovie(@RequestBody final MediaRequest movieRequest) {
+    public ResponseEntity<MediaResponse> createMovie(@Valid @RequestBody final MediaRequest movieRequest) {
         try {
-            // Validate mediaId input
-            RestPreConditions.validateCreateMediaId(movieRequest.getMediaId());
-            // Validate additional attributes
-            validatedAdditionalAttributes(movieRequest);
             log.info("Received a request to create resource: " + movieRequest);
             Movie movie = MovieMapper.INSTANCE.mapMediaRequestToMovie(movieRequest);
             MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.create(movie));
@@ -83,14 +81,10 @@ public class MovieController {
 
     @PutMapping(value = "{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateMovie(@RequestBody final MediaRequest movieRequet) {
+    public ResponseEntity<MediaResponse> updateMovie(@Valid @RequestBody final MediaRequest mediaRequest) {
         try {
-            // validated MediaId
-            RestPreConditions.validateUpdateMediaId(movieRequet.getMediaId());
-            // validate artists, song list, and release date
-            validatedAdditionalAttributes(movieRequet);
-            log.info("received request to update resource: " + movieRequet);
-            Movie updatedMovie = MovieMapper.INSTANCE.mapMediaRequestToMovie(movieRequet);
+            log.info("received request to update resource: " + mediaRequest);
+            Movie updatedMovie = MovieMapper.INSTANCE.mapMediaRequestToMovie(mediaRequest);
             MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.update(updatedMovie));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
@@ -105,21 +99,22 @@ public class MovieController {
             if (id == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
             }
-            Movie movie = movieService.deleteById(id);
-            MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movie);
+            MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.deleteById(id));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
         }
     }
 
-    private void validatedAdditionalAttributes(MediaRequest movieRequest) {
-        @SuppressWarnings("unchecked")
-        List<String> directors = (List<String>) movieRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.DIRECTORS.getJsonKey());
-        LocalDate releaseDate = (LocalDate) movieRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey());
-
-        if (directors == null || directors.isEmpty() || releaseDate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Directors and release date must not be null or empty.");
-        }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 }

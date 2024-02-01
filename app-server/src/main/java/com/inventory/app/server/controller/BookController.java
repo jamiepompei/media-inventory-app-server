@@ -49,7 +49,7 @@ public class BookController {
     }
 
     @GetMapping(value = "/{authors}")
-    ResponseEntity<List<MediaResponse>> findByAuthor(@Valid @PathVariable("authors") final List<String> authors) {
+    ResponseEntity<List<MediaResponse>> findByAuthor(@PathVariable("authors") final List<String> authors) {
         try {
             if (authors.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
@@ -102,8 +102,7 @@ public class BookController {
             if (id == null){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
             }
-            Book book = bookService.deleteById(id);
-            MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(book);
+            MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.deleteById(id));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);

@@ -1,21 +1,23 @@
 package com.inventory.app.server.controller;
 
-import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Game;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.GameMapper;
 import com.inventory.app.server.service.media.GameService;
-import com.inventory.app.server.utility.RestPreConditions;
+import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -65,12 +67,8 @@ public class GameController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createGame(@RequestBody final MediaRequest gameRequest) {
+    public ResponseEntity<MediaResponse> createGame(@Valid @RequestBody final MediaRequest gameRequest) {
         try {
-            // Validate mediaId input
-            RestPreConditions.validateCreateMediaId(gameRequest.getMediaId());
-            // Validate additional attributes
-            validatedAdditionalAttributes(gameRequest);
             log.info("Received request to create resource: " + gameRequest);
             Game game = GameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
             MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.create(game));
@@ -83,12 +81,8 @@ public class GameController {
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateGame(@RequestBody final MediaRequest gameRequest) {
+    public ResponseEntity<MediaResponse> updateGame(@Valid @RequestBody final MediaRequest gameRequest) {
         try {
-            // Validate MediaId
-            RestPreConditions.validateUpdateMediaId(gameRequest.getMediaId());
-            // Validate authors, copyright year, and edition
-            validatedAdditionalAttributes(gameRequest);
             log.info("received request to update resource: " + gameRequest);
             Game updatedGame = GameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
             MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.update(updatedGame));
@@ -105,22 +99,22 @@ public class GameController {
             if (id == null){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
             }
-            Game game = gameService.deleteById(id);
-            MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(game);
+            MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.deleteById(id));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
         }
     }
 
-    private void validatedAdditionalAttributes(MediaRequest gameRequest) {
-        @SuppressWarnings("unchecked")
-        List<String> consoles = (List<String>) gameRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.CONSOLES.getJsonKey());
-        Integer numberOfPlayers = (Integer) gameRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.NUMBER_OF_PLAYERS.getJsonKey());
-        LocalDate releaseDate = (LocalDate) gameRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey());
-
-        if (consoles == null || consoles.isEmpty() || numberOfPlayers == null || releaseDate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Consoles, number of players, and release date must not be null or empty.");
-        }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 }

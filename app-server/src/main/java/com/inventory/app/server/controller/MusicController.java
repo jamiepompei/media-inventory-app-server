@@ -1,21 +1,23 @@
 package com.inventory.app.server.controller;
 
-import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Music;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.MusicMapper;
 import com.inventory.app.server.service.media.MusicService;
-import com.inventory.app.server.utility.RestPreConditions;
+import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,7 +35,7 @@ public class MusicController {
     @GetMapping
     ResponseEntity<List<MediaResponse>> findAllMusic() {
         try{
-            log.info("Recieved a request to get all music");
+            log.info("Received a request to get all music");
             List<MediaResponse> responseList = musicService.getAllMusic().stream()
                     .map(m -> MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(m))
                     .collect(Collectors.toList());
@@ -65,13 +67,9 @@ public class MusicController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createMusic(@RequestBody final MediaRequest musicRequest) {
+    public ResponseEntity<MediaResponse> createMusic(@Valid @RequestBody final MediaRequest musicRequest) {
         try {
-            // Validate mediaId input
-            RestPreConditions.validateCreateMediaId(musicRequest.getMediaId());
-            // Validate additional attributes
-            validatedAdditionalAttributes(musicRequest);
-            log.info("Recieved a request to create resource: " + musicRequest);
+            log.info("Received a request to create resource: " + musicRequest);
             Music music = MusicMapper.INSTANCE.mapMediaRequestToMusic(musicRequest);
             MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.create(music));
             log.info("Created new music: " + response);
@@ -83,12 +81,8 @@ public class MusicController {
 
     @PutMapping(value = "{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateMusic(@RequestBody final MediaRequest musicRequest) {
+    public ResponseEntity<MediaResponse> updateMusic(@Valid @RequestBody final MediaRequest musicRequest) {
         try {
-            // validated MediaId
-            RestPreConditions.validateUpdateMediaId(musicRequest.getMediaId());
-            // validate artists, song list, and release date
-            validatedAdditionalAttributes(musicRequest);
             log.info("received request to update resource: " + musicRequest);
             Music updatedMusic = MusicMapper.INSTANCE.mapMediaRequestToMusic(musicRequest);
             MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.update(updatedMusic));
@@ -105,23 +99,23 @@ public class MusicController {
             if (id == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
             }
-            Music music = musicService.deleteById(id);
-            MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(music);
+            MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.deleteById(id));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
         }
     }
 
-    private void validatedAdditionalAttributes(MediaRequest musicRequest) {
-        @SuppressWarnings("unchecked")
-        List<String> artists = (List<String>) musicRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.ARTISTS.getJsonKey());
-        List<String> songList = (List<String>) musicRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.SONG_LIST.getJsonKey());
-        LocalDate releaseDate = (LocalDate) musicRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey());
-
-        if (artists == null || artists.isEmpty() || songList == null || songList.isEmpty() || releaseDate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Artists, songlist, and release date must not be null or empty.");
-        }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 
 }
