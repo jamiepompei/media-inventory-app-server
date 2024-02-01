@@ -1,20 +1,23 @@
 package com.inventory.app.server.controller;
 
-import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.BookMapper;
 import com.inventory.app.server.service.media.BookService;
-import com.inventory.app.server.utility.RestPreConditions;
+import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,7 +46,7 @@ public class BookController {
     }
 
     @GetMapping(value = "/{authors}")
-    ResponseEntity<List<MediaResponse>> findByAuthor(@PathVariable("author") final List<String> authors) {
+    ResponseEntity<List<MediaResponse>> findByAuthor(@Valid @PathVariable("author") final List<String> authors) {
         try {
             if (authors.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
@@ -64,17 +67,13 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createBook(@RequestBody final MediaRequest bookRequest) {
+    public ResponseEntity<MediaResponse> createBook(@Valid @RequestBody final MediaRequest bookRequest) {
         try {
-            // Validate mediaId input
-            RestPreConditions.validateCreateMediaId(bookRequest.getMediaId());
-            // Validate additional attributes
-            validatedAdditionalAttributes(bookRequest);
             log.info("Received request to create resource: " + bookRequest);
             Book book = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
             MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book));
             log.info("Created new book: " + response);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error: " + e);
         }
@@ -82,12 +81,8 @@ public class BookController {
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateBook(@RequestBody final MediaRequest bookRequest) {
+    public ResponseEntity<MediaResponse> updateBook(@Valid @RequestBody final MediaRequest bookRequest) {
         try {
-            // Validate MediaId
-            RestPreConditions.validateUpdateMediaId(bookRequest.getMediaId());
-            // Validate authors, copyright year, and edition
-            validatedAdditionalAttributes(bookRequest);
             log.info("received request to update resource: " + bookRequest);
             Book updatedBook = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
             MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(updatedBook));
@@ -112,14 +107,15 @@ public class BookController {
         }
     }
 
-    private void validatedAdditionalAttributes(MediaRequest bookRequest) {
-        @SuppressWarnings("unchecked")
-        List<String> authors = (List<String>) bookRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey());
-        Integer copyrightYear = (Integer) bookRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey());
-        Integer edition = (Integer) bookRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.EDITION.getJsonKey());
-
-        if (authors == null || authors.isEmpty() || copyrightYear == null || edition == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors, copyrightYear, and edition must not be null or empty.");
-        }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 }
