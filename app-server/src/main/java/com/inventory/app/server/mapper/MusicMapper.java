@@ -3,7 +3,6 @@ package com.inventory.app.server.mapper;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Media;
 import com.inventory.app.server.entity.media.Music;
-import com.inventory.app.server.entity.payload.request.MediaId;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
@@ -60,12 +59,11 @@ public interface MusicMapper {
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionName", target = "collectionName")
-    MediaId mapMusicIdToMediaId(Media entity);
+    MediaResponse mapMusicIdToMediaId(Media entity);
 
 
     default MediaResponse mapMusicToMediaResponseWithAdditionalAttributes(Music music){
-        MediaResponse mediaResponse = new MediaResponse();
-        mediaResponse.setMediaId(mapMusicIdToMediaId(music));
+        MediaResponse mediaResponse = mapMusicIdToMediaId(music);
         mediaResponse.setAdditionalAttributes(mapMusicToAdditionalAttributes(music));
         return mediaResponse;
     }

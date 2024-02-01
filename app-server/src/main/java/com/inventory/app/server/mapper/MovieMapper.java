@@ -2,7 +2,6 @@ package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Movie;
-import com.inventory.app.server.entity.payload.request.MediaId;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
@@ -46,8 +45,7 @@ public interface MovieMapper {
     }
 
     default MediaResponse mapMovieToMediaResponseWithAdditionalAttributes(Movie movie) {
-        MediaResponse mediaResponse = new MediaResponse();
-        mediaResponse.setMediaId(mapMovieIdToMediaId(movie));
+        MediaResponse mediaResponse = mapMovieIdToMediaId(movie);
         mediaResponse.setAdditionalAttributes(mapMovieToAdditionalAttributes(movie));
         return mediaResponse;
     }
@@ -58,7 +56,7 @@ public interface MovieMapper {
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionName", target = "collectionName")
-    MediaId mapMovieIdToMediaId(Movie movie);
+    MediaResponse mapMovieIdToMediaId(Movie movie);
 
     @Named("mapBookToAdditionalAttributes")
     default ConcurrentHashMap<String, Object> mapMovieToAdditionalAttributes(Movie movie) {

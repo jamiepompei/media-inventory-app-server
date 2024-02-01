@@ -2,7 +2,6 @@ package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Game;
-import com.inventory.app.server.entity.payload.request.MediaId;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
@@ -52,8 +51,7 @@ public interface GameMapper {
     }
 
     default MediaResponse mapGameToMediaResponseWithAdditionalAttributes(Game game) {
-        MediaResponse mediaResponse = new MediaResponse();
-        mediaResponse.setMediaId(mapGameIdToMediaId(game));
+        MediaResponse mediaResponse = mapGameIdToMediaId(game);
         mediaResponse.setAdditionalAttributes(mapGameToAdditionalAttributes(game));
         return mediaResponse;
     }
@@ -64,7 +62,7 @@ public interface GameMapper {
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionName", target = "collectionName")
-    MediaId mapGameIdToMediaId(Game game);
+    MediaResponse mapGameIdToMediaId(Game game);
 
     @Named("mapGameToAdditionalAttributes")
     default ConcurrentHashMap<String, Object> mapGameToAdditionalAttributes(Game game) {
