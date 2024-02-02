@@ -20,12 +20,12 @@ public interface GameMapper {
 
     GameMapper INSTANCE = Mappers.getMapper(GameMapper.class);
 
-    @Mapping(source = "mediaId.id", target = "id")
-    @Mapping(source = "mediaId.version", target = "version")
-    @Mapping(source = "mediaId.title", target = "title")
-    @Mapping(source = "mediaId.format", target = "format")
-    @Mapping(source = "mediaId.genre", target = "genre")
-    @Mapping(source = "mediaId.collectionName", target = "collectionName")
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "version", target = "version")
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "format", target = "format")
+    @Mapping(source = "genre", target = "genre")
+    @Mapping(source = "collectionName", target = "collectionName")
     @Mapping(source = "additionalAttributes", target = "consoles", qualifiedByName = "mapConsoles")
     @Mapping(source = "additionalAttributes", target = "numberOfPlayers", qualifiedByName = "mapNumberOfPlayers")
     @Mapping(source = "additionalAttributes", target = "releaseDate", qualifiedByName = "mapReleaseDate")
