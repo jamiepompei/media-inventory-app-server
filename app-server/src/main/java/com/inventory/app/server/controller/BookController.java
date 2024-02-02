@@ -76,7 +76,7 @@ public class BookController {
             Book book = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
             MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book));
             log.info("Created new book: " + response);
-            return ResponseEntity.ok(response);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error: " + e);
         }

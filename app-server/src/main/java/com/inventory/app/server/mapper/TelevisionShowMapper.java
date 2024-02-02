@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,7 @@ public interface TelevisionShowMapper {
     @Mapping(source = "collectionName", target = "collectionName")
     @Mapping(source = "additionalAttributes", target = "writers", qualifiedByName = "mapWriters")
     @Mapping(source = "additionalAttributes", target = "season", qualifiedByName = "mapSeason")
-    @Mapping(source = "additionalAttributes", target = "releaseDate", qualifiedByName = "mapReleaseDate")
+    @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
     TelevisionShow mapMediaRequestToTelevisionShow(MediaRequest mediaRequest);
 
 
@@ -45,9 +44,9 @@ public interface TelevisionShowMapper {
         return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.SEASON.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.SEASON.getJsonKey()) : null;
     }
 
-    @Named("mapReleaseDate")
-    default LocalDate mapReleaseDate(Map<String, Object> additionalAttributes) {
-        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) ? (LocalDate) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) : null;
+    @Named("mapReleaseYear")
+    default Integer mapReleaseYear(Map<String, Object> additionalAttributes) {
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) : null;
     }
 
     default MediaResponse mapTelevisionShowToMediaResponseWithAdditionalAttributes(TelevisionShow televisionShow) {
@@ -80,8 +79,8 @@ public interface TelevisionShowMapper {
         }
 
         // Map release date if available
-        if (televisionShow.getReleaseDate() != null) {
-            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey(), televisionShow.getReleaseDate());
+        if (televisionShow.getReleaseYear() != null) {
+            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), televisionShow.getReleaseYear());
         }
 
         return additionalAttributes;

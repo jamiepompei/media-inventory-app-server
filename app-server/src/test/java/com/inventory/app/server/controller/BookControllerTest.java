@@ -35,42 +35,34 @@ public class BookControllerTest {
     private BookService bookService;
 
     @Autowired
-    private BookController bookController;
+    private BookController underTest;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    public void whenBookControllerInjected_thenNotNull() {
-        assertThat(bookController).isNotNull();
-    }
+    public void whenBookControllerInjected_thenNotNull() {assertThat(underTest).isNotNull();}
 
     @Test
     public void whenPostRequestToBookAndValidBook_thenCorrectResponse() throws Exception {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
-        Book mockBook = new Book();
-        mockBook.setTitle("Test");
-        mockBook.setGenre("Comedy");
-        mockBook.setFormat("hardcover");
-        mockBook.setCollectionName("Jamie's Stuff");
-        mockBook.setAuthors(Arrays.asList("Jon Snow"));
-        mockBook.setEdition(1);
-        mockBook.setCopyrightYear(2023);
+        Book mockBook = createBook("Test", "hardcover", "Comedy", 1, Arrays.asList("Jon Snow"), "Jamie's Stuff", 2023 );
+
         // Mock the behavior of bookService.create
         when(bookService.create(any())).thenReturn(mockBook);
 
-        MediaRequest mediaRequest = MediaRequest.builder()
-                .title("Test")
-                .genre("Comedy")
-                .format("hardcover")
-                .collectionName("Jamie's Stuff")
-                .build();
         ConcurrentHashMap<String, Object> additionalBookAttributes = new ConcurrentHashMap<>();
-        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), Arrays.asList("Jon Snow"));
-        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey(), 2023);
-        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.EDITION.getJsonKey(), 1);
-        mediaRequest.setAdditionalAttributes(additionalBookAttributes);
+        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), mockBook.getAuthors());
+        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey(), mockBook.getCopyrightYear());
+        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.EDITION.getJsonKey(), mockBook.getEdition());
+        MediaRequest mediaRequest = MediaRequest.builder()
+                .title(mockBook.getTitle())
+                .genre(mockBook.getGenre())
+                .format(mockBook.getFormat())
+                .collectionName(mockBook.getCollectionName())
+                .additionalAttributes(additionalBookAttributes)
+                .build();
 
         // Convert MediaRequest to JSON string
         ObjectMapper objectMapper = new ObjectMapper();
@@ -79,7 +71,7 @@ public class BookControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/books")
                         .content(book)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(mockBook.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.version").value(mockBook.getVersion()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(mockBook.getTitle()))
@@ -115,36 +107,27 @@ public class BookControllerTest {
     }
 
     @Test
-    public void whenPuttRequestToBookAndValidBook_thenCorrectResponse() throws Exception {
+    public void whenPutRequestToBookAndValidBook_thenCorrectResponse() throws Exception {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
-        Book mockBook = new Book();
-        mockBook.setId(1L);
-        mockBook.setVersion(1);
-        mockBook.setTitle("Test");
-        mockBook.setGenre("Comedy");
-        mockBook.setFormat("hardcover");
-        mockBook.setCollectionName("Jamie's Stuff");
-        mockBook.setAuthors(Arrays.asList("Jon Snow"));
-        mockBook.setEdition(1);
-        mockBook.setCopyrightYear(2023);
+        Book mockBook = createBook(1L, 1, "Title", "hardcover", "Comedy", 1, Arrays.asList("Jon Snow"), "Jamie's Stuff", 2023);
+
         // Mock the behavior of bookService.create
         when(bookService.update(any())).thenReturn(mockBook);
 
-        MediaRequest mediaRequest = MediaRequest.builder()
-                .id(1L)
-                .version(1)
-                .title("Test")
-                .genre("Comedy")
-                .format("hardcover")
-                .collectionName("Jamie's Stuff")
-                .build();
-
         ConcurrentHashMap<String, Object> additionalBookAttributes = new ConcurrentHashMap<>();
-        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), Arrays.asList("Jon Snow"));
-        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey(), 2023);
-        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.EDITION.getJsonKey(), 1);
-        mediaRequest.setAdditionalAttributes(additionalBookAttributes);
+        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), mockBook.getAuthors());
+        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.COPYRIGHT_YEAR.getJsonKey(), mockBook.getCopyrightYear());
+        additionalBookAttributes.put(MediaInventoryAdditionalAttributes.EDITION.getJsonKey(), mockBook.getEdition());
+        MediaRequest mediaRequest = MediaRequest.builder()
+                .id(mockBook.getId())
+                .version(mockBook.getVersion())
+                .title(mockBook.getTitle())
+                .genre(mockBook.getGenre())
+                .format(mockBook.getFormat())
+                .collectionName(mockBook.getCollectionName())
+                .additionalAttributes(additionalBookAttributes)
+                .build();
 
         // Convert MediaRequest to JSON string
         ObjectMapper objectMapper = new ObjectMapper();
@@ -197,7 +180,6 @@ public class BookControllerTest {
         Book book = new Book();
         when(bookService.getAllBooksByAuthor(authors)).thenReturn(Arrays.asList(book));
 
-
         mockMvc.perform(MockMvcRequestBuilders.get("/books/{authors}",  String.join(",", authors))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -221,7 +203,6 @@ public class BookControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
     }
 
-    //todo fix why the deleted book is not returned
     @Test
     public void whenDeleteByIdRequestValid_thenCorrectResponse() throws Exception {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
@@ -235,6 +216,31 @@ public class BookControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(book.getId()))
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+    private Book createBook(Long id, Integer version, String title, String format, String genre, Integer edition, List<String> authors, String collectionName, Integer copyrightYear) {
+        Book book = new Book();
+        book.setId(id);
+        book.setVersion(version);
+        book.setTitle(title);
+        book.setFormat(format);
+        book.setGenre(genre);
+        book.setEdition(edition);
+        book.setAuthors(authors);
+        book.setCollectionName(collectionName);
+        book.setCopyrightYear(copyrightYear);
+        return book;
+    }
+
+    private Book createBook(String title, String format, String genre, Integer edition, List<String> authors, String collectionName, Integer copyrightYear) {
+        Book book = new Book();
+        book.setTitle(title);
+        book.setFormat(format);
+        book.setGenre(genre);
+        book.setEdition(edition);
+        book.setAuthors(authors);
+        book.setCollectionName(collectionName);
+        book.setCopyrightYear(copyrightYear);
+        return book;
     }
 
 }

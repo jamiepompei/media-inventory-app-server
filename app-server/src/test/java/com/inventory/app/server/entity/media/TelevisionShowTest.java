@@ -24,7 +24,7 @@ class TelevisionShowTest {
         show1.setTitle("Sample Show");
         show1.setWriters(List.of("Writer1", "Writer2"));
         show1.setSeason(1);
-        show1.setReleaseDate(LocalDate.of(2022, 1, 30));
+        show1.setReleaseYear(2023);
         show1.setGenre("Comedy");
         show1.setFormat("DVD");
         show1.setCollectionName("Jamie's Stuff");
@@ -35,7 +35,7 @@ class TelevisionShowTest {
         show2.setTitle("Sample Show");
         show2.setWriters(List.of("Writer1", "Writer2"));
         show2.setSeason(1);
-        show2.setReleaseDate(LocalDate.of(2022, 1, 30));
+        show2.setReleaseYear(2023);
         show2.setGenre("Comedy");
         show2.setFormat("DVD");
         show2.setCollectionName("Jamie's Stuff");
@@ -90,17 +90,17 @@ class TelevisionShowTest {
         // Test getters and setters
         assertThat(show1.getWriters()).containsExactly("Writer1", "Writer2");
         assertEquals(1, show1.getSeason());
-        assertEquals(LocalDate.of(2022, 1, 30), show1.getReleaseDate());
+        assertEquals(LocalDate.of(2022, 1, 30), show1.getReleaseYear());
 
         // Modify values using setters
         show1.setWriters(List.of("NewWriter"));
         show1.setSeason(2);
-        show1.setReleaseDate(LocalDate.of(2023, 1, 30));
+        show1.setReleaseYear(2023);
 
         // Test that values have been updated
         assertThat(show1.getWriters()).containsExactly("NewWriter");
         assertEquals(2, show1.getSeason());
-        assertEquals(LocalDate.of(2023, 1, 30), show1.getReleaseDate());
+        assertEquals(LocalDate.of(2023, 1, 30), show1.getReleaseYear());
     }
 
 }
