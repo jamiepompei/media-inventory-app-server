@@ -199,6 +199,22 @@ public class TelevisionShowControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
     }
 
+    @Test
+    public void whenDeleteByIdRequestValid_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        TelevisionShow televisionShow = new TelevisionShow();
+        televisionShow.setId(1L);
+
+        when(televisionService.deleteById(1L)).thenReturn(televisionShow);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/televisionShows/{id}", televisionShow.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(televisionShow.getId()))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
     private TelevisionShow createTelevisionShow(Long id, Integer version, String title, String format, String genre, Integer season, List<String> episodes, String collectionName, Integer releaseYear) {
         TelevisionShow show = new TelevisionShow();
         show.setId(id);
