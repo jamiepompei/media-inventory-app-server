@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,7 @@ public interface GameMapper {
     @Mapping(source = "collectionName", target = "collectionName")
     @Mapping(source = "additionalAttributes", target = "consoles", qualifiedByName = "mapConsoles")
     @Mapping(source = "additionalAttributes", target = "numberOfPlayers", qualifiedByName = "mapNumberOfPlayers")
-    @Mapping(source = "additionalAttributes", target = "releaseDate", qualifiedByName = "mapReleaseDate")
+    @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
     Game mapMediaRequestToGame(MediaRequest mediaRequest);
 
 
@@ -45,9 +44,9 @@ public interface GameMapper {
         return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.NUMBER_OF_PLAYERS.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.NUMBER_OF_PLAYERS.getJsonKey()) : null;
     }
 
-    @Named("mapReleaseDate")
-    default LocalDate mapReleaseDate(Map<String, Object> additionalAttributes) {
-        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) ? (LocalDate) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) : null;
+    @Named("mapReleaseYear")
+    default Integer mapReleaseYear(Map<String, Object> additionalAttributes) {
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) : null;
     }
 
     default MediaResponse mapGameToMediaResponseWithAdditionalAttributes(Game game) {
@@ -79,8 +78,8 @@ public interface GameMapper {
         }
 
         // Map copyright year if available
-        if (game.getReleaseDate() != null) {
-            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey(), game.getReleaseDate());
+        if (game.getReleaseYear() != null) {
+            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), game.getReleaseYear());
         }
 
         return additionalAttributes;
