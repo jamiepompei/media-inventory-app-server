@@ -45,17 +45,17 @@ public class TelevisionShowController {
         }
     }
 
-    @GetMapping(value = "/{writers}")
-    ResponseEntity<List<MediaResponse>> findByWriter(@PathVariable("writers") final List<String> writers) {
+    @GetMapping(value = "/{episodes}")
+    ResponseEntity<List<MediaResponse>> findByEpisode(@PathVariable("episodes") final List<String> episodes) {
         try {
-            if (writers.isEmpty()) {
+            if (episodes.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Writers cannot be empty.");
             }
-            List<TelevisionShow> televisionShowsByWriter = televisionService.getAllTelevisionShowsByWriter(writers);
-            if (televisionShowsByWriter.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + writers);
+            List<TelevisionShow> televisionShowsByEpisodes = televisionService.getAllTelevisionShowsByEpisode(episodes);
+            if (televisionShowsByEpisodes.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + episodes);
             }
-            List<MediaResponse> responseList = televisionShowsByWriter.stream()
+            List<MediaResponse> responseList = televisionShowsByEpisodes.stream()
                     .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
                     .collect(Collectors.toList());
 

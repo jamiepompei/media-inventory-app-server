@@ -26,8 +26,8 @@ public class TelevisionService {
         return dao.findByField("collection_name", collectionTitle);
     }
 
-    public List<TelevisionShow> getAllTelevisionShowsByWriter(List<String> writer) {
-        return dao.findByField(MediaInventoryAdditionalAttributes.WRITERS.getJsonKey(), writer);
+    public List<TelevisionShow> getAllTelevisionShowsByEpisode(List<String> writer) {
+        return dao.findByField(MediaInventoryAdditionalAttributes.EPISODES.getJsonKey(), writer);
     }
 
     public List<TelevisionShow> getAllTelevisionShowsByGenre(String genre) {
@@ -82,7 +82,7 @@ public class TelevisionService {
     }
 
     private boolean televisionShowAlreadyExists(TelevisionShow televisionShow) {
-        return getAllTelevisionShowsByWriter(televisionShow.getWriters())
+        return getAllTelevisionShowsByEpisode(televisionShow.getEpisodes())
                 .stream()
                 .anyMatch(t -> televisionShow.getTitle().equals(t.getTitle()));
     }

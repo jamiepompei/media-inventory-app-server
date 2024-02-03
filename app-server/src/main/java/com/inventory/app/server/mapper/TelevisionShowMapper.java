@@ -25,18 +25,18 @@ public interface TelevisionShowMapper {
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionName", target = "collectionName")
-    @Mapping(source = "additionalAttributes", target = "writers", qualifiedByName = "mapWriters")
+    @Mapping(source = "additionalAttributes", target = "episodes", qualifiedByName = "mapEpisodes")
     @Mapping(source = "additionalAttributes", target = "season", qualifiedByName = "mapSeason")
     @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
     TelevisionShow mapMediaRequestToTelevisionShow(MediaRequest mediaRequest);
 
 
-    @Named("mapWriters")
-    default List<String> mapWriters(Map<String, Object> additionalAttributes) {
-        Object writersValue = additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.WRITERS.getJsonKey(), Collections.emptyList());
+    @Named("mapEpisodes")
+    default List<String> mapEpisodes(Map<String, Object> additionalAttributes) {
+        Object episodesValue = additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.EPISODES.getJsonKey(), Collections.emptyList());
         @SuppressWarnings("unchecked")
-        List<String> writersList = writersValue instanceof List<?> ? (List<String>) writersValue : Collections.emptyList();
-        return writersList;
+        List<String> episdoesList = episodesValue instanceof List<?> ? (List<String>) episodesValue : Collections.emptyList();
+        return episdoesList;
     }
 
     @Named("mapSeason")
@@ -67,10 +67,9 @@ public interface TelevisionShowMapper {
     default ConcurrentHashMap<String, Object> mapTelevisionShowToAdditionalAttributes(TelevisionShow televisionShow) {
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
 
-        // Map writers if available
-        //TODO should this be episodes?
-        if (televisionShow.getWriters() != null && !televisionShow.getWriters().isEmpty()) {
-            additionalAttributes.put(MediaInventoryAdditionalAttributes.WRITERS.getJsonKey(), televisionShow.getWriters());
+        // Map episodes if available
+        if (televisionShow.getEpisodes() != null && !televisionShow.getEpisodes().isEmpty()) {
+            additionalAttributes.put(MediaInventoryAdditionalAttributes.EPISODES.getJsonKey(), televisionShow.getEpisodes());
         }
 
         // Map season if available

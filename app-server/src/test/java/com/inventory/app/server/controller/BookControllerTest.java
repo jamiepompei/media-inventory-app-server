@@ -112,7 +112,7 @@ public class BookControllerTest {
 
         Book mockBook = createBook(1L, 1, "Title", "hardcover", "Comedy", 1, Arrays.asList("Jon Snow"), "Jamie's Stuff", 2023);
 
-        // Mock the behavior of bookService.create
+        // Mock the behavior of bookService.update
         when(bookService.update(any())).thenReturn(mockBook);
 
         ConcurrentHashMap<String, Object> additionalBookAttributes = new ConcurrentHashMap<>();

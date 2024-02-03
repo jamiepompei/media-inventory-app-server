@@ -15,8 +15,8 @@ import java.util.Objects;
 @Data
 public class TelevisionShow extends Media {
     @Convert(converter = StringListConverter.class)
-    @Column(name = "writers")
-    private List<String> writers;
+    @Column(name = "episodes")
+    private List<String> episodes;
     @Column(name = "season")
     private Integer season;
     @Column(name = "release_year")
@@ -25,7 +25,7 @@ public class TelevisionShow extends Media {
     @Override
     public String toString() {
         return "TelevisionShow{" +
-                "writers=" + writers +
+                "episodes=" + episodes +
                 ", season=" + season +
                 ", releaseDate=" + releaseYear +
                 ", " +
@@ -41,7 +41,7 @@ public class TelevisionShow extends Media {
         // Compare fields from the superclass (Media)
         if (!super.equals(o)) return false;
         // Compare fields specific to Television Show
-        return Objects.equals(getWriters(), that.getWriters()) &&
+        return Objects.equals(getEpisodes(), that.getEpisodes()) &&
                 Objects.equals(getSeason(), that.getSeason()) &&
                 Objects.equals(getReleaseYear(), that.getReleaseYear());
     }
@@ -50,7 +50,7 @@ public class TelevisionShow extends Media {
     public int hashCode() {
         return Objects.hash(
                 super.hashCode(),
-                getWriters(),
+                getEpisodes(),
                 getSeason(),
                 getReleaseYear());
     }
