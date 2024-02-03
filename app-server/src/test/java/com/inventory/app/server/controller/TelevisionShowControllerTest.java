@@ -183,6 +183,22 @@ public class TelevisionShowControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
     }
 
+    @Test
+    public void whenGetAllBooksRequestValid_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        TelevisionShow televisionShow = new TelevisionShow();
+
+        when(televisionService.getAllTelevisionShows()).thenReturn(Arrays.asList(televisionShow));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/televisionShows")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
     private TelevisionShow createTelevisionShow(Long id, Integer version, String title, String format, String genre, Integer season, List<String> episodes, String collectionName, Integer releaseYear) {
         TelevisionShow show = new TelevisionShow();
         show.setId(id);
