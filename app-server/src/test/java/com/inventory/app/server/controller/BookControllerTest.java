@@ -242,5 +242,4 @@ public class BookControllerTest {
         book.setCopyrightYear(copyrightYear);
         return book;
     }
-
 }
