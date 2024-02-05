@@ -27,7 +27,7 @@ public interface MovieMapper {
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionName", target = "collectionName")
     @Mapping(source = "additionalAttributes", target = "directors", qualifiedByName = "mapDirectors")
-    @Mapping(source = "additionalAttributes", target = "releaseDate", qualifiedByName = "mapReleaseDate")
+    @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
     Movie mapMediaRequestToMovie(MediaRequest mediaRequest);
 
 
@@ -39,9 +39,9 @@ public interface MovieMapper {
         return directorsList;
     }
 
-    @Named("mapReleaseDate")
-    default LocalDate mapReleaseDate(Map<String, Object> additionalAttributes) {
-        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) ? (LocalDate) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey()) : null;
+    @Named("mapReleaseYear")
+    default Integer mapReleaseYear(Map<String, Object> additionalAttributes) {
+        return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) : null;
     }
 
     default MediaResponse mapMovieToMediaResponseWithAdditionalAttributes(Movie movie) {
@@ -68,8 +68,8 @@ public interface MovieMapper {
         }
 
         // Map release date if available
-        if (movie.getReleaseDate() != null) {
-            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey(), movie.getReleaseDate());
+        if (movie.getReleaseYear() != null) {
+            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), movie.getReleaseYear());
         }
 
         return additionalAttributes;

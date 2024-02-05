@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +23,7 @@ class MovieTest {
         movie1.setVersion(1);
         movie1.setTitle("Sample Movie");
         movie1.setDirectors(List.of("Director1", "Director2"));
-        movie1.setReleaseDate(LocalDate.of(2022, 1, 30));
+        movie1.setReleaseYear(2022);
         movie1.setCollectionName("Jamie's Stuff");
         movie1.setGenre("Comedy");
         movie1.setFormat("DVD");
@@ -34,7 +33,7 @@ class MovieTest {
         movie2.setVersion(1);
         movie2.setTitle("Sample Movie");
         movie2.setDirectors(List.of("Director1", "Director2"));
-        movie2.setReleaseDate(LocalDate.of(2022, 1, 30));
+        movie2.setReleaseYear(2022);
         movie2.setCollectionName("Jamie's Stuff");
         movie2.setGenre("Comedy");
         movie2.setFormat("DVD");
@@ -72,7 +71,7 @@ class MovieTest {
     public void testToString() {
         // Test that toString method works correctly
         String expectedToString = "Movie{directors=[Director1, Director2], " +
-                "releaseDate=2022-01-30, " +
+                "releaseYear=2022, " +
                 "id=1, " +
                 "version=1, " +
                 "title='Sample Movie', " +
@@ -87,15 +86,15 @@ class MovieTest {
     public void testGettersAndSetters() {
         // Test getters and setters
         assertThat(movie1.getDirectors()).containsExactly("Director1", "Director2");
-        assertEquals(LocalDate.of(2022, 1, 30), movie1.getReleaseDate());
+        assertEquals(2022, movie1.getReleaseYear());
 
         // Modify values using setters
         movie1.setDirectors(List.of("NewDirector"));
-        movie1.setReleaseDate(LocalDate.of(2023, 1, 30));
+        movie1.setReleaseYear(2023);
 
         // Test that values have been updated
         assertThat(movie1.getDirectors()).containsExactly("NewDirector");
-        assertEquals(LocalDate.of(2023, 1, 30), movie1.getReleaseDate());
+        assertEquals(2023, movie1.getReleaseYear());
     }
 
 }
