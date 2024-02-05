@@ -70,7 +70,7 @@ public class BookControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/books")
                         .content(book)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(mockBook.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.version").value(mockBook.getVersion()))
@@ -96,7 +96,7 @@ public class BookControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/books")
                         .content(book)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title", Is.is("Title is mandatory.")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.format", Is.is("Format is mandatory.")))
@@ -135,7 +135,7 @@ public class BookControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put("/books/{id}", mediaRequest.getId())
                         .content(book)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(mockBook.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.version").value(mockBook.getVersion()))
@@ -162,7 +162,7 @@ public class BookControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put("/books/{id}", mediaRequest.getId())
                         .content(book)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title", Is.is("Title is mandatory.")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.format", Is.is("Format is mandatory.")))
@@ -181,7 +181,7 @@ public class BookControllerTest {
         when(bookService.getAllBooksByAuthor(authors)).thenReturn(Arrays.asList(book));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/books/{authors}",  String.join(",", authors))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
@@ -189,14 +189,14 @@ public class BookControllerTest {
     }
 
     @Test
-    public void whenGetAllBoooksRequestValid_thenCorrectResponse() throws Exception {
+    public void whenGetAllBooksRequestValid_thenCorrectResponse() throws Exception {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         Book book = new Book();
         when(bookService.getAllBooks()).thenReturn(Arrays.asList(book));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/books")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
@@ -212,7 +212,7 @@ public class BookControllerTest {
         when(bookService.deleteById(1L)).thenReturn(book);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/books/{id}", book.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(book.getId()))
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
