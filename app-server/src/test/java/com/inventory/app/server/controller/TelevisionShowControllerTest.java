@@ -69,7 +69,7 @@ public class TelevisionShowControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/televisionShows")
                         .content(televisionShow)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(mockTelevisionShow.getTitle()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.genre").value(mockTelevisionShow.getGenre()))
@@ -93,7 +93,7 @@ public class TelevisionShowControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/televisionShows")
                         .content(televisionShow)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title", Is.is("Title is mandatory.")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.format", Is.is("Format is mandatory.")))
@@ -131,7 +131,7 @@ public class TelevisionShowControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put("/televisionShows/{id}", mediaRequest.getId())
                         .content(televisionShow)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(mockTelevisionShow.getTitle()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.genre").value(mockTelevisionShow.getGenre()))
@@ -156,7 +156,7 @@ public class TelevisionShowControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put("/televisionShows/{id}", mediaRequest.getId())
                         .content(televisionShow)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title", Is.is("Title is mandatory.")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.format", Is.is("Format is mandatory.")))
@@ -176,7 +176,7 @@ public class TelevisionShowControllerTest {
         when(televisionService.getAllTelevisionShowsByEpisode(episodes)).thenReturn(Arrays.asList(televisionShow));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/televisionShows/{episodes}", String.join(",", episodes))
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
@@ -192,7 +192,7 @@ public class TelevisionShowControllerTest {
         when(televisionService.getAllTelevisionShows()).thenReturn(Arrays.asList(televisionShow));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/televisionShows")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
@@ -209,7 +209,7 @@ public class TelevisionShowControllerTest {
         when(televisionService.deleteById(1L)).thenReturn(televisionShow);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/televisionShows/{id}", televisionShow.getId())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(televisionShow.getId()))
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
