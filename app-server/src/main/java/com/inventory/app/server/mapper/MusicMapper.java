@@ -10,7 +10,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,7 @@ public interface MusicMapper {
     @Mapping(source = "collectionName", target = "collectionName")
     @Mapping(source = "additionalAttributes", target = "artists", qualifiedByName = "mapArtists")
     @Mapping(source = "additionalAttributes", target = "songList", qualifiedByName = "mapSongList")
-    @Mapping(source = "additionalAttributes", target = "releaseDate", qualifiedByName = "mapReleaseDate")
+    @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
     Music mapMediaRequestToMusic(MediaRequest mediaRequest);
 
     @Named("mapArtists")
@@ -48,9 +47,9 @@ public interface MusicMapper {
         return songList;
     }
 
-    @Named("mapReleaseDate")
-    default LocalDate mapReleaseDate(Map<String, Object> additionalAttributes) {
-        return (LocalDate) additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey(), null);
+    @Named("mapReleaseYear")
+    default Integer mapReleaseYear(Map<String, Object> additionalAttributes) {
+        return (Integer) additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), null);
     }
 
     @Mapping(source = "id", target = "id")
@@ -83,8 +82,8 @@ public interface MusicMapper {
         }
 
         // Map release date if available
-        if (music.getReleaseDate() != null) {
-            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey(), music.getReleaseDate());
+        if (music.getReleaseYear() != null) {
+            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), music.getReleaseYear());
         }
 
         return additionalAttributes;

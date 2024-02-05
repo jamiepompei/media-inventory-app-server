@@ -4,14 +4,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class MusicTest {
+public class MusicTest {
     private Music music1;
     private Music music2;
 
@@ -24,7 +23,7 @@ class MusicTest {
         music1.setTitle("Sample Music");
         music1.setArtists(List.of("Artist1", "Artist2"));
         music1.setSongList(List.of("Song1", "Song2"));
-        music1.setReleaseDate(LocalDate.of(2022, 1, 30));
+        music1.setReleaseYear( 2022);
         music1.setGenre("Rock");
         music1.setFormat("Vinyl");
         music1.setCollectionName("Jamie's Stuff");
@@ -35,7 +34,7 @@ class MusicTest {
         music2.setTitle("Sample Music");
         music2.setArtists(List.of("Artist1", "Artist2"));
         music2.setSongList(List.of("Song1", "Song2"));
-        music2.setReleaseDate(LocalDate.of(2022, 1, 30));
+        music2.setReleaseYear(2022);
         music2.setGenre("Rock");
         music2.setFormat("Vinyl");
         music2.setCollectionName("Jamie's Stuff");
@@ -74,7 +73,7 @@ class MusicTest {
         // Test that toString method works correctly
         String expectedToString = "Music{artists=[Artist1, Artist2], " +
                 "songList=[Song1, Song2], " +
-                "releaseDate=2022-01-30, " +
+                "releaseYear=2022, " +
                 "id=1, " +
                 "version=1, " +
                 "title='Sample Music', " +
@@ -90,17 +89,17 @@ class MusicTest {
         // Test getters and setters
         assertThat(music1.getArtists()).containsExactly("Artist1", "Artist2");
         assertThat(music1.getSongList()).containsExactly("Song1", "Song2");
-        assertEquals(LocalDate.of(2022, 1, 30), music1.getReleaseDate());
+        assertEquals(2022, music1.getReleaseYear());
 
         // Modify values using setters
         music1.setArtists(List.of("NewArtist"));
         music1.setSongList(List.of("NewSong"));
-        music1.setReleaseDate(LocalDate.of(2023, 1, 30));
+        music1.setReleaseYear(2023);
 
         // Test that values have been updated
         assertThat(music1.getArtists()).containsExactly("NewArtist");
         assertThat(music1.getSongList()).containsExactly("NewSong");
-        assertEquals(LocalDate.of(2023, 1, 30), music1.getReleaseDate());
+        assertEquals(2023, music1.getReleaseYear());
     }
 
 }
