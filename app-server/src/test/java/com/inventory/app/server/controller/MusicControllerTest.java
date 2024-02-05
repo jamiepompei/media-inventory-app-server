@@ -5,6 +5,7 @@ import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Music;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.service.media.MusicService;
+import org.hamcrest.core.Is;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,120 @@ public class MusicControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.artists").isArray())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.songList").isArray())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.releaseYear").value(mockMusic.getReleaseYear()))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenPostRequestMusicAndInvalidMusic_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        MediaRequest mediaRequest = new MediaRequest();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String music = objectMapper.writeValueAsString(mediaRequest);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/music")
+                .content(music)
+                .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.title", Is.is("Title is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.format", Is.is("Format is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.genre", Is.is("Genre is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.collectionName", Is.is("Collection Title is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes", Is.is("Additional attributes are mandatory.")))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenPutRequestMusicAndValidMusic_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        Music mockMusic = createMusic(1L, 1,"Eye On The Bat", "Vinyl", "Rock", Arrays.asList("Palehound"), Arrays.asList("Good Sex", "The Clutch", "Eye On The Bat", "Independence Day", "Route 22", "Right About You", "You Want It You Got It", "Fadin"), "Jamie's Stuff", 2023);
+
+        when(musicService.create(any())).thenReturn(mockMusic);
+
+        ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
+        additionalAttributes.put(MediaInventoryAdditionalAttributes.ARTISTS.getJsonKey(), mockMusic.getArtists());
+        additionalAttributes.put(MediaInventoryAdditionalAttributes.SONG_LIST.getJsonKey(), mockMusic.getSongList());
+        additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), mockMusic.getReleaseYear());
+        MediaRequest mediaRequest = MediaRequest.builder()
+                .id(mockMusic.getId())
+                .version(mockMusic.getVersion())
+                .title(mockMusic.getTitle())
+                .genre(mockMusic.getGenre())
+                .format(mockMusic.getFormat())
+                .collectionName(mockMusic.getCollectionName())
+                .additionalAttributes(additionalAttributes)
+                .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String music = objectMapper.writeValueAsString(mediaRequest);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/music/{id}", mediaRequest.getId())
+                        .content(music)
+                        .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(mockMusic.getTitle()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.genre").value(mockMusic.getGenre()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.format").value(mockMusic.getFormat()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.collectionName").value(mockMusic.getCollectionName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.artists").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.songList").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.releaseYear").value(mockMusic.getReleaseYear()))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenPutRequestMusicAndInvalidMusic_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        MediaRequest mediaRequest = new MediaRequest();
+        mediaRequest.setId(1L);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String music = objectMapper.writeValueAsString(mediaRequest);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/music/{id}", mediaRequest.getId())
+                        .content(music)
+                        .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.title", Is.is("Title is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.format", Is.is("Format is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.genre", Is.is("Genre is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.collectionName", Is.is("Collection Title is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes", Is.is("Additional attributes are mandatory.")))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenGetAllMusicRequestValid_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        Music music = new Music();
+
+        when(musicService.getAllMusic()).thenReturn(Arrays.asList(music));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/music")
+                .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenDeleteByIdRequestValid_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        Music music = new Music();
+        music.setId(1L);
+
+        when(musicService.deleteById(1L)).thenReturn(music);
+
+        mockMvc .perform(MockMvcRequestBuilders.delete("/music/{id}", music.getId())
+                .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(music.getId()))
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
     }
 
