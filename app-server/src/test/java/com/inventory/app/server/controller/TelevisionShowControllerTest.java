@@ -206,7 +206,7 @@ public class TelevisionShowControllerTest {
         TelevisionShow televisionShow = new TelevisionShow();
         televisionShow.setId(1L);
 
-        when(televisionService.deleteById(1L)).thenReturn(televisionShow);
+        when(televisionService.deleteById(televisionShow.getId())).thenReturn(televisionShow);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/televisionShows/{id}", televisionShow.getId())
                 .contentType(jsonMediaType))

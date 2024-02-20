@@ -187,9 +187,9 @@ public class MusicControllerTest {
         Music music = new Music();
         music.setId(1L);
 
-        when(musicService.deleteById(1L)).thenReturn(music);
+        when(musicService.deleteById(music.getId())).thenReturn(music);
 
-        mockMvc .perform(MockMvcRequestBuilders.delete("/music/{id}", music.getId())
+        mockMvc.perform(MockMvcRequestBuilders.delete("/music/{id}", music.getId())
                 .contentType(jsonMediaType))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(music.getId()))

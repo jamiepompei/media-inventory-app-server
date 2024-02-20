@@ -209,7 +209,7 @@ public class BookControllerTest {
 
         Book book = new Book();
         book.setId(1L);
-        when(bookService.deleteById(1L)).thenReturn(book);
+        when(bookService.deleteById(book.getId())).thenReturn(book);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/books/{id}", book.getId())
                         .contentType(jsonMediaType))

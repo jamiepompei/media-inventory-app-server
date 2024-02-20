@@ -1,8 +1,10 @@
 package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Game;
+import com.inventory.app.server.error.NoChangesToUpdateException;
+import com.inventory.app.server.error.ResourceAlreadyExistsException;
+import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
-import com.inventory.app.server.utility.RestPreConditions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,10 @@ import java.util.List;
 @Service
 public class GameService {
     private IBaseDao<Game> dao;
+
+    public GameService(IBaseDao<Game> dao) {
+        this.dao = dao;
+    }
 
     @Autowired
     public void setDao(IBaseDao<Game> daoToSet) {
@@ -48,31 +54,35 @@ public class GameService {
     }
 
     public Game create(Game game) {
-        // validations before performing create
-        RestPreConditions.checkAlreadyExists(gameAlreadyExists(game), game);
-
+        if (gameAlreadyExists(game)) {
+            throw new ResourceAlreadyExistsException("Cannot create game because games already exist: " + game);
+        }
         Game gameToSave = cloneGame(game);
         gameToSave.setId(null);
         gameToSave.setVersion(1);
-
         return dao.createOrUpdate(gameToSave);
     }
 
     public Game update(Game updatedGame) {
-        //validations before performing the update
-        Game existingGame = RestPreConditions.checkFound(getGameById(updatedGame.getId()));
-        RestPreConditions.checkEquals(existingGame, updatedGame);
-
+        if (!gameAlreadyExists(updatedGame)) {
+            throw new ResourceNotFoundException("Cannot update game because game does not exist: " + updatedGame);
+        }
+        Game existingGame = getGameById(updatedGame.getId());
+        if (verifyIfGameUpdate(existingGame, updatedGame)) {
+            throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Game: " + existingGame + " Update Game: " + updatedGame);
+        }
         updatedGame = cloneGame(existingGame, updatedGame);
         updatedGame.setVersion(existingGame.getVersion() + 1);
-
         return dao.createOrUpdate(updatedGame);
     }
 
     public Game deleteById(Long id){
-       Game game = RestPreConditions.checkFound(getGameById(id));
-        dao.deleteById(id);
-        return game;
+       Game game = getGameById(id);
+       if (game == null) {
+           throw new ResourceNotFoundException("Cannot delete game because game does not exist.");
+       }
+       dao.deleteById(id);
+       return game;
     }
 
     private Game cloneGame(Game game) {
@@ -90,5 +100,9 @@ public class GameService {
         return getAllGamesByTitle(game.getTitle())
                 .stream()
                 .anyMatch(g -> game.getTitle().equals(g.getTitle()));
+    }
+
+    private boolean verifyIfGameUpdate(Game existingGame, Game updatedGame) {
+        return existingGame.equals(updatedGame);
     }
 }

@@ -3,14 +3,14 @@ package com.inventory.app.server.config;
 public enum MediaInventoryAdditionalAttributes {
     CONSOLES("consoles"),
     NUMBER_OF_PLAYERS("numberOfPlayers"),
-    RELEASE_DATE("releaseDate"),
+    RELEASE_YEAR("releaseYear"),
     AUTHORS("authors"),
-    COPYRIGHT_YEAR("copyright_year"),
+    COPYRIGHT_YEAR("copyrightYear"),
     EDITION("edition"),
     DIRECTORS("directors"),
     ARTISTS("artists"),
     SONG_LIST("songList"),
-    WRITERS("writers"),
+    EPISODES("episodes"),
     SEASON("season");
 
      private final String jsonKey;

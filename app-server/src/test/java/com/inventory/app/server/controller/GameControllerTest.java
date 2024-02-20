@@ -212,7 +212,7 @@ public class GameControllerTest {
         Game game = new Game();
         game.setId(1L);
 
-        when(gameService.deleteById(1L)).thenReturn(game);
+        when(gameService.deleteById(game.getId())).thenReturn(game);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/games/{id}", game.getId())
                 .contentType(jsonMediaType))

@@ -1,8 +1,10 @@
 package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Music;
+import com.inventory.app.server.error.NoChangesToUpdateException;
+import com.inventory.app.server.error.ResourceAlreadyExistsException;
+import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
-import com.inventory.app.server.utility.RestPreConditions;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,29 +45,33 @@ public class MusicService {
     }
 
     public Music create(Music music) {
-        // validations before performing create
-        RestPreConditions.checkAlreadyExists(musicAlreadyExists(music), music);
-
+       if (musicAlreadyExists(music)) {
+           throw new ResourceAlreadyExistsException("Cannot create music because music already exists: " + music);
+        }
         Music musicToSave = cloneMusic(music);
         musicToSave.setId(null);
         musicToSave.setVersion(1);
-
         return dao.createOrUpdate(musicToSave);
     }
 
     public Music update(Music updatedMusic) {
-        //validations before performing the update
-        Music existingMusic = RestPreConditions.checkFound(getMusicById(updatedMusic.getId()));
-        RestPreConditions.checkEquals(existingMusic, updatedMusic);
-
+        if (!musicAlreadyExists(updatedMusic)) {
+            throw new ResourceNotFoundException("Cannot update music because music does not exist: " + updatedMusic);
+        }
+        Music existingMusic = getMusicById(updatedMusic.getId());
+        if (verifyIfMusicUpdated(existingMusic, updatedMusic)) {
+            throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingMusic+ "Updated Book: " + updatedMusic);
+        }
         updatedMusic = cloneMusic(existingMusic, updatedMusic);
         updatedMusic.setVersion(existingMusic.getVersion() + 1);
-
         return dao.createOrUpdate(updatedMusic);
     }
 
     public Music deleteById(Long id){
-        Music music = RestPreConditions.checkFound(getMusicById(id));
+        Music music = getMusicById(id);
+        if (music == null) {
+            throw new ResourceNotFoundException("Cannot delete music because music does not exist.");
+        }
         dao.deleteById(id);
         return music;
     }
@@ -85,5 +91,9 @@ public class MusicService {
         Music clonedMusic = new Music();
         BeanUtils.copyProperties(music, clonedMusic);
         return clonedMusic;
+    }
+
+    private boolean verifyIfMusicUpdated(Music existingMusic, Music updatedMusic) {
+        return existingMusic.equals(updatedMusic);
     }
 }

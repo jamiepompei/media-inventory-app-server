@@ -75,8 +75,7 @@ public class MovieControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.genre").value(mockMovie.getGenre()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.format").value(mockMovie.getFormat()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.collectionName").value(mockMovie.getCollectionName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.artists").isArray())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.songList").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.directors").isArray())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.releaseYear").value(mockMovie.getReleaseYear()))
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
     }
@@ -99,6 +98,97 @@ public class MovieControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.genre", Is.is("Genre is mandatory.")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.collectionName", Is.is("Collection Title is mandatory.")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes", Is.is("Additional attributes are mandatory.")))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenPutRequestMovieAndValidMovie_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        Movie mockMovie = createMovie(1L, 1, "The Goonies", "DVD", "Adventure", Arrays.asList("Jessie Pinkman"), "Jamie's Stuff", 2023);
+
+        when(movieService.update(mockMovie)).thenReturn(mockMovie);
+
+        ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
+        additionalAttributes.put(MediaInventoryAdditionalAttributes.DIRECTORS.getJsonKey(), mockMovie.getDirectors());
+        additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), mockMovie.getReleaseYear());
+        MediaRequest mediaRequest = MediaRequest.builder()
+                .id(mockMovie.getId())
+                .version(mockMovie.getVersion())
+                .title(mockMovie.getTitle())
+                .genre(mockMovie.getGenre())
+                .format(mockMovie.getFormat())
+                .collectionName(mockMovie.getCollectionName())
+                .additionalAttributes(additionalAttributes)
+                .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String movie = objectMapper.writeValueAsString(mediaRequest);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/movies/{id}", mockMovie.getId())
+                .content(movie)
+                .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(mockMovie.getTitle()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.genre").value(mockMovie.getGenre()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.format").value(mockMovie.getFormat()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.collectionName").value(mockMovie.getCollectionName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.directors").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes.releaseYear").value(mockMovie.getReleaseYear()))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenPutRequestMovieAndInvalidMovie_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        MediaRequest mediaRequest = new MediaRequest();
+        mediaRequest.setId(1L);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String movie = objectMapper.writeValueAsString(mediaRequest);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/movies/{id}", mediaRequest.getId())
+                        .content(movie)
+                        .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.title", Is.is("Title is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.format", Is.is("Format is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.genre", Is.is("Genre is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.collectionName", Is.is("Collection Title is mandatory.")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.additionalAttributes", Is.is("Additional attributes are mandatory.")))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenGetAllMoviesRequestValid_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        Movie movie = new Movie();
+
+        when(movieService.getAllMovies()).thenReturn(Arrays.asList(movie));
+
+        mockMvc.perform((MockMvcRequestBuilders.get("/movies"))
+                .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
+    }
+
+    @Test
+    public void whenDeleteByIdRequestValid_thenCorrectResponse() throws Exception {
+        MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
+
+        Movie movie = new Movie();
+        movie.setId(1L);
+
+        when(movieService.deleteById(movie.getId())).thenReturn(movie);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/movie/{id}", movie.getId())
+                        .contentType(jsonMediaType))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(movie.getId()))
                 .andExpect(MockMvcResultMatchers.content().contentType(jsonMediaType));
     }
 
