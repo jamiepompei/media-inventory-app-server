@@ -195,7 +195,7 @@ public class GameControllerTest {
 
         Game game = new Game();
 
-        when(gameService.getAllGames()).thenReturn(Arrays.asList(game));
+        when(gameService.getAll()).thenReturn(Arrays.asList(game));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/games")
                         .contentType(jsonMediaType))

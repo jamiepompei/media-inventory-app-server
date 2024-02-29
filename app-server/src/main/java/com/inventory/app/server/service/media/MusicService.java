@@ -36,11 +36,11 @@ public class MusicService {
         return dao.findByField("collection_name", collectionTitle);
     }
 
-    public List<Music> getAllMusic() {
+    public List<Music> getAll() {
         return dao.findAll();
     }
 
-    public Music getMusicById(Long id){
+    public Music getById(Long id){
         return dao.findOne(id);
     }
 
@@ -58,7 +58,7 @@ public class MusicService {
         if (!musicAlreadyExists(updatedMusic)) {
             throw new ResourceNotFoundException("Cannot update music because music does not exist: " + updatedMusic);
         }
-        Music existingMusic = getMusicById(updatedMusic.getId());
+        Music existingMusic = getById(updatedMusic.getId());
         if (verifyIfMusicUpdated(existingMusic, updatedMusic)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingMusic+ "Updated Book: " + updatedMusic);
         }
@@ -68,7 +68,7 @@ public class MusicService {
     }
 
     public Music deleteById(Long id){
-        Music music = getMusicById(id);
+        Music music = getById(id);
         if (music == null) {
             throw new ResourceNotFoundException("Cannot delete music because music does not exist.");
         }

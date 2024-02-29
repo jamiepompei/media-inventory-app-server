@@ -39,9 +39,9 @@ public class MovieService {
         return dao.findByField("title", collectionTitle);
     }
 
-    public List<Movie> getAllMovies() { return dao.findAll();}
+    public List<Movie> getAll() { return dao.findAll();}
 
-    public Movie getMovieById(Long id) { return dao.findOne(id);}
+    public Movie getById(Long id) { return dao.findOne(id);}
 
     public Movie create(Movie movie) {
        if (movieAlreadyExists(movie)) {
@@ -57,7 +57,7 @@ public class MovieService {
         if (!movieAlreadyExists(updatedMovie)) {
             throw new ResourceNotFoundException("Cannot update movie because movie does not exist: " + updatedMovie);
         }
-        Movie existingMovie = getMovieById(updatedMovie.getId());
+        Movie existingMovie = getById(updatedMovie.getId());
         if (verifyIfMovieUpdated(existingMovie, updatedMovie)) {
             throw new NoChangesToUpdateException("No updates in movie to save. Will not proceed with update. Existing Movie: " + existingMovie + "Updated Movie: " + updatedMovie);
         }
@@ -67,7 +67,7 @@ public class MovieService {
     }
 
     public Movie deleteById(Long id){
-        Movie movie = getMovieById(id);
+        Movie movie = getById(id);
         if (movie == null ) {
             throw new ResourceNotFoundException("Cannot delete movie because movie does not exist.");
         }

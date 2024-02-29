@@ -23,7 +23,7 @@ public class BookServiceTest {
     private IBaseDao<Book> daoMock;
 
     @InjectMocks
-    private BookService bookService;
+    private BookService underTest;
 
     @Before
     public void setUp() {
@@ -43,7 +43,7 @@ public class BookServiceTest {
 
         when(daoMock.findByField("collection_name", collectionTitle)).thenReturn(expectedBooks);
 
-        List<Book> actualBooks = bookService.getAllBooksByCollectionTitle(collectionTitle);
+        List<Book> actualBooks = underTest.getAllBooksByCollectionTitle(collectionTitle);
 
         assertEquals(expectedBooks, actualBooks);
         verify(daoMock, times(1)).findByField("collection_name", collectionTitle);
@@ -56,7 +56,7 @@ public class BookServiceTest {
 
         when(daoMock.findByField("authors", authors)).thenReturn(expectedBooks);
 
-        List<Book> actualBooks = bookService.getAllBooksByAuthor(authors);
+        List<Book> actualBooks = underTest.getAllBooksByAuthor(authors);
 
         assertEquals(expectedBooks, actualBooks);
         verify(daoMock, times(1)).findByField("authors", authors);
@@ -69,7 +69,7 @@ public class BookServiceTest {
 
         when(daoMock.findByField("genre", genre)).thenReturn(expectedBooks);
 
-        List<Book> actualBooks = bookService.getAllBooksByGenre(genre);
+        List<Book> actualBooks = underTest.getAllBooksByGenre(genre);
 
         assertEquals(expectedBooks, actualBooks);
         verify(daoMock, times(1)).findByField("genre", genre);
@@ -81,7 +81,7 @@ public class BookServiceTest {
 
         when(daoMock.findAll()).thenReturn(expectedBooks);
 
-        List<Book> actualBooks = bookService.getAllBooks();
+        List<Book> actualBooks = underTest.getAll();
 
         assertEquals(expectedBooks, actualBooks);
         verify(daoMock, times(1)).findAll();
@@ -94,7 +94,7 @@ public class BookServiceTest {
 
         when(daoMock.findOne(bookId)).thenReturn(expectedBook);
 
-        Book actualBook = bookService.getBookById(bookId);
+        Book actualBook = underTest.getById(bookId);
 
         assertEquals(expectedBook, actualBook);
         verify(daoMock, times(1)).findOne(bookId);
@@ -108,7 +108,7 @@ public class BookServiceTest {
 
         when(daoMock.findByField(any(), any())).thenReturn(Collections.emptyList());
 
-        Book savedBook = bookService.create(inputBook);
+        Book savedBook = underTest.create(inputBook);
 
         assertNotNull(savedBook);
         assertEquals(inputBook.getTitle(), savedBook.getTitle());
@@ -132,7 +132,7 @@ public class BookServiceTest {
         updatedBook.setTitle("Updated Book");
 
         when(daoMock.findOne(updatedBook.getId())).thenReturn(existingBook);
-        Book result = bookService.update(updatedBook);
+        Book result = underTest.update(updatedBook);
 
         assertNotNull(result);
         assertEquals(updatedBook.getTitle(), result.getTitle());
@@ -148,7 +148,7 @@ public class BookServiceTest {
 
         when(daoMock.findOne(bookId)).thenReturn(bookToDelete);
 
-        Book result = bookService.deleteById(bookId);
+        Book result = underTest.deleteById(bookId);
 
         assertNotNull(result);
         verify(daoMock, times(1)).deleteById(bookId);

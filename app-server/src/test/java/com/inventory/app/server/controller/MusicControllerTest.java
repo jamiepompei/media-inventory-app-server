@@ -170,7 +170,7 @@ public class MusicControllerTest {
 
         Music music = new Music();
 
-        when(musicService.getAllMusic()).thenReturn(Arrays.asList(music));
+        when(musicService.getAll()).thenReturn(Arrays.asList(music));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/music")
                 .contentType(jsonMediaType))

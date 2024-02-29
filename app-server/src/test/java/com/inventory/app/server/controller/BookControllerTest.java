@@ -193,7 +193,7 @@ public class BookControllerTest {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         Book book = new Book();
-        when(bookService.getAllBooks()).thenReturn(Arrays.asList(book));
+        when(bookService.getAll()).thenReturn(Arrays.asList(book));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/books")
                         .contentType(jsonMediaType))

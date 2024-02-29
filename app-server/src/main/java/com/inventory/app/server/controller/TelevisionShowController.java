@@ -10,14 +10,10 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,87 +30,50 @@ public class TelevisionShowController {
 
     @GetMapping
     ResponseEntity<List<MediaResponse>> findAllTelevisionShows() {
-        try {
-            log.info("Received a request to get all books");
-            List<MediaResponse> responseList = televisionService.getAllTelevisionShows().stream()
-                    .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
-                    .collect(Collectors.toList());
-            return ResponseEntity.status(HttpStatus.OK).body(responseList);
-        } catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error " + e);
-        }
+        List<MediaResponse> responseList = televisionService.getAll().stream()
+                .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @GetMapping(value = "/{episodes}")
     ResponseEntity<List<MediaResponse>> findByEpisode(@PathVariable("episodes") final List<String> episodes) {
-        try {
-            if (episodes.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Writers cannot be empty.");
-            }
-            List<TelevisionShow> televisionShowsByEpisodes = televisionService.getAllTelevisionShowsByEpisode(episodes);
-            if (televisionShowsByEpisodes.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + episodes);
-            }
-            List<MediaResponse> responseList = televisionShowsByEpisodes.stream()
-                    .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.status(HttpStatus.OK).body(responseList);
-        } catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e);
+        if (episodes.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Writers cannot be empty.");
         }
+        List<TelevisionShow> televisionShowsByEpisodes = televisionService.getAllTelevisionShowsByEpisode(episodes);
+        List<MediaResponse> responseList = televisionShowsByEpisodes.stream()
+                .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<MediaResponse> createTelevisionShow(@Valid @RequestBody final MediaRequest televisionShowRequest) {
-        try {
-            log.info("Received request to create resource: " + televisionShowRequest);
-            TelevisionShow televisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(televisionShowRequest);
-            MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.create(televisionShow));
-            log.info("Created new television show: " + response);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error: " + e);
-        }
+        log.info("Received request to create resource: " + televisionShowRequest);
+        TelevisionShow televisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(televisionShowRequest);
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.create(televisionShow));
+        log.info("Created new television show: " + response);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> updateTelevisionShow(@Valid @RequestBody final MediaRequest televisionShowRequest) {
-        try {
-            log.info("Received request to update resource: " + televisionShowRequest);
-            TelevisionShow updatedTelevisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(televisionShowRequest);
-            MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.update(updatedTelevisionShow));
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
-        }
+        log.info("Received request to update resource: " + televisionShowRequest);
+        TelevisionShow updatedTelevisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(televisionShowRequest);
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.update(updatedTelevisionShow));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> deleteTelevisionShow(@PathVariable("id") final Long id){
-        try{
-            if (id == null){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
-            }
-            MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.deleteById(id));
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
+        if (id == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.deleteById(id));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

@@ -21,7 +21,7 @@ public class GameServiceTest {
     private IBaseDao<Game> daoMock;
 
     @InjectMocks
-    private GameService gameService;
+    private GameService underTest;
 
     @Before
     public void setUp() {
@@ -41,7 +41,7 @@ public class GameServiceTest {
 
         when(daoMock.findByField("collection_name", collectionTitle)).thenReturn(expectedGames);
 
-        List<Game> actualGames = gameService.getAllGamesByCollectionTitle(collectionTitle);
+        List<Game> actualGames = underTest.getAllGamesByCollectionTitle(collectionTitle);
 
         assertEquals(expectedGames, actualGames);
         verify(daoMock, times(1)).findByField("collection_name", collectionTitle);
@@ -54,7 +54,7 @@ public class GameServiceTest {
 
         when(daoMock.findByField("number_of_players", numOfPlayers)).thenReturn(expectedGames);
 
-        List<Game> actualGames = gameService.getAllGamesByNumberOfPlayers(numOfPlayers);
+        List<Game> actualGames = underTest.getAllGamesByNumberOfPlayers(numOfPlayers);
 
         assertEquals(expectedGames, actualGames);
         verify(daoMock, times(1)).findByField("number_of_players", numOfPlayers);
@@ -67,7 +67,7 @@ public class GameServiceTest {
 
         when(daoMock.findByField("consoles", consoles)).thenReturn(expectedGames);
 
-        List<Game> actualGames = gameService.getAllGamesByConsole(consoles);
+        List<Game> actualGames = underTest.getAllGamesByConsole(consoles);
 
         assertEquals(expectedGames, actualGames);
         verify(daoMock, times(1)).findByField("consoles", consoles);
@@ -80,7 +80,7 @@ public class GameServiceTest {
 
         when(daoMock.findByField("title", title)).thenReturn(expectedGames);
 
-        List<Game> actualGames = gameService.getAllGamesByTitle(title);
+        List<Game> actualGames = underTest.getAllGamesByTitle(title);
 
         assertEquals(expectedGames, actualGames);
         verify(daoMock, times(1)).findByField("title", title);
@@ -93,7 +93,7 @@ public class GameServiceTest {
 
         when(daoMock.findByField("genre", genre)).thenReturn(expectedGames);
 
-        List<Game> actualGames = gameService.getAllGamesByGenre(genre);
+        List<Game> actualGames = underTest.getAllGamesByGenre(genre);
 
         assertEquals(expectedGames, actualGames);
         verify(daoMock, times(1)).findByField("genre", genre);
@@ -105,7 +105,7 @@ public class GameServiceTest {
 
         when(daoMock.findAll()).thenReturn(expectedGames);
 
-        List<Game> actualGames = gameService.getAllGames();
+        List<Game> actualGames = underTest.getAll();
 
         assertEquals(expectedGames, actualGames);
         verify(daoMock, times(1)).findAll();
@@ -118,7 +118,7 @@ public class GameServiceTest {
 
         when(daoMock.findOne(gameId)).thenReturn(expectedGame);
 
-        Game actualGame = gameService.getGameById(gameId);
+        Game actualGame = underTest.getById(gameId);
 
         assertEquals(expectedGame, actualGame);
         verify(daoMock, times(1)).findOne(gameId);
@@ -133,7 +133,7 @@ public class GameServiceTest {
         when(daoMock.findByField("title", title)).thenReturn(Collections.emptyList());
         when(daoMock.createOrUpdate(inputGame)).thenReturn(inputGame);
 
-        Game savedGame = gameService.create(inputGame);
+        Game savedGame = underTest.create(inputGame);
 
         assertNotNull(savedGame);
         assertEquals(inputGame.getTitle(), savedGame.getTitle());
@@ -153,7 +153,7 @@ public class GameServiceTest {
         updatedGame.setTitle("Updated It Takes Two");
 
         when(daoMock.findOne(updatedGame.getId())).thenReturn(existingGame);
-        Game result = gameService.update(updatedGame);
+        Game result = underTest.update(updatedGame);
 
         assertNotNull(result);
         assertEquals(updatedGame, result);
@@ -169,7 +169,7 @@ public class GameServiceTest {
 
         when(daoMock.findOne(gameId)).thenReturn(gameToDelete);
 
-        Game result = gameService.deleteById(gameId);
+        Game result = underTest.deleteById(gameId);
 
         assertNotNull(result);
         verify(daoMock, times(1)).deleteById(gameId);

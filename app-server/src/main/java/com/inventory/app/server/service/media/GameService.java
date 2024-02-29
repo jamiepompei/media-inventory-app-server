@@ -5,6 +5,7 @@ import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,31 +27,63 @@ public class GameService {
     }
 
     public List<Game> getAllGamesByNumberOfPlayers(Integer numberOfPlayers){
-        return dao.findByField("number_of_players", String.valueOf(numberOfPlayers));
+        List<Game> gameList = dao.findByField("number_of_players", String.valueOf(numberOfPlayers));
+        if (gameList.isEmpty()) {
+            throw new ResourceNotFoundException("No games found with number of players: " + numberOfPlayers);
+        }
+        return gameList;
     }
 
     public List<Game> getAllGamesByConsole(List<String> console){
-        return  dao.findByField("consoles", console);
+        List<Game> gameList = dao.findByField("consoles", console);
+        if (gameList.isEmpty()) {
+            throw new ResourceNotFoundException("No games found for consoles " + console );
+        }
+        return gameList;
     }
 
     public List<Game> getAllGamesByTitle(String title){
-        return dao.findByField("title", title);
+        List<Game> gameList = dao.findByField("title", title);
+        if (gameList.isEmpty()) {
+            throw new ResourceNotFoundException("No game results for title " + title);
+        }
+        return gameList;
     }
 
     public List<Game> getAllGamesByCollectionTitle(String collectionTitle) {
-        return dao.findByField("collection_name", collectionTitle);
+        List<Game> gameList = dao.findByField("collection_name", collectionTitle);
+        if (gameList.isEmpty()) {
+            throw new ResourceNotFoundException("No game results found for collection title " + collectionTitle);
+        }
+        return gameList;
     }
 
     public List<Game> getAllGamesByGenre(String genre) {
-        return dao.findByField("genre", genre);
+        List<Game> gameList = dao.findByField("genre", genre);
+        if (gameList.isEmpty()) {
+            throw new ResourceNotFoundException("No fame results found for genre " + genre);
+        }
+        return gameList;
     }
 
-    public List<Game> getAllGames() {
-        return dao.findAll();
+    public List<Game> getAll() {
+        List<Game> gameList = dao.findAll();
+        if (gameList.isEmpty()) {
+            throw new ResourceNotFoundException("No game data exists.");
+        }
+        return gameList;
     }
 
-    public Game getGameById(Long id) {
-        return dao.findOne(id);
+    public Game getById(Long id) {
+        try {
+            return dao.findOne(id);
+        } catch (Exception e) {
+            if(e.getClass().isInstance(EntityNotFoundException.class)) {
+                throw new ResourceNotFoundException("No game exists with id: " + id);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public Game create(Game game) {
@@ -67,7 +100,7 @@ public class GameService {
         if (!gameAlreadyExists(updatedGame)) {
             throw new ResourceNotFoundException("Cannot update game because game does not exist: " + updatedGame);
         }
-        Game existingGame = getGameById(updatedGame.getId());
+        Game existingGame = getById(updatedGame.getId());
         if (verifyIfGameUpdate(existingGame, updatedGame)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Game: " + existingGame + " Update Game: " + updatedGame);
         }
@@ -77,7 +110,7 @@ public class GameService {
     }
 
     public Game deleteById(Long id){
-       Game game = getGameById(id);
+       Game game = getById(id);
        if (game == null) {
            throw new ResourceNotFoundException("Cannot delete game because game does not exist.");
        }

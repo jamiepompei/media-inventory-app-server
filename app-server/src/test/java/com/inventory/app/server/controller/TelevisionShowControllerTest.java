@@ -189,7 +189,7 @@ public class TelevisionShowControllerTest {
 
         TelevisionShow televisionShow = new TelevisionShow();
 
-        when(televisionService.getAllTelevisionShows()).thenReturn(Arrays.asList(televisionShow));
+        when(televisionService.getAll()).thenReturn(Arrays.asList(televisionShow));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/televisionShows")
                         .contentType(jsonMediaType))

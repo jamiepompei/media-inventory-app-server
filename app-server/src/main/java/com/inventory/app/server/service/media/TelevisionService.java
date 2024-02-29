@@ -6,6 +6,7 @@ import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,23 +26,47 @@ public class TelevisionService {
     }
 
     public List<TelevisionShow> getAllBooksByCollectionTitle(String collectionTitle) {
-        return dao.findByField("collection_name", collectionTitle);
+        List<TelevisionShow> televisionShowList = dao.findByField("collection_name", collectionTitle);
+        if (televisionShowList.isEmpty()) {
+            throw new ResourceNotFoundException("No television show results found with collection title " + collectionTitle);
+        }
+        return televisionShowList;
     }
 
-    public List<TelevisionShow> getAllTelevisionShowsByEpisode(List<String> writer) {
-        return dao.findByField(MediaInventoryAdditionalAttributes.EPISODES.getJsonKey(), writer);
+    public List<TelevisionShow> getAllTelevisionShowsByEpisode(List<String> episodes) {
+        List<TelevisionShow> televisionShowList = dao.findByField(MediaInventoryAdditionalAttributes.EPISODES.getJsonKey(), episodes);
+        if (televisionShowList.isEmpty()) {
+            throw new ResourceNotFoundException("No television show results found with episode(s) " + episodes);
+        }
+        return televisionShowList;
     }
 
     public List<TelevisionShow> getAllTelevisionShowsByGenre(String genre) {
-        return dao.findByField("genre", genre);
+        List<TelevisionShow> televisionShowList = dao.findByField("genre", genre);
+        if (televisionShowList.isEmpty()) {
+            throw new ResourceNotFoundException("No television show results found for genre " + genre);
+        }
+        return televisionShowList;
     }
 
-    public List<TelevisionShow> getAllTelevisionShows() {
-        return dao.findAll();
+    public List<TelevisionShow> getAll() {
+        List<TelevisionShow> televisionShowList = dao.findAll();
+        if (televisionShowList.isEmpty()) {
+            throw new ResourceNotFoundException("No television show data exists.");
+        }
+        return televisionShowList;
     }
 
-    public TelevisionShow getTelevisionShowById(Long id) {
-        return dao.findOne(id);
+    public TelevisionShow getById(Long id) {
+        try {
+            return dao.findOne(id);
+        } catch (Exception e) {
+            if ( e.getClass().isInstance(EntityNotFoundException.class)) {
+                throw new ResourceNotFoundException("No book exists with id: " + id);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public TelevisionShow create(TelevisionShow televisionShow) {
@@ -58,7 +83,7 @@ public class TelevisionService {
         if (!televisionShowAlreadyExists(updatedTelevisionShow)) {
             throw new ResourceNotFoundException("Cannot update television show because television show does not exist: " + updatedTelevisionShow);
         }
-        TelevisionShow existingTelevisionShow = getTelevisionShowById(updatedTelevisionShow.getId());
+        TelevisionShow existingTelevisionShow = getById(updatedTelevisionShow.getId());
         if (verifyIfTelevisionShowUpdated(existingTelevisionShow, updatedTelevisionShow)) {
             throw new NoChangesToUpdateException("No updates in television show to save. Will not proceed with update. Existing Television Show: " + existingTelevisionShow + "Updated Television Show: " + updatedTelevisionShow);
         }
@@ -68,8 +93,7 @@ public class TelevisionService {
     }
 
     public TelevisionShow deleteById(Long id){
-        TelevisionShow televisionShow = getTelevisionShowById(id);
-        // TODO ADD A NULL CHECK HERE AND THROW EXCEPTION IF TV SHOW DOES NOT EXIST
+        TelevisionShow televisionShow = getById(id);
         if (televisionShow == null) {
             throw new ResourceNotFoundException("Cannot delete television show because television show does not exist.");
         }

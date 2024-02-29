@@ -6,6 +6,7 @@ import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,23 +32,47 @@ public class BookService {
     }
 
     public List<Book> getAllBooksByCollectionTitle(String collectionTitle) {
-        return dao.findByField("collection_name", collectionTitle);
+        List<Book> bookList = dao.findByField("collection_name", collectionTitle);
+        if (bookList.isEmpty()){
+            throw new ResourceNotFoundException("No book results found with collection title " + collectionTitle);
+        }
+        return bookList;
     }
 
     public List<Book> getAllBooksByAuthor(List<String> author) {
-        return dao.findByField(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), author);
+        List<Book> bookList = dao.findByField(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), author);
+        if (bookList.isEmpty()) {
+            throw new ResourceNotFoundException("No book results found by author " + author);
+        }
+        return bookList;
     }
 
     public List<Book> getAllBooksByGenre(String genre) {
-        return dao.findByField("genre", genre);
+        List<Book> bookList = dao.findByField("genre", genre);
+        if (bookList.isEmpty()) {
+            throw new ResourceNotFoundException("No book data exists for genre " + genre);
+        }
+        return  bookList;
     }
 
-    public List<Book> getAllBooks() {
-        return dao.findAll();
+    public List<Book> getAll() {
+        List<Book> bookList = dao.findAll();
+        if (bookList.isEmpty()) {
+            throw new ResourceNotFoundException("No book data exists.");
+        }
+        return bookList;
     }
 
-    public Book getBookById(Long id) {
-        return dao.findOne(id);
+    public Book getById(Long id) {
+        try {
+            return dao.findOne(id);
+        } catch(Exception e) {
+            if ( e.getClass().isInstance(EntityNotFoundException.class)) {
+                throw new ResourceNotFoundException("No book exists with id: " + id);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public Book create(Book book) {
@@ -64,7 +89,7 @@ public class BookService {
         if (!bookAlreadyExists(updatedBook)) {
             throw new ResourceNotFoundException("Cannot update book because book does not exist: " + updatedBook);
         }
-        Book existingBook = getBookById(updatedBook.getId());
+        Book existingBook = getById(updatedBook.getId());
         if (verifyIfBookUpdated(existingBook, updatedBook)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingBook + "Updated Book: " + updatedBook);
         }
@@ -74,7 +99,7 @@ public class BookService {
     }
 
     public Book deleteById(Long id){
-        Book book = getBookById(id);
+        Book book = getById(id);
         if (book == null) {
             throw new ResourceNotFoundException("Cannot delete book because book does not exist.");
         }

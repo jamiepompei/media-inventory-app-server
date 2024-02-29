@@ -166,7 +166,7 @@ public class MovieControllerTest {
 
         Movie movie = new Movie();
 
-        when(movieService.getAllMovies()).thenReturn(Arrays.asList(movie));
+        when(movieService.getAll()).thenReturn(Arrays.asList(movie));
 
         mockMvc.perform((MockMvcRequestBuilders.get("/movies"))
                 .contentType(jsonMediaType))
