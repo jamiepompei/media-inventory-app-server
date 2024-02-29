@@ -1,8 +1,10 @@
 package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Movie;
+import com.inventory.app.server.error.NoChangesToUpdateException;
+import com.inventory.app.server.error.ResourceAlreadyExistsException;
+import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
-import com.inventory.app.server.utility.RestPreConditions;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,34 +39,38 @@ public class MovieService {
         return dao.findByField("title", collectionTitle);
     }
 
-    public List<Movie> getAllMovies() { return dao.findAll();}
+    public List<Movie> getAll() { return dao.findAll();}
 
-    public Movie getMovieById(Long id) { return dao.findOne(id);}
+    public Movie getById(Long id) { return dao.findOne(id);}
 
     public Movie create(Movie movie) {
-        // validations before performing create
-        RestPreConditions.checkAlreadyExists(movieAlreadyExists(movie), movie);
-
+       if (movieAlreadyExists(movie)) {
+           throw new ResourceAlreadyExistsException("Cannot create movie because movie already exists: " + movie);
+       }
         Movie movieToSave = cloneMovie(movie);
         movieToSave.setId(null);
         movieToSave.setVersion(1);
-
         return dao.createOrUpdate(movieToSave);
     }
 
     public Movie update(Movie updatedMovie) {
-        //validations before performing the update
-        Movie existingMovie = RestPreConditions.checkFound(getMovieById(updatedMovie.getId()));
-        RestPreConditions.checkEquals(existingMovie, updatedMovie);
-
+        if (!movieAlreadyExists(updatedMovie)) {
+            throw new ResourceNotFoundException("Cannot update movie because movie does not exist: " + updatedMovie);
+        }
+        Movie existingMovie = getById(updatedMovie.getId());
+        if (verifyIfMovieUpdated(existingMovie, updatedMovie)) {
+            throw new NoChangesToUpdateException("No updates in movie to save. Will not proceed with update. Existing Movie: " + existingMovie + "Updated Movie: " + updatedMovie);
+        }
         updatedMovie = cloneMovie(existingMovie, updatedMovie);
         updatedMovie.setVersion(existingMovie.getVersion() + 1);
-
         return dao.createOrUpdate(updatedMovie);
     }
 
     public Movie deleteById(Long id){
-        Movie movie = RestPreConditions.checkFound(getMovieById(id));
+        Movie movie = getById(id);
+        if (movie == null ) {
+            throw new ResourceNotFoundException("Cannot delete movie because movie does not exist.");
+        }
         dao.deleteById(id);
         return movie;
     }
@@ -84,6 +90,10 @@ public class MovieService {
         Movie clonedMovie = new Movie();
         BeanUtils.copyProperties(movie, clonedMovie);
         return clonedMovie;
+    }
+
+    private boolean verifyIfMovieUpdated(Movie existingMovie, Movie updatedMovie) {
+        return existingMovie.equals(updatedMovie);
     }
 }
 

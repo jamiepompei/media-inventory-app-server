@@ -24,7 +24,7 @@ class GameTest {
         game1.setTitle("Sample Game");
         game1.setConsoles(List.of("Console1", "Console2"));
         game1.setNumberOfPlayers(2);
-        game1.setReleaseDate(LocalDate.of(2022, 1, 30));
+        game1.setReleaseYear(2022);
 
         game2 = new Game();
         game2.setId(1L);
@@ -32,7 +32,7 @@ class GameTest {
         game2.setTitle("Sample Game");
         game2.setConsoles(List.of("Console1", "Console2"));
         game2.setNumberOfPlayers(2);
-        game2.setReleaseDate(LocalDate.of(2022, 1, 30));
+        game2.setReleaseYear(2022);
     }
 
     @AfterEach
@@ -83,16 +83,16 @@ class GameTest {
         // Test getters and setters
         assertThat(game1.getConsoles()).containsExactly("Console1", "Console2");
         assertEquals(2, game1.getNumberOfPlayers());
-        assertEquals(LocalDate.of(2022, 1, 30), game1.getReleaseDate());
+        assertEquals(LocalDate.of(2022, 1, 30), game1.getReleaseYear());
 
         // Modify values using setters
         game1.setConsoles(List.of("NewConsole"));
         game1.setNumberOfPlayers(4);
-        game1.setReleaseDate(LocalDate.of(2023, 1, 30));
+        game1.setReleaseYear(2023);
 
         // Test that values have been updated
         assertThat(game1.getConsoles()).containsExactly("NewConsole");
         assertEquals(4, game1.getNumberOfPlayers());
-        assertEquals(LocalDate.of(2023, 1, 30), game1.getReleaseDate());
+        assertEquals(LocalDate.of(2023, 1, 30), game1.getReleaseYear());
     }
 }

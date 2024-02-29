@@ -1,6 +1,5 @@
 package com.inventory.app.server.config;
 
-import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,12 +53,19 @@ public class AppConfig {
 
     @Bean
     public DataSource dataSource() {
-        final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(Preconditions.checkNotNull(getDatasourceDriverClassName()));
-        dataSource.setUrl(Preconditions.checkNotNull(getDatasourceUrl()));
-        dataSource.setUsername(Preconditions.checkNotNull(getUsername()));
-        dataSource.setPassword(Preconditions.checkNotNull(getPassword()));
+        final String datasourceDriverClassName = getDatasourceDriverClassName();
+        final String dataSourceUrl = getDatasourceUrl();
+        final String username = getUsername();
+        final String password = getPassword();
 
+        if (datasourceDriverClassName == null || dataSourceUrl == null || username == null || password == null) {
+            throw new IllegalArgumentException("Database config properties cannot be null.");
+        }
+        final DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(datasourceDriverClassName);
+        dataSource.setUrl(dataSourceUrl);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
         return dataSource;
     }
 
@@ -77,8 +83,12 @@ public class AppConfig {
 
     final Properties getAdditionalProperties() {
         final Properties jpaProperties = new Properties();
-       jpaProperties.setProperty("spring.jpa.hibernate.ddl-auto", getDdlAuto());
+        final String ddlAuto = getDdlAuto();
 
+        if (ddlAuto == null) {
+            throw new IllegalArgumentException("Additional database config properties cannot be null.");
+        }
+       jpaProperties.setProperty("spring.jpa.hibernate.ddl-auto", ddlAuto);
         return jpaProperties;
     }
 

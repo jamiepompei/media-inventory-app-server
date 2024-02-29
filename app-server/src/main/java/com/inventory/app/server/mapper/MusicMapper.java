@@ -3,7 +3,6 @@ package com.inventory.app.server.mapper;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Media;
 import com.inventory.app.server.entity.media.Music;
-import com.inventory.app.server.entity.payload.request.MediaId;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
@@ -11,7 +10,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,15 +20,15 @@ public interface MusicMapper {
 
     MusicMapper INSTANCE = Mappers.getMapper(MusicMapper.class);
 
-    @Mapping(source = "mediaId.id", target = "id")
-    @Mapping(source = "mediaId.version", target = "version")
-    @Mapping(source = "mediaId.title", target = "title")
-    @Mapping(source = "mediaId.format", target = "format")
-    @Mapping(source = "mediaId.genre", target = "genre")
-    @Mapping(source = "mediaId.collectionName", target = "collectionName")
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "version", target = "version")
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "format", target = "format")
+    @Mapping(source = "genre", target = "genre")
+    @Mapping(source = "collectionName", target = "collectionName")
     @Mapping(source = "additionalAttributes", target = "artists", qualifiedByName = "mapArtists")
     @Mapping(source = "additionalAttributes", target = "songList", qualifiedByName = "mapSongList")
-    @Mapping(source = "additionalAttributes", target = "releaseDate", qualifiedByName = "mapReleaseDate")
+    @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
     Music mapMediaRequestToMusic(MediaRequest mediaRequest);
 
     @Named("mapArtists")
@@ -49,9 +47,9 @@ public interface MusicMapper {
         return songList;
     }
 
-    @Named("mapReleaseDate")
-    default LocalDate mapReleaseDate(Map<String, Object> additionalAttributes) {
-        return (LocalDate) additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey(), null);
+    @Named("mapReleaseYear")
+    default Integer mapReleaseYear(Map<String, Object> additionalAttributes) {
+        return (Integer) additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), null);
     }
 
     @Mapping(source = "id", target = "id")
@@ -60,12 +58,11 @@ public interface MusicMapper {
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionName", target = "collectionName")
-    MediaId mapMusicIdToMediaId(Media entity);
+    MediaResponse mapMusicIdToMediaId(Media entity);
 
 
     default MediaResponse mapMusicToMediaResponseWithAdditionalAttributes(Music music){
-        MediaResponse mediaResponse = new MediaResponse();
-        mediaResponse.setMediaId(mapMusicIdToMediaId(music));
+        MediaResponse mediaResponse = mapMusicIdToMediaId(music);
         mediaResponse.setAdditionalAttributes(mapMusicToAdditionalAttributes(music));
         return mediaResponse;
     }
@@ -85,8 +82,8 @@ public interface MusicMapper {
         }
 
         // Map release date if available
-        if (music.getReleaseDate() != null) {
-            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey(), music.getReleaseDate());
+        if (music.getReleaseYear() != null) {
+            additionalAttributes.put(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey(), music.getReleaseYear());
         }
 
         return additionalAttributes;

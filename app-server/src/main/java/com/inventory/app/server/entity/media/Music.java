@@ -1,10 +1,12 @@
 package com.inventory.app.server.entity.media;
 
 import com.inventory.app.server.config.converter.StringListConverter;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,15 +20,15 @@ public class Music extends Media {
     @Convert(converter = StringListConverter.class)
     @Column(name = "song_list")
     private List<String> songList;
-    @Column(name = "release_date")
-    private LocalDate releaseDate;
+    @Column(name = "release_year")
+    private Integer releaseYear;
 
     @Override
     public String toString() {
         return "Music{" +
                 "artists=" + artists +
                 ", songList=" + songList +
-                ", releaseDate=" + releaseDate +
+                ", releaseYear=" + releaseYear +
                 ", " +
                 super.toString() +
                 "}";
@@ -42,7 +44,7 @@ public class Music extends Media {
         // Compare fields specific to Movie
         return Objects.equals(getArtists(), music.getArtists()) &&
                 Objects.equals(getSongList(), music.getSongList()) &&
-                Objects.equals(getReleaseDate(), music.getReleaseDate());
+                Objects.equals(getReleaseYear(), music.getReleaseYear());
     }
 
     @Override
@@ -51,6 +53,6 @@ public class Music extends Media {
                 super.hashCode(),
                 getArtists(),
                 getSongList(),
-                getReleaseDate());
+                getReleaseYear());
     }
 }
