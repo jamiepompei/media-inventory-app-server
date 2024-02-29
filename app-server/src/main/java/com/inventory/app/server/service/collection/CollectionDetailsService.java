@@ -1,6 +1,5 @@
 package com.inventory.app.server.service.collection;
 
-import com.google.common.base.Preconditions;
 import com.inventory.app.server.entity.collection.CollectionDetails;
 import com.inventory.app.server.entity.media.Media;
 import com.inventory.app.server.entity.user.User;
@@ -33,13 +32,11 @@ public class CollectionDetailsService {
     }
 
     public CollectionDetails create(CollectionDetails resource) {
-        Preconditions.checkNotNull(resource);
         return  dao.createOrUpdate(resource);
     }
 
 
     public CollectionDetails update(CollectionDetails resource) {
-        Preconditions.checkNotNull(resource);
         return  dao.createOrUpdate(resource);
     }
 

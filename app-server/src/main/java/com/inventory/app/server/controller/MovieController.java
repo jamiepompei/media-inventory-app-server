@@ -1,12 +1,11 @@
 package com.inventory.app.server.controller;
 
-import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Movie;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.MovieMapper;
 import com.inventory.app.server.service.media.MovieService;
-import com.inventory.app.server.utility.RestPreConditions;
+import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,94 +30,86 @@ public class MovieController {
 
     @GetMapping
     ResponseEntity<List<MediaResponse>> findAllMovies() {
-        try{
-            log.info("Recieved a request to get all movies");
-            List<MediaResponse> responseList = movieService.getAllMovies().stream()
-                    .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
-                    .collect(Collectors.toList());
-            return ResponseEntity.status(HttpStatus.OK).body(responseList);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error " + e);
-        }
+        List<MediaResponse> responseList = movieService.getAll().stream()
+                .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @GetMapping(value = "/{directors}")
     ResponseEntity<List<MediaResponse>> findByDirector(@PathVariable("directors") final List<String> directors) {
-        try {
-            if (directors.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Directors cannot be empty.");
-            }
-            List<Movie> moviesByDirectors = movieService.getAllMoviesByDirectors(directors);
-            if (moviesByDirectors.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No results found for " + directors);
-            }
-            List<MediaResponse> responseList = moviesByDirectors.stream()
-                    .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.status(HttpStatus.OK).body(responseList);
-        } catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e);
+        if (directors.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Directors cannot be empty.");
         }
+        List<Movie> moviesByDirectors = movieService.getAllMoviesByDirectors(directors);
+        List<MediaResponse> responseList = moviesByDirectors.stream()
+                .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
+    }
+
+    @GetMapping(value = "/{title}")
+    ResponseEntity<List<MediaResponse>> findByTitle(@PathVariable("title") final String title) {
+        if (title.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Title cannot be empty.");
+        }
+        List<Movie> moviesByTitle = movieService.getAllMoviesByTitle(title);
+        List<MediaResponse> responseList = moviesByTitle.stream()
+                .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
+    }
+
+    @GetMapping(value = "/{genre}")
+    ResponseEntity<List<MediaResponse>> findByGenre(@PathVariable("genre") final String genre) {
+        if (genre.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Genre cannot be empty.");
+        }
+        List<Movie> moviesByGenre = movieService.getAllMoviesByGenre(genre);
+        List<MediaResponse> responseList = moviesByGenre.stream()
+                .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
+    }
+
+    @GetMapping(value = "/{collectionTitle}")
+    ResponseEntity<List<MediaResponse>> findByCollectionTitle(@PathVariable("collectionTitle") final String collectionTitle) {
+        if (collectionTitle.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Collection Title cannot be empty.");
+        }
+        List<Movie> moviesByGenre = movieService.getAllMoviesByCollectionTitle(collectionTitle);
+        List<MediaResponse> responseList = moviesByGenre.stream()
+                .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createMovie(@RequestBody final MediaRequest movieRequest) {
-        try {
-            // Validate mediaId input
-            RestPreConditions.validateCreateMediaId(movieRequest.getMediaId());
-            // Validate additional attributes
-            validatedAdditionalAttributes(movieRequest);
-            log.info("Received a request to create resource: " + movieRequest);
-            Movie movie = MovieMapper.INSTANCE.mapMediaRequestToMovie(movieRequest);
-            MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.create(movie));
-            log.info("Created new movie: " + response);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error: " + e);
-        }
+    public ResponseEntity<MediaResponse> createMovie(@Valid @RequestBody final MediaRequest movieRequest) {
+        log.info("Received a request to create resource: " + movieRequest);
+        Movie movie = MovieMapper.INSTANCE.mapMediaRequestToMovie(movieRequest);
+        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.create(movie));
+        log.info("Created new movie: " + response);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateMovie(@RequestBody final MediaRequest movieRequet) {
-        try {
-            // validated MediaId
-            RestPreConditions.validateUpdateMediaId(movieRequet.getMediaId());
-            // validate artists, song list, and release date
-            validatedAdditionalAttributes(movieRequet);
-            log.info("received request to update resource: " + movieRequet);
-            Movie updatedMovie = MovieMapper.INSTANCE.mapMediaRequestToMovie(movieRequet);
-            MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.update(updatedMovie));
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
-        }
+    public ResponseEntity<MediaResponse> updateMovie(@Valid @RequestBody final MediaRequest mediaRequest) {
+        log.info("received request to update resource: " + mediaRequest);
+        Movie updatedMovie = MovieMapper.INSTANCE.mapMediaRequestToMovie(mediaRequest);
+        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.update(updatedMovie));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> deleteMovie(@PathVariable("id") final Long id){
-        try {
-            if (id == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
-            }
-            Movie movie = movieService.deleteById(id);
-            MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movie);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error: " + e);
+        if (id == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-    }
-
-    private void validatedAdditionalAttributes(MediaRequest movieRequest) {
-        @SuppressWarnings("unchecked")
-        List<String> directors = (List<String>) movieRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.DIRECTORS.getJsonKey());
-        LocalDate releaseDate = (LocalDate) movieRequest.getAdditionalAttributes().get(MediaInventoryAdditionalAttributes.RELEASE_DATE.getJsonKey());
-
-        if (directors == null || directors.isEmpty() || releaseDate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Directors and release date must not be null or empty.");
-        }
+        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.deleteById(id));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

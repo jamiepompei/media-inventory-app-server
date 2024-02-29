@@ -2,10 +2,12 @@ package com.inventory.app.server.entity.media;
 
 
 import com.inventory.app.server.config.converter.StringListConverter;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,14 +18,14 @@ public class Movie extends Media {
     @Convert(converter = StringListConverter.class)
     @Column(name = "directors")
     private List<String> directors;
-    @Column(name = "release_date")
-    private LocalDate releaseDate;
+    @Column(name = "release_year")
+    private Integer releaseYear;
 
     @Override
     public String toString() {
         return "Movie{" +
                 "directors=" + directors +
-                ", releaseDate=" + releaseDate +
+                ", releaseYear=" + releaseYear +
                 ", " +
                 super.toString() +
                 "}";
@@ -38,7 +40,7 @@ public class Movie extends Media {
         if (!super.equals(o)) return false;
         // Compare fields specific to Movie
         return Objects.equals(getDirectors(), movie.getDirectors()) &&
-                Objects.equals(getReleaseDate(), movie.getReleaseDate());
+                Objects.equals(getReleaseYear(), movie.getReleaseYear());
     }
 
     @Override
@@ -46,6 +48,6 @@ public class Movie extends Media {
         return Objects.hash(
                 super.hashCode(),
                 getDirectors(),
-                getReleaseDate());
+                getReleaseYear());
     }
 }
