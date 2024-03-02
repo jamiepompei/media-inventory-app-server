@@ -87,7 +87,8 @@ public class TelevisionService {
         if (verifyIfTelevisionShowUpdated(existingTelevisionShow, updatedTelevisionShow)) {
             throw new NoChangesToUpdateException("No updates in television show to save. Will not proceed with update. Existing Television Show: " + existingTelevisionShow + "Updated Television Show: " + updatedTelevisionShow);
         }
-        updatedTelevisionShow = cloneTelevisionShow(existingTelevisionShow, updatedTelevisionShow);
+        updatedTelevisionShow = cloneTelevisionShow(updatedTelevisionShow);
+        updatedTelevisionShow.setId(existingTelevisionShow.getId());
         updatedTelevisionShow.setVersion(existingTelevisionShow.getVersion() + 1);
         return dao.createOrUpdate(updatedTelevisionShow);
     }
@@ -105,11 +106,6 @@ public class TelevisionService {
         TelevisionShow clonedTelevisionShow = new TelevisionShow();
         BeanUtils.copyProperties(televisionShow, clonedTelevisionShow);
         return clonedTelevisionShow;
-    }
-
-    private TelevisionShow cloneTelevisionShow(TelevisionShow existingTelevisionShow, TelevisionShow updatedTelevisionShow) {
-        BeanUtils.copyProperties(updatedTelevisionShow, existingTelevisionShow);
-        return existingTelevisionShow;
     }
 
     private boolean televisionShowAlreadyExists(TelevisionShow televisionShow) {

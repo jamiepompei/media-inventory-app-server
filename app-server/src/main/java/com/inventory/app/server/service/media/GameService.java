@@ -104,7 +104,8 @@ public class GameService {
         if (verifyIfGameUpdate(existingGame, updatedGame)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Game: " + existingGame + " Update Game: " + updatedGame);
         }
-        updatedGame = cloneGame(existingGame, updatedGame);
+        updatedGame = cloneGame(updatedGame);
+        updatedGame.setId(existingGame.getId());
         updatedGame.setVersion(existingGame.getVersion() + 1);
         return dao.createOrUpdate(updatedGame);
     }
@@ -122,11 +123,6 @@ public class GameService {
         Game clonedGame = new Game();
         BeanUtils.copyProperties(game, clonedGame);
         return clonedGame;
-    }
-
-    private Game cloneGame(Game existingGame, Game updatedGame) {
-        BeanUtils.copyProperties(updatedGame, existingGame);
-        return existingGame;
     }
 
     private boolean gameAlreadyExists(Game game) {
