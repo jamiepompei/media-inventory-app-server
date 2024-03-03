@@ -5,6 +5,7 @@ import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,23 +26,47 @@ public class MusicService {
     }
 
     public List<Music> getAllMusicByArtist(List<String> artist){
-       return dao.findByField("artist", artist);
+       List<Music> musicList = dao.findByField("artist", artist);
+       if (musicList.isEmpty()) {
+           throw new ResourceNotFoundException("No music found by artist(s) " + artist);
+       }
+        return musicList;
     }
 
     public List<Music> getAllMusicByGenre(String genre){
-        return dao.findByField("genre", genre);
+        List<Music> musicList = dao.findByField("genre", genre);
+        if (musicList.isEmpty()) {
+            throw new ResourceNotFoundException("No music found with genre " + genre);
+        }
+        return musicList;
     }
 
     public List<Music> getAllMusicByCollectionTitle(String collectionTitle){
-        return dao.findByField("collection_name", collectionTitle);
+        List<Music> musicList = dao.findByField("collection_name", collectionTitle);
+        if (musicList.isEmpty()) {
+            throw new ResourceNotFoundException("No music found with collection title " + collectionTitle);
+        }
+        return musicList;
     }
 
     public List<Music> getAll() {
-        return dao.findAll();
+        List<Music> musicList = dao.findAll();
+        if (musicList.isEmpty()) {
+            throw new ResourceNotFoundException("No music data exists.");
+        }
+        return musicList;
     }
 
     public Music getById(Long id){
-        return dao.findOne(id);
+        try {
+            return dao.findOne(id);
+        } catch (Exception e) {
+            if (e.getClass().isInstance(EntityNotFoundException.class)) {
+                throw new ResourceNotFoundException("No music exists with id: " + id);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public Music create(Music music) {
@@ -62,7 +87,8 @@ public class MusicService {
         if (verifyIfMusicUpdated(existingMusic, updatedMusic)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingMusic+ "Updated Book: " + updatedMusic);
         }
-        updatedMusic = cloneMusic(existingMusic, updatedMusic);
+        updatedMusic = cloneMusic(updatedMusic);
+        updatedMusic.setId(existingMusic.getId());
         updatedMusic.setVersion(existingMusic.getVersion() + 1);
         return dao.createOrUpdate(updatedMusic);
     }
@@ -80,11 +106,6 @@ public class MusicService {
         return getAllMusicByArtist(music.getArtists())
                 .stream()
                 .anyMatch(m -> music.getTitle().equals(m.getTitle()));
-    }
-
-    private Music cloneMusic(Music existingMusic, Music updatedMusic) {
-        BeanUtils.copyProperties(updatedMusic, existingMusic);
-        return existingMusic;
     }
 
     private Music cloneMusic(Music music) {

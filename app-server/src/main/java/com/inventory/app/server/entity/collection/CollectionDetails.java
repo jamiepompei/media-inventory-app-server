@@ -1,14 +1,12 @@
 package com.inventory.app.server.entity.collection;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.time.LocalDateTime;
-@Entity(name = "Collection_Details")
+@Entity(name = "collection_details")
 @Table(name = "collection_details")
-@Getter
-@Setter
+@Data
 public class CollectionDetails extends BaseCollection {
     @Column(name = "created_by")
     private String createdBy;

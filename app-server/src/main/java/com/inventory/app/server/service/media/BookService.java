@@ -93,7 +93,8 @@ public class BookService {
         if (verifyIfBookUpdated(existingBook, updatedBook)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingBook + "Updated Book: " + updatedBook);
         }
-        updatedBook = cloneBook(existingBook, updatedBook);
+        updatedBook = cloneBook(updatedBook);
+        updatedBook.setId(existingBook.getId());
         updatedBook.setVersion(existingBook.getVersion() + 1);
         return dao.createOrUpdate(updatedBook);
     }
@@ -107,15 +108,10 @@ public class BookService {
         return book;
     }
 
-    private Book cloneBook(Book book) {
+    private Book cloneBook(Book updatedBook) {
         Book clonedBook = new Book();
-        BeanUtils.copyProperties(book, clonedBook);
+        BeanUtils.copyProperties(updatedBook, clonedBook);
         return clonedBook;
-    }
-
-    private Book cloneBook(Book existingBook, Book updatedBook) {
-        BeanUtils.copyProperties(updatedBook, existingBook);
-        return existingBook;
     }
 
     private boolean bookAlreadyExists(Book book) {

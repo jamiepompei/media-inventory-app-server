@@ -5,6 +5,7 @@ import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,24 +25,56 @@ public class MovieService {
     }
 
     public List<Movie> getAllMoviesByGenre(String genre){
-        return dao.findByField("genre", genre);
+        List<Movie> movieList = dao.findByField("genre", genre);
+        if (movieList.isEmpty()) {
+            throw new ResourceNotFoundException("No movie results found for genre " + genre);
+        }
+        return movieList;
     }
 
     public List<Movie> getAllMoviesByTitle(String title){
-        return dao.findByField("title", title);
+        List<Movie> movieList = dao.findByField("title", title);
+        if (movieList.isEmpty()) {
+            throw new ResourceNotFoundException("No movie results found for title " + title);
+        }
+        return movieList;
     }
 
     public List<Movie> getAllMoviesByDirectors(List<String> directors){
-        return dao.findByField("directors", directors);
+        List<Movie> movieList = dao.findByField("directors", directors);
+        if (movieList.isEmpty()) {
+            throw new ResourceNotFoundException("No movie results found by directors " + directors);
+        }
+        return movieList;
     }
 
     public List<Movie> getAllMoviesByCollectionTitle(String collectionTitle){
-        return dao.findByField("title", collectionTitle);
+        List<Movie> movieList = dao.findByField("title", collectionTitle);
+        if (movieList.isEmpty()) {
+            throw new ResourceNotFoundException("No movie results found for collection title " + collectionTitle);
+        }
+        return movieList;
     }
 
-    public List<Movie> getAll() { return dao.findAll();}
+    public List<Movie> getAll() {
+        List<Movie> movieList = dao.findAll();
+        if (movieList.isEmpty()) {
+            throw new ResourceNotFoundException("No movie data exists.");
+        }
+        return movieList;
+    }
 
-    public Movie getById(Long id) { return dao.findOne(id);}
+    public Movie getById(Long id) {
+        try {
+            return dao.findOne(id);
+        } catch (Exception e) {
+            if (e.getClass().isInstance(EntityNotFoundException.class)){
+                throw new ResourceNotFoundException("No movie exists with id: " + id);
+            } else {
+                throw e;
+            }
+        }
+    }
 
     public Movie create(Movie movie) {
        if (movieAlreadyExists(movie)) {
@@ -61,7 +94,8 @@ public class MovieService {
         if (verifyIfMovieUpdated(existingMovie, updatedMovie)) {
             throw new NoChangesToUpdateException("No updates in movie to save. Will not proceed with update. Existing Movie: " + existingMovie + "Updated Movie: " + updatedMovie);
         }
-        updatedMovie = cloneMovie(existingMovie, updatedMovie);
+        updatedMovie = cloneMovie(updatedMovie);
+        updatedMovie.setId(existingMovie.getId());
         updatedMovie.setVersion(existingMovie.getVersion() + 1);
         return dao.createOrUpdate(updatedMovie);
     }
@@ -79,11 +113,6 @@ public class MovieService {
         return getAllMoviesByDirectors(movie.getDirectors())
                 .stream()
                 .anyMatch(m -> movie.getTitle().equals(m.getTitle()));
-    }
-
-    private Movie cloneMovie(Movie existingMovie, Movie updatedMovie) {
-        BeanUtils.copyProperties(updatedMovie, existingMovie);
-        return existingMovie;
     }
 
     private Movie cloneMovie(Movie movie) {
