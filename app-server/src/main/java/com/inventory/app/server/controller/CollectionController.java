@@ -24,7 +24,7 @@ public class CollectionController {
 
     @GetMapping
     ResponseEntity<List<CollectionDetails>> findAllCollections(){
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getAllCollections());
+        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getAllCollectionsByUser());
     }
 
     @GetMapping(value = "/collection/all/{collection_name}")
