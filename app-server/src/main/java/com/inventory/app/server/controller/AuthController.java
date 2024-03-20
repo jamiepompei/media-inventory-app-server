@@ -33,7 +33,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/login")
-    public JwtResponseDTO AuthenticateAndGetToken(@RequestBody AuthRequestDTO authRequestDTO) {
+    public JwtResponseDTO authenticateAndGetToken(@RequestBody AuthRequestDTO authRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword()));
         if (authentication.isAuthenticated()) {
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequestDTO.getUsername());
@@ -61,5 +61,4 @@ public class AuthController {
                             .refreshToken(refreshTokenRequestDTO.getToken()).build();
                 }).findFirst().orElseThrow(() -> new RuntimeException("Refresh Token is not in DB."));
     }
-
 }
