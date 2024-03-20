@@ -6,8 +6,6 @@ import jakarta.persistence.TypedQuery;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
 
-
-import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.List;
 
@@ -24,6 +22,11 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
     @Override
     public List<T> findByField(String field, Object value) {
         return createQuery(field, value);
+    }
+
+    @Override
+    public T findOneByField(String field, Object value) {
+        return findByField(field, value).stream().findFirst().get();
     }
 
     private List<T> createQuery(String fieldName, Object fieldValue) {

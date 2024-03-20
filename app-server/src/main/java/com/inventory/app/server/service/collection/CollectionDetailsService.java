@@ -2,7 +2,7 @@ package com.inventory.app.server.service.collection;
 
 import com.inventory.app.server.entity.collection.CollectionDetails;
 import com.inventory.app.server.entity.media.Media;
-import com.inventory.app.server.entity.user.User;
+import com.inventory.app.server.entity.user.UserInfo;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
@@ -85,9 +85,8 @@ public class CollectionDetailsService {
 
     public List<CollectionDetails> getAllCollectionsByUser() {
         //TODO get the current user
-        User user = new User();
-
-        return getCollectionsByCreatedBy(user.getUserLogin().getUsername());
+        UserInfo user = new UserInfo();
+        return getCollectionsByCreatedBy(user.getUsername());
     }
 
     public List<Media> getAllMediaByCollectionName() {
