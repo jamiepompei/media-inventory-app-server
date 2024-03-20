@@ -32,6 +32,11 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    /**
+     * This method is responsible for creating the access and refresh tokens if a user is authenticated.
+     * @param authRequestDTO
+     * @return
+     */
     @PostMapping("/login")
     public JwtResponseDTO authenticateAndGetToken(@RequestBody AuthRequestDTO authRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword()));
@@ -39,8 +44,7 @@ public class AuthController {
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequestDTO.getUsername());
             return JwtResponseDTO.builder()
                     .accessToken(jwtService.generateToken(authRequestDTO.getUsername()))
-                    //TODO not sure about this
-                    .accessToken(refreshToken.getToken())
+                    .refreshToken(refreshToken.getToken())
                     .build();
         } else {
             //todo add more useful info
@@ -48,6 +52,14 @@ public class AuthController {
         }
     }
 
+    /**
+     * This method is responsible for handle refreshing an access token. It first checks that the refresh token
+     * exists in the DB, then verifies the validity of the refresh token by checking for expiration. Then the UserInfo
+     * details are used to generate a new access token. Finally, a successful refresh results in a response with the new
+     * access token and the original refresh token.
+     * @param refreshTokenRequestDTO
+     * @return
+     */
     @PostMapping("/refreshToken")
     public JwtResponseDTO refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
         return refreshTokenService.findByToken(refreshTokenRequestDTO.getToken())
