@@ -1,4 +1,4 @@
-package com.inventory.app.server.validator;
+package com.inventory.app.server.service.validator;
 
 import com.inventory.app.server.entity.media.Book;
 import org.springframework.validation.Errors;
