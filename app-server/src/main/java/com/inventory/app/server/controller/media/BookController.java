@@ -1,4 +1,4 @@
-package com.inventory.app.server.controller;
+package com.inventory.app.server.controller.media;
 
 import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
@@ -10,6 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,7 +32,7 @@ public class BookController {
     }
 
     @GetMapping
-    ResponseEntity<List<MediaResponse>> findAllBooks() {
+    ResponseEntity<List<MediaResponse>> findAllBooks(@AuthenticationPrincipal UserDetails userDetails) {
         List<MediaResponse> responseList = bookService.getAll().stream()
                 .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
@@ -37,11 +40,11 @@ public class BookController {
     }
 
     @GetMapping(value = "/{collectionTitle}")
-    ResponseEntity<List<MediaResponse>> findByCollectionTitle(@PathVariable("collectionTitle") final String collectionTitle) {
+    ResponseEntity<List<MediaResponse>> findByCollectionTitle(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("collectionTitle") final String collectionTitle) {
         if (collectionTitle.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Collection title cannot be empty.");
         }
-        List<Book> booksByCollection = bookService.getAllBooksByCollectionTitle(collectionTitle);
+        List<Book> booksByCollection = bookService.getAllBooksByCollectionTitle(collectionTitle, userDetails.getUsername());
         List<MediaResponse> responseList = booksByCollection.stream()
                 .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
@@ -49,11 +52,11 @@ public class BookController {
     }
 
     @GetMapping(value = "/{authors}")
-    ResponseEntity<List<MediaResponse>> findByAuthor(@PathVariable("authors") final List<String> authors) {
+    ResponseEntity<List<MediaResponse>> findByAuthor(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("authors") final List<String> authors) {
         if (authors.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
         }
-        List<Book> booksByAuthor = bookService.getAllBooksByAuthor(authors);
+        List<Book> booksByAuthor = bookService.getAllBooksByAuthor(authors, userDetails.getUsername());
         List<MediaResponse> responseList = booksByAuthor.stream()
                 .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
@@ -61,11 +64,11 @@ public class BookController {
     }
 
     @GetMapping(value = "/{genre}")
-    ResponseEntity<List<MediaResponse>> findByGenre(@PathVariable("genre") final String genre) {
+    ResponseEntity<List<MediaResponse>> findByGenre(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("genre") final String genre) {
         if (genre.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
         }
-        List<Book> booksByGenre = bookService.getAllBooksByGenre(genre);
+        List<Book> booksByGenre = bookService.getAllBooksByGenre(genre, userDetails.getUsername());
         List<MediaResponse> responseList = booksByGenre.stream()
                 .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
@@ -73,8 +76,9 @@ public class BookController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createBook(@Valid @RequestBody final MediaRequest bookRequest) {
+    public ResponseEntity<MediaResponse> createBook(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest bookRequest) {
         log.info("Received request to create resource: " + bookRequest);
         Book book = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
         MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book));
@@ -83,8 +87,9 @@ public class BookController {
     }
 
     @PutMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateBook(@Valid @RequestBody final MediaRequest bookRequest) {
+    public ResponseEntity<MediaResponse> updateBook(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest bookRequest) {
         log.info("received request to update resource: " + bookRequest);
         Book updatedBook = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
         MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(updatedBook));
@@ -92,8 +97,9 @@ public class BookController {
     }
 
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> deleteBook(@PathVariable("id") final Long id){
+    public ResponseEntity<MediaResponse> deleteBook(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") final Long id){
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
