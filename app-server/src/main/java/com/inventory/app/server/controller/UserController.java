@@ -3,7 +3,8 @@ package com.inventory.app.server.controller;
 import com.inventory.app.server.entity.payload.request.UserRequest;
 import com.inventory.app.server.entity.payload.response.UserResponse;
 import com.inventory.app.server.entity.user.UserInfo;
-import com.inventory.app.server.error.Error;
+
+import com.inventory.app.server.error.ErrorResponse;
 import com.inventory.app.server.service.user.UserDAOService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +39,7 @@ public class UserController {
 
     //get all users
     @GetMapping
-    public ResponseEntity getAllUsers() {
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
         try {
             List<UserInfo> userList = userService.getAllUsers();
             List<UserResponse> userResponseList = userList
@@ -46,7 +48,8 @@ public class UserController {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(userResponseList);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e);
+            ResponseEntity<List<UserResponse>> list = (ResponseEntity<List<UserResponse>>) Arrays.asList(createErrorResponse(e));
+            return list;
         }
     }
 
@@ -78,8 +81,8 @@ public class UserController {
 
     private ResponseEntity<UserResponse> createErrorResponse(Exception e) {
         String message = e.getMessage();
-        Error error = new Error(message, HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UserResponse.builder().errorObject(error).build());
+        ErrorResponse errorResponse = new com.inventory.app.server.error.ErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UserResponse.builder().errorResponse(errorResponse).build());
     }
 
     //test
