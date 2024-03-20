@@ -23,13 +23,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-
+/**
+ * This class defines the security settings, authentication, and authorization rules for the application.
+ */
 @EnableWebSecurity
 @Slf4j
 @Configuration
 public class SecurityConfig {
-
-    //private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -51,17 +51,6 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-//    @Bean
-//    public AuthenticationManager customAuthenticationManager() throws Exception {
-//        return new ProviderManager(Collections.singletonList(authenticationProvider()));
-//    }
-
-//    @Bean
-//    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-//        return new JwtAuthenticationFilter(customAuthenticationManager(), new JwtService(), (UserDetailsServiceImpl) userDetailsService());
-//    }
-
-
     @Bean
     @Primary
     public UserDetailsService userDetailsService() {
@@ -76,6 +65,19 @@ public class SecurityConfig {
         return authenticationProvider;
     }
 
+    /**
+     * This method defines the security filter chain. The filter chain specifies security configs:
+     *
+     * It disables Cross-Site Request Forgery protection.
+     * It configures authorization rules using authorizeHttpRequests() to permit public access to specific endpoints.
+     * For other endpoints under /api/v1/* it requires authentication to access those resources
+     * The session management is set to SessionCreationPolicy.STATELESS, indicating the application is stateless and sessions are not used for user tracking.
+     * It sets the AuthenticationProvider, which specifies the user details service and password encoder for authentication.
+     * It adds the JwtAuthFilter before the UsernamePasswordAuthenticationFilter.
+     * @param http
+     * @return
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             return http
