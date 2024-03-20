@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * This class is a custom implementation of the UserDetails interface, used for representing user details and authorities, or roles, for authentication and authorization purposes.
+ */
 public class CustomUserDetails extends UserInfo implements UserDetails {
 
     private String username;
