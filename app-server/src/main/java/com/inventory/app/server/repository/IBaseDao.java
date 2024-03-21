@@ -8,9 +8,9 @@ public interface IBaseDao<T extends Serializable> {
 
     Class<T> getClazz();
 
-    List<T> findByField(String field, Object value);
+    List<T> findByField(String field, Object value, String username);
 
-    T findOneByField(String field, Object value);
+    T findOneByField(String field, Object value, String username);
 
     T findOne(final long id);
 
