@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,7 +33,7 @@ public class MovieController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findAllMovies() {
+    ResponseEntity<List<MediaResponse>> findAllMovies(@AuthenticationPrincipal UserDetails userDetails) {
         List<MediaResponse> responseList = movieService.getAll().stream()
                 .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
@@ -41,7 +43,7 @@ public class MovieController {
 
     @GetMapping(value = "/{directors}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByDirector(@PathVariable("directors") final List<String> directors) {
+    ResponseEntity<List<MediaResponse>> findByDirector(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("directors") final List<String> directors) {
         if (directors.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Directors cannot be empty.");
         }
@@ -54,7 +56,7 @@ public class MovieController {
 
     @GetMapping(value = "/{title}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByTitle(@PathVariable("title") final String title) {
+    ResponseEntity<List<MediaResponse>> findByTitle(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("title") final String title) {
         if (title.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Title cannot be empty.");
         }
@@ -67,7 +69,7 @@ public class MovieController {
 
     @GetMapping(value = "/{genre}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByGenre(@PathVariable("genre") final String genre) {
+    ResponseEntity<List<MediaResponse>> findByGenre(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("genre") final String genre) {
         if (genre.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Genre cannot be empty.");
         }
@@ -80,7 +82,7 @@ public class MovieController {
 
     @GetMapping(value = "/{collectionTitle}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByCollectionTitle(@PathVariable("collectionTitle") final String collectionTitle) {
+    ResponseEntity<List<MediaResponse>> findByCollectionTitle(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("collectionTitle") final String collectionTitle) {
         if (collectionTitle.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Collection Title cannot be empty.");
         }
@@ -94,7 +96,7 @@ public class MovieController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
-    public ResponseEntity<MediaResponse> createMovie(@Valid @RequestBody final MediaRequest movieRequest) {
+    public ResponseEntity<MediaResponse> createMovie(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest movieRequest) {
         log.info("Received a request to create resource: " + movieRequest);
         Movie movie = MovieMapper.INSTANCE.mapMediaRequestToMovie(movieRequest);
         MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.create(movie));
@@ -105,7 +107,7 @@ public class MovieController {
     @PutMapping(value = "{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
-    public ResponseEntity<MediaResponse> updateMovie(@Valid @RequestBody final MediaRequest mediaRequest) {
+    public ResponseEntity<MediaResponse> updateMovie(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest mediaRequest) {
         log.info("received request to update resource: " + mediaRequest);
         Movie updatedMovie = MovieMapper.INSTANCE.mapMediaRequestToMovie(mediaRequest);
         MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.update(updatedMovie));
@@ -115,7 +117,7 @@ public class MovieController {
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
-    public ResponseEntity<MediaResponse> deleteMovie(@PathVariable("id") final Long id){
+    public ResponseEntity<MediaResponse> deleteMovie(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") final Long id){
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
