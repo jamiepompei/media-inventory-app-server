@@ -55,9 +55,8 @@ public class BookService {
         return  bookList;
     }
 
-    //TODO username
-    public List<Book> getAll() {
-        List<Book> bookList = dao.findAll();
+    public List<Book> getAllByUsername(String username) {
+        List<Book> bookList = dao.findAllByUsername(username);
         if (bookList.isEmpty()) {
             throw new ResourceNotFoundException("No book data exists.");
         }
@@ -77,7 +76,6 @@ public class BookService {
         }
     }
 
-    // TODO username
     public Book create(Book book, String username) {
         if (bookAlreadyExists(book, username)) {
             throw new ResourceAlreadyExistsException("Cannot create book because book already exists: " + book);
@@ -88,7 +86,6 @@ public class BookService {
         return dao.createOrUpdate(bookToSave);
     }
 
-    // TODO username
     public Book update(Book updatedBook, String username) {
         if (!bookAlreadyExists(updatedBook, username)) {
             throw new ResourceNotFoundException("Cannot update book because book does not exist: " + updatedBook);

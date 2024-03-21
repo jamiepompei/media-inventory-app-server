@@ -34,7 +34,7 @@ public class BookController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping
     ResponseEntity<List<MediaResponse>> findAllBooks(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = bookService.getAll().stream()
+        List<MediaResponse> responseList = bookService.getAllByUsername(userDetails.getUsername()).stream()
                 .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);

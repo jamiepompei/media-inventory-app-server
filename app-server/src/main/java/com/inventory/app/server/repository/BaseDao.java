@@ -50,8 +50,10 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
     }
 
     @SuppressWarnings("unchecked")
-    public List<T> findAll(){
-        return entityManager.createQuery("from " + clazz.getName()).getResultList();
+    public List<T> findAllByUsername(String username){
+        return entityManager.createQuery("from " + clazz.getName() + " where username = :username")
+                .setParameter("username", username)
+                .getResultList();
     }
 
     public T createOrUpdate(final T entity) {
