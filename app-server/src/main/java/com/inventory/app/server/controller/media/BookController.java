@@ -85,7 +85,7 @@ public class BookController {
     public ResponseEntity<MediaResponse> createBook(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest bookRequest) {
         log.info("Received request to create resource: " + bookRequest);
         Book book = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
-        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book));
+        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book, userDetails.getUsername()));
         log.info("Created new book: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -96,7 +96,7 @@ public class BookController {
     public ResponseEntity<MediaResponse> updateBook(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest bookRequest) {
         log.info("received request to update resource: " + bookRequest);
         Book updatedBook = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
-        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(updatedBook));
+        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(updatedBook, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
