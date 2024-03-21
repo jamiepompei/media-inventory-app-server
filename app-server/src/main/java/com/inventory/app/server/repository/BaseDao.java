@@ -20,23 +20,25 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
     }
 
     @Override
-    public List<T> findByField(String field, Object value) {
-        return createQuery(field, value);
+    public List<T> findByField(String field, Object value, String username) {
+        return createQuery(field, value, username);
     }
 
     @Override
-    public T findOneByField(String field, Object value) {
-        return findByField(field, value).stream().findFirst().get();
+    public T findOneByField(String field, Object value, String username) {
+        return findByField(field, value, username).stream().findFirst().get();
     }
 
-    private List<T> createQuery(String fieldName, Object fieldValue) {
+    private List<T> createQuery(String fieldName, Object fieldValue, String username) {
         JpaEntityInformation<T, ?> entityInformation = JpaEntityInformationSupport.getEntityInformation(getClazz(), entityManager);
         String entityName = entityInformation.getEntityName();
         Class<T> entityType = entityInformation.getJavaType();
 
-        String queryString = String.format("FROM %s WHERE %s = :value", entityName, fieldName);
+        String queryString = String.format("FROM %s WHERE %s = :value AND createdBy = :username", entityName, fieldName);
         TypedQuery<T> query = entityManager.createQuery(queryString, entityType);
-        return query.setParameter("value", fieldValue).getResultList();
+        query.setParameter("username", username);
+        query.setParameter("value", fieldValue);
+        return query.getResultList();
     }
 
     public final void setClazz(final Class<T> clazzToSet){
