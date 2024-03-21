@@ -31,6 +31,7 @@ public class BookController {
         this.bookService = bookService;
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping
     ResponseEntity<List<MediaResponse>> findAllBooks(@AuthenticationPrincipal UserDetails userDetails) {
         List<MediaResponse> responseList = bookService.getAll().stream()
@@ -39,6 +40,7 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping(value = "/{collectionTitle}")
     ResponseEntity<List<MediaResponse>> findByCollectionTitle(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("collectionTitle") final String collectionTitle) {
         if (collectionTitle.isEmpty()) {
@@ -51,6 +53,7 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping(value = "/{authors}")
     ResponseEntity<List<MediaResponse>> findByAuthor(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("authors") final List<String> authors) {
         if (authors.isEmpty()) {
@@ -63,6 +66,7 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping(value = "/{genre}")
     ResponseEntity<List<MediaResponse>> findByGenre(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("genre") final String genre) {
         if (genre.isEmpty()) {
@@ -76,7 +80,7 @@ public class BookController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<MediaResponse> createBook(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest bookRequest) {
         log.info("Received request to create resource: " + bookRequest);
@@ -87,7 +91,7 @@ public class BookController {
     }
 
     @PutMapping(value = "/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> updateBook(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest bookRequest) {
         log.info("received request to update resource: " + bookRequest);
@@ -97,7 +101,7 @@ public class BookController {
     }
 
     @DeleteMapping(value = "/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> deleteBook(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") final Long id){
         if (id == null) {
