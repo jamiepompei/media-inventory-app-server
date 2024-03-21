@@ -1,4 +1,4 @@
-package com.inventory.app.server.controller;
+package com.inventory.app.server.controller.media;
 
 import com.inventory.app.server.entity.media.Game;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +31,7 @@ public class GameController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findAllGames() {
         log.info("Received a request to get all games");
         List<MediaResponse> responseList = gameService.getAll().stream()
@@ -39,6 +41,7 @@ public class GameController {
     }
 
     @GetMapping(value = "/{consoles}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findByConsole(@PathVariable("consoles") final List<String> consoles) {
         if (consoles.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Consoles cannot be empty.");
@@ -51,6 +54,7 @@ public class GameController {
     }
 
     @GetMapping(value = "/{title}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findByTitle(@PathVariable("title") final String title) {
         if (title.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Title cannot be empty.");
@@ -63,6 +67,7 @@ public class GameController {
     }
 
     @GetMapping(value = "/{collectionTitle}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findByCollectionTitle(@PathVariable("collectionTitle") final String collectionTitle) {
         if (collectionTitle.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Collection title cannot be empty.");
@@ -75,6 +80,7 @@ public class GameController {
     }
 
     @GetMapping(value = "/{genre}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findByGenre(@PathVariable("genre") final String genre) {
         if (genre.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Genre cannot be empty.");
@@ -87,6 +93,7 @@ public class GameController {
     }
 
     @GetMapping(value = "/{numberOfPlayers}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findByNumberOfPlayers(@PathVariable("numberOfPlayers") final Integer numberOfPlayers) {
         if (numberOfPlayers == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
@@ -98,7 +105,9 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
+
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<MediaResponse> createGame(@Valid @RequestBody final MediaRequest gameRequest) {
         log.info("Received request to create resource: " + gameRequest);
@@ -109,6 +118,7 @@ public class GameController {
     }
 
     @PutMapping(value = "/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> updateGame(@Valid @RequestBody final MediaRequest gameRequest) {
         log.info("received request to update resource: " + gameRequest);
@@ -118,6 +128,7 @@ public class GameController {
     }
 
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> deleteGame(@PathVariable("id") final Long id){
         if (id == null) {
