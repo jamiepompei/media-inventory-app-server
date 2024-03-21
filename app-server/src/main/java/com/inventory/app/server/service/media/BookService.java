@@ -31,38 +31,39 @@ public class BookService {
         dao.setClazz(Book.class);
     }
 
-    public List<Book> getAllBooksByCollectionTitle(String collectionTitle) {
-        List<Book> bookList = dao.findByField("collection_name", collectionTitle);
+    public List<Book> getAllBooksByCollectionTitle(String collectionTitle, String username) {
+        List<Book> bookList = dao.findByField("collection_name", collectionTitle, username);
         if (bookList.isEmpty()){
             throw new ResourceNotFoundException("No book results found with collection title " + collectionTitle);
         }
         return bookList;
     }
 
-    public List<Book> getAllBooksByAuthor(List<String> author) {
-        List<Book> bookList = dao.findByField(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), author);
+    public List<Book> getAllBooksByAuthor(List<String> author, String username) {
+        List<Book> bookList = dao.findByField(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), author, username);
         if (bookList.isEmpty()) {
             throw new ResourceNotFoundException("No book results found by author " + author);
         }
         return bookList;
     }
 
-    public List<Book> getAllBooksByGenre(String genre) {
-        List<Book> bookList = dao.findByField("genre", genre);
+    public List<Book> getAllBooksByGenre(String genre, String username) {
+        List<Book> bookList = dao.findByField("genre", genre, username);
         if (bookList.isEmpty()) {
             throw new ResourceNotFoundException("No book data exists for genre " + genre);
         }
         return  bookList;
     }
 
-    public List<Book> getAll() {
-        List<Book> bookList = dao.findAll();
+    public List<Book> getAllByUsername(String username) {
+        List<Book> bookList = dao.findAllByUsername(username);
         if (bookList.isEmpty()) {
             throw new ResourceNotFoundException("No book data exists.");
         }
         return bookList;
     }
 
+    // TODO username
     public Book getById(Long id) {
         try {
             return dao.findOne(id);
@@ -75,8 +76,8 @@ public class BookService {
         }
     }
 
-    public Book create(Book book) {
-        if (bookAlreadyExists(book)) {
+    public Book create(Book book, String username) {
+        if (bookAlreadyExists(book, username)) {
             throw new ResourceAlreadyExistsException("Cannot create book because book already exists: " + book);
         }
         Book bookToSave = cloneBook(book);
@@ -85,8 +86,8 @@ public class BookService {
         return dao.createOrUpdate(bookToSave);
     }
 
-    public Book update(Book updatedBook) {
-        if (!bookAlreadyExists(updatedBook)) {
+    public Book update(Book updatedBook, String username) {
+        if (!bookAlreadyExists(updatedBook, username)) {
             throw new ResourceNotFoundException("Cannot update book because book does not exist: " + updatedBook);
         }
         Book existingBook = getById(updatedBook.getId());
@@ -99,6 +100,7 @@ public class BookService {
         return dao.createOrUpdate(updatedBook);
     }
 
+    // TODO username
     public Book deleteById(Long id){
         Book book = getById(id);
         if (book == null) {
@@ -114,8 +116,8 @@ public class BookService {
         return clonedBook;
     }
 
-    private boolean bookAlreadyExists(Book book) {
-        return getAllBooksByAuthor(book.getAuthors())
+    private boolean bookAlreadyExists(Book book, String username) {
+        return getAllBooksByAuthor(book.getAuthors(), username)
                 .stream()
                 .anyMatch(b -> book.getTitle().equals(b.getTitle()));
     }

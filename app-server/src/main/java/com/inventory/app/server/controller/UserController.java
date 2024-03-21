@@ -48,8 +48,7 @@ public class UserController {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(userResponseList);
         } catch (Exception e) {
-            ResponseEntity<List<UserResponse>> list = (ResponseEntity<List<UserResponse>>) Arrays.asList(createErrorResponse(e));
-            return list;
+            return (ResponseEntity<List<UserResponse>>) Arrays.asList(createErrorResponse(e));
         }
     }
 
