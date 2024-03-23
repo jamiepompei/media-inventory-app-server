@@ -87,6 +87,11 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
         delete(entity);
     }
 
+    @Override
+    public List<T> findAll(){
+        return entityManager.createQuery("from " + clazz.getName()).getResultList();
+    }
+
     public Class<T> getClazz() {
         return clazz;
     }

@@ -16,6 +16,8 @@ public interface IBaseDao<T extends Serializable> {
 
     List<T> findAllByUsername(final String username);
 
+    List<T> findAll();
+
     T createOrUpdate(final T entity);
 
     void delete(final T entity);
