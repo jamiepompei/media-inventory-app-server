@@ -49,7 +49,7 @@ public class TelevisionService {
         return televisionShowList;
     }
 
-    public List<TelevisionShow> getAll(String username) {
+    public List<TelevisionShow> getAllByUsername(String username) {
         List<TelevisionShow> televisionShowList = dao.findAllByUsername(username);
         if (televisionShowList.isEmpty()) {
             throw new ResourceNotFoundException("No television show data exists.");
