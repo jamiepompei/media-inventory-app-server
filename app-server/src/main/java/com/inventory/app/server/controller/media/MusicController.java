@@ -34,7 +34,7 @@ public class MusicController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findAllMusic(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = musicService.getAll(userDetails.getUsername()).stream()
+        List<MediaResponse> responseList = musicService.getAllByUsername(userDetails.getUsername()).stream()
                 .map(m -> MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);

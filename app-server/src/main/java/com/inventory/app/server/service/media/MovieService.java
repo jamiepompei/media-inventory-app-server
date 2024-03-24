@@ -56,7 +56,7 @@ public class MovieService {
         return movieList;
     }
 
-    public List<Movie> getAll(String username) {
+    public List<Movie> getAllByUsername(String username) {
         List<Movie> movieList = dao.findAllByUsername(username);
         if (movieList.isEmpty()) {
             throw new ResourceNotFoundException("No movie data exists.");

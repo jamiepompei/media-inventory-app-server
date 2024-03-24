@@ -2,6 +2,7 @@ package com.inventory.app.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
+import com.inventory.app.server.controller.media.GameController;
 import com.inventory.app.server.entity.media.Game;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.service.media.GameService;
@@ -50,7 +51,7 @@ public class GameControllerTest {
         Game mockGame = createGame("Nancy Drew", "Digital Download", "Mystery", Arrays.asList("Computer"),1, "Jamie's Stuff", 2019);
 
         // Mock the behavior of bookService.create
-        when(gameService.create(any())).thenReturn(mockGame);
+        when(gameService.create(any(), any())).thenReturn(mockGame);
 
         ConcurrentHashMap<String, Object> additionalBookAttributes = new ConcurrentHashMap<>();
         additionalBookAttributes.put(MediaInventoryAdditionalAttributes.CONSOLES.getJsonKey(), mockGame.getConsoles());
@@ -113,7 +114,7 @@ public class GameControllerTest {
         Game mockGame = createGame(1L, 1,"Nancy Drew", "Digital Download", "Mystery", Arrays.asList("Computer"),1, "Jamie's Stuff", 2019);
 
         // Mock the behavior of bookService.create
-        when(gameService.update(any())).thenReturn(mockGame);
+        when(gameService.update(any(), any())).thenReturn(mockGame);
 
         ConcurrentHashMap<String, Object> additionalBookAttributes = new ConcurrentHashMap<>();
         additionalBookAttributes.put(MediaInventoryAdditionalAttributes.CONSOLES.getJsonKey(), mockGame.getConsoles());
@@ -178,8 +179,9 @@ public class GameControllerTest {
 
         List<String> consoles = Arrays.asList("Switch");
         Game game = new Game();
+        String username = "jpompei";
 
-        when(gameService.getAllGamesByConsole(consoles)).thenReturn(Arrays.asList(game));
+        when(gameService.getAllGamesByConsole(consoles, username)).thenReturn(Arrays.asList(game));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/games/{consoles}",  String.join(",", consoles))
                         .contentType(jsonMediaType))
@@ -194,8 +196,9 @@ public class GameControllerTest {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         Game game = new Game();
+        String username = "jpompei";
 
-        when(gameService.getAll()).thenReturn(Arrays.asList(game));
+        when(gameService.getAllByUsername(username)).thenReturn(Arrays.asList(game));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/games")
                         .contentType(jsonMediaType))
@@ -211,8 +214,9 @@ public class GameControllerTest {
 
         Game game = new Game();
         game.setId(1L);
+        String username = "jpompei";
 
-        when(gameService.deleteById(game.getId())).thenReturn(game);
+        when(gameService.deleteById(game.getId(), username)).thenReturn(game);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/games/{id}", game.getId())
                 .contentType(jsonMediaType))

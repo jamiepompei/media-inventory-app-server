@@ -34,7 +34,7 @@ public class MovieController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findAllMovies(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = movieService.getAll(userDetails.getUsername()).stream()
+        List<MediaResponse> responseList = movieService.getAllByUsername(userDetails.getUsername()).stream()
                 .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);

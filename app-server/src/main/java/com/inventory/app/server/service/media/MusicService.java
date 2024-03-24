@@ -49,7 +49,7 @@ public class MusicService {
         return musicList;
     }
 
-    public List<Music> getAll(String username) {
+    public List<Music> getAllByUsername(String username) {
         List<Music> musicList = dao.findAllByUsername(username);
         if (musicList.isEmpty()) {
             throw new ResourceNotFoundException("No music data exists.");

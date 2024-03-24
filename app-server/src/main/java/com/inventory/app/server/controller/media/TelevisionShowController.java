@@ -34,7 +34,7 @@ public class TelevisionShowController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findAllTelevisionShows(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = televisionService.getAll(userDetails.getUsername()).stream()
+        List<MediaResponse> responseList = televisionService.getAllByUsername(userDetails.getUsername()).stream()
                 .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);

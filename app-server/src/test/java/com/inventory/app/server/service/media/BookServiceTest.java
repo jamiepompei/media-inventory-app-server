@@ -37,6 +37,15 @@ public class BookServiceTest {
     }
 
     @Test
+    public void setDao() {
+        // GIVEN
+
+        // WHEN
+
+        // THEN
+    }
+
+    @Test
     public void getAllBooksByCollectionTitle() {
         // GIVEN
         String collectionTitle = "Collection1";
