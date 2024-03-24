@@ -38,119 +38,126 @@ public class BookServiceTest {
 
     @Test
     public void getAllBooksByCollectionTitle() {
+        // GIVEN
         String collectionTitle = "Collection1";
         List<Book> expectedBooks = Arrays.asList(new Book(), new Book());
-
-        when(daoMock.findByField("collection_name", collectionTitle)).thenReturn(expectedBooks);
-
-        List<Book> actualBooks = underTest.getAllBooksByCollectionTitle(collectionTitle);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("collection_name", collectionTitle, username)).thenReturn(expectedBooks);
+        List<Book> actualBooks = underTest.getAllBooksByCollectionTitle(collectionTitle, username);
+        // THEN
         assertEquals(expectedBooks, actualBooks);
-        verify(daoMock, times(1)).findByField("collection_name", collectionTitle);
+        verify(daoMock, times(1)).findByField("collection_name", collectionTitle, username);
     }
 
     @Test
     public void getAllBooksByAuthor() {
+        // GIVEN
         List<String> authors = Arrays.asList("Author1", "Author2");
         List<Book> expectedBooks = Arrays.asList(new Book(), new Book());
-
-        when(daoMock.findByField("authors", authors)).thenReturn(expectedBooks);
-
-        List<Book> actualBooks = underTest.getAllBooksByAuthor(authors);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("authors", authors, username)).thenReturn(expectedBooks);
+        List<Book> actualBooks = underTest.getAllBooksByAuthor(authors, username);
+        // THEN
         assertEquals(expectedBooks, actualBooks);
-        verify(daoMock, times(1)).findByField("authors", authors);
+        verify(daoMock, times(1)).findByField("authors", authors, username);
     }
 
     @Test
     public void getAllBooksByGenre() {
+        // GIVEN
         String genre = "Fiction";
         List<Book> expectedBooks = Arrays.asList(new Book(), new Book());
-
-        when(daoMock.findByField("genre", genre)).thenReturn(expectedBooks);
-
-        List<Book> actualBooks = underTest.getAllBooksByGenre(genre);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("genre", genre, username)).thenReturn(expectedBooks);
+        List<Book> actualBooks = underTest.getAllBooksByGenre(genre, username);
+        // THEN
         assertEquals(expectedBooks, actualBooks);
-        verify(daoMock, times(1)).findByField("genre", genre);
+        verify(daoMock, times(1)).findByField("genre", genre, username);
     }
 
     @Test
     public void getAllBooks() {
+        // GIVEN
         List<Book> expectedBooks = Arrays.asList(new Book(), new Book());
-
-        when(daoMock.findAll()).thenReturn(expectedBooks);
-
-        List<Book> actualBooks = underTest.getAll();
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findAllByUsername(username)).thenReturn(expectedBooks);
+        List<Book> actualBooks = underTest.getAllByUsername(username);
+        // THEN
         assertEquals(expectedBooks, actualBooks);
-        verify(daoMock, times(1)).findAll();
+        verify(daoMock, times(1)).findAllByUsername(username);
     }
 
     @Test
     public void getBookById() {
+        // GIVEN
         Long bookId = 1L;
         Book expectedBook = new Book();
-
-        when(daoMock.findOne(bookId)).thenReturn(expectedBook);
-
-        Book actualBook = underTest.getById(bookId);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findOne(bookId, username)).thenReturn(expectedBook);
+        Book actualBook = underTest.getById(bookId,username);
+        // THEN
         assertEquals(expectedBook, actualBook);
-        verify(daoMock, times(1)).findOne(bookId);
+        verify(daoMock, times(1)).findOne(bookId, username);
     }
 
     @Test
     public void create() {
+        // GIVEN
         Book inputBook = new Book();
         inputBook.setAuthors(Arrays.asList("Author1", "Author2"));
         inputBook.setTitle("Sample Book");
-
-        when(daoMock.findByField(any(), any())).thenReturn(Collections.emptyList());
-
-        Book savedBook = underTest.create(inputBook);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField(any(), any(), any())).thenReturn(Collections.emptyList());
+        Book savedBook = underTest.create(inputBook, username);
+        // THEN
         assertNotNull(savedBook);
         assertEquals(inputBook.getTitle(), savedBook.getTitle());
-
         verify(daoMock, times(1)).createOrUpdate(any(Book.class));
     }
 
     @Test
     public void update() {
+        // GIVEN
         Integer expectedVersion = 2;
-        Book existingBook = new Book();
-        existingBook.setId(1L);
-        existingBook.setVersion(1);
-        existingBook.setAuthors(Arrays.asList("Author1", "Author2"));
-        existingBook.setTitle("Sample Book");
-
-        Book updatedBook = new Book();
-        updatedBook.setId(1L);
-        updatedBook.setVersion(1);
-        updatedBook.setAuthors(Arrays.asList("Author1", "Author2"));
-        updatedBook.setTitle("Updated Book");
-
-        when(daoMock.findOne(updatedBook.getId())).thenReturn(existingBook);
-        Book result = underTest.update(updatedBook);
-
+        Book existingBook = createBook(1L, 1,Arrays.asList("Author1", "Author2"), "Sample Book");
+        Book updatedBook = createBook(1L, 1, Arrays.asList("Author1", "Author2"), "Updated Book");
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findOne(updatedBook.getId(), username)).thenReturn(existingBook);
+        Book result = underTest.update(updatedBook, username);
+        // THEN
         assertNotNull(result);
         assertEquals(updatedBook.getTitle(), result.getTitle());
         assertEquals(expectedVersion, result.getVersion());
-
         verify(daoMock, times(1)).createOrUpdate(updatedBook);
     }
 
     @Test
     public void deleteById() {
+        // GIVEN
         Long bookId = 1L;
         Book bookToDelete = new Book();
-
-        when(daoMock.findOne(bookId)).thenReturn(bookToDelete);
-
-        Book result = underTest.deleteById(bookId);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findOne(bookId, username)).thenReturn(bookToDelete);
+        Book result = underTest.deleteById(bookId, username);
+        // THEN
         assertNotNull(result);
-        verify(daoMock, times(1)).deleteById(bookId);
+        verify(daoMock, times(1)).deleteById(bookId, username);
+    }
+
+    private Book createBook(Long id, Integer version, List<String> authors, String title){
+        Book book = new Book();
+        book.setId(id);
+        book.setVersion(version);
+        book.setAuthors(authors);
+        book.setTitle(title);
+        return book;
     }
 }
