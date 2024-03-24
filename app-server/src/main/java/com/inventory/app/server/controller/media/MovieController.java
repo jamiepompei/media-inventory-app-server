@@ -34,7 +34,7 @@ public class MovieController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findAllMovies(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = movieService.getAll().stream()
+        List<MediaResponse> responseList = movieService.getAll(userDetails.getUsername()).stream()
                 .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
@@ -47,7 +47,7 @@ public class MovieController {
         if (directors.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Directors cannot be empty.");
         }
-        List<Movie> moviesByDirectors = movieService.getAllMoviesByDirectors(directors);
+        List<Movie> moviesByDirectors = movieService.getAllMoviesByDirectors(directors, userDetails.getUsername());
         List<MediaResponse> responseList = moviesByDirectors.stream()
                 .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
@@ -60,7 +60,7 @@ public class MovieController {
         if (title.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Title cannot be empty.");
         }
-        List<Movie> moviesByTitle = movieService.getAllMoviesByTitle(title);
+        List<Movie> moviesByTitle = movieService.getAllMoviesByTitle(title, userDetails.getUsername());
         List<MediaResponse> responseList = moviesByTitle.stream()
                 .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
@@ -73,7 +73,7 @@ public class MovieController {
         if (genre.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Genre cannot be empty.");
         }
-        List<Movie> moviesByGenre = movieService.getAllMoviesByGenre(genre);
+        List<Movie> moviesByGenre = movieService.getAllMoviesByGenre(genre, userDetails.getUsername());
         List<MediaResponse> responseList = moviesByGenre.stream()
                 .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
@@ -86,7 +86,7 @@ public class MovieController {
         if (collectionTitle.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Collection Title cannot be empty.");
         }
-        List<Movie> moviesByGenre = movieService.getAllMoviesByCollectionTitle(collectionTitle);
+        List<Movie> moviesByGenre = movieService.getAllMoviesByCollectionTitle(collectionTitle, userDetails.getUsername());
         List<MediaResponse> responseList = moviesByGenre.stream()
                 .map(m -> MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
@@ -99,7 +99,7 @@ public class MovieController {
     public ResponseEntity<MediaResponse> createMovie(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest movieRequest) {
         log.info("Received a request to create resource: " + movieRequest);
         Movie movie = MovieMapper.INSTANCE.mapMediaRequestToMovie(movieRequest);
-        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.create(movie));
+        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.create(movie, userDetails.getUsername()));
         log.info("Created new movie: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -110,7 +110,7 @@ public class MovieController {
     public ResponseEntity<MediaResponse> updateMovie(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest mediaRequest) {
         log.info("received request to update resource: " + mediaRequest);
         Movie updatedMovie = MovieMapper.INSTANCE.mapMediaRequestToMovie(mediaRequest);
-        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.update(updatedMovie));
+        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.update(updatedMovie, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -121,7 +121,7 @@ public class MovieController {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.deleteById(id));
+        MediaResponse response = MovieMapper.INSTANCE.mapMovieToMediaResponseWithAdditionalAttributes(movieService.deleteById(id, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

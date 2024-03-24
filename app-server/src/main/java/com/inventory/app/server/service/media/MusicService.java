@@ -25,41 +25,41 @@ public class MusicService {
         dao.setClazz(Music.class);
     }
 
-    public List<Music> getAllMusicByArtist(List<String> artist){
-       List<Music> musicList = dao.findByField("artist", artist);
+    public List<Music> getAllMusicByArtist(List<String> artist, String username){
+       List<Music> musicList = dao.findByField("artist", artist, username);
        if (musicList.isEmpty()) {
            throw new ResourceNotFoundException("No music found by artist(s) " + artist);
        }
         return musicList;
     }
 
-    public List<Music> getAllMusicByGenre(String genre){
-        List<Music> musicList = dao.findByField("genre", genre);
+    public List<Music> getAllMusicByGenre(String genre, String username){
+        List<Music> musicList = dao.findByField("genre", genre, username);
         if (musicList.isEmpty()) {
             throw new ResourceNotFoundException("No music found with genre " + genre);
         }
         return musicList;
     }
 
-    public List<Music> getAllMusicByCollectionTitle(String collectionTitle){
-        List<Music> musicList = dao.findByField("collection_name", collectionTitle);
+    public List<Music> getAllMusicByCollectionTitle(String collectionTitle, String username){
+        List<Music> musicList = dao.findByField("collection_name", collectionTitle, username);
         if (musicList.isEmpty()) {
             throw new ResourceNotFoundException("No music found with collection title " + collectionTitle);
         }
         return musicList;
     }
 
-    public List<Music> getAll() {
-        List<Music> musicList = dao.findAll();
+    public List<Music> getAll(String username) {
+        List<Music> musicList = dao.findAllByUsername(username);
         if (musicList.isEmpty()) {
             throw new ResourceNotFoundException("No music data exists.");
         }
         return musicList;
     }
 
-    public Music getById(Long id){
+    public Music getById(Long id, String username){
         try {
-            return dao.findOne(id);
+            return dao.findOne(id, username);
         } catch (Exception e) {
             if (e.getClass().isInstance(EntityNotFoundException.class)) {
                 throw new ResourceNotFoundException("No music exists with id: " + id);
@@ -69,8 +69,8 @@ public class MusicService {
         }
     }
 
-    public Music create(Music music) {
-       if (musicAlreadyExists(music)) {
+    public Music create(Music music, String username) {
+       if (musicAlreadyExists(music, username)) {
            throw new ResourceAlreadyExistsException("Cannot create music because music already exists: " + music);
         }
         Music musicToSave = cloneMusic(music);
@@ -79,11 +79,11 @@ public class MusicService {
         return dao.createOrUpdate(musicToSave);
     }
 
-    public Music update(Music updatedMusic) {
-        if (!musicAlreadyExists(updatedMusic)) {
+    public Music update(Music updatedMusic, String username) {
+        if (!musicAlreadyExists(updatedMusic, username)) {
             throw new ResourceNotFoundException("Cannot update music because music does not exist: " + updatedMusic);
         }
-        Music existingMusic = getById(updatedMusic.getId());
+        Music existingMusic = getById(updatedMusic.getId(),username);
         if (verifyIfMusicUpdated(existingMusic, updatedMusic)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingMusic+ "Updated Book: " + updatedMusic);
         }
@@ -93,17 +93,17 @@ public class MusicService {
         return dao.createOrUpdate(updatedMusic);
     }
 
-    public Music deleteById(Long id){
-        Music music = getById(id);
+    public Music deleteById(Long id, String username){
+        Music music = getById(id, username);
         if (music == null) {
             throw new ResourceNotFoundException("Cannot delete music because music does not exist.");
         }
-        dao.deleteById(id);
+        dao.deleteById(id, username);
         return music;
     }
 
-    private boolean musicAlreadyExists(Music music) {
-        return getAllMusicByArtist(music.getArtists())
+    private boolean musicAlreadyExists(Music music, String username) {
+        return getAllMusicByArtist(music.getArtists(), username)
                 .stream()
                 .anyMatch(m -> music.getTitle().equals(m.getTitle()));
     }

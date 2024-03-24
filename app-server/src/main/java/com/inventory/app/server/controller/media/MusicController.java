@@ -34,7 +34,7 @@ public class MusicController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findAllMusic(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = musicService.getAll().stream()
+        List<MediaResponse> responseList = musicService.getAll(userDetails.getUsername()).stream()
                 .map(m -> MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
@@ -46,7 +46,7 @@ public class MusicController {
         if (artists.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Artists cannot be empty.");
         }
-        List<Music> musicByArtists = musicService.getAllMusicByArtist(artists);
+        List<Music> musicByArtists = musicService.getAllMusicByArtist(artists, userDetails.getUsername());
         List<MediaResponse> responseList = musicByArtists.stream()
                 .map(m -> MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
@@ -59,7 +59,7 @@ public class MusicController {
     public ResponseEntity<MediaResponse> createMusic(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest musicRequest) {
         log.info("Received a request to create resource: " + musicRequest);
         Music music = MusicMapper.INSTANCE.mapMediaRequestToMusic(musicRequest);
-        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.create(music));
+        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.create(music, userDetails.getUsername()));
         log.info("Created new music: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -70,7 +70,7 @@ public class MusicController {
     public ResponseEntity<MediaResponse> updateMusic(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest musicRequest) {
         log.info("received request to update resource: " + musicRequest);
         Music updatedMusic = MusicMapper.INSTANCE.mapMediaRequestToMusic(musicRequest);
-        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.update(updatedMusic));
+        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.update(updatedMusic, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -81,7 +81,7 @@ public class MusicController {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.deleteById(id));
+        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.deleteById(id, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

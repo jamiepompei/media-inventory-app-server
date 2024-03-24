@@ -26,57 +26,57 @@ public class GameService {
         dao.setClazz(Game.class);
     }
 
-    public List<Game> getAllGamesByNumberOfPlayers(Integer numberOfPlayers){
-        List<Game> gameList = dao.findByField("number_of_players", String.valueOf(numberOfPlayers));
+    public List<Game> getAllGamesByNumberOfPlayers(Integer numberOfPlayers, String username){
+        List<Game> gameList = dao.findByField("number_of_players", String.valueOf(numberOfPlayers), username);
         if (gameList.isEmpty()) {
             throw new ResourceNotFoundException("No games found with number of players: " + numberOfPlayers);
         }
         return gameList;
     }
 
-    public List<Game> getAllGamesByConsole(List<String> console){
-        List<Game> gameList = dao.findByField("consoles", console);
+    public List<Game> getAllGamesByConsole(List<String> console, String username){
+        List<Game> gameList = dao.findByField("consoles", console, username);
         if (gameList.isEmpty()) {
             throw new ResourceNotFoundException("No games found for consoles " + console );
         }
         return gameList;
     }
 
-    public List<Game> getAllGamesByTitle(String title){
-        List<Game> gameList = dao.findByField("title", title);
+    public List<Game> getAllGamesByTitle(String title, String username){
+        List<Game> gameList = dao.findByField("title", title, username);
         if (gameList.isEmpty()) {
             throw new ResourceNotFoundException("No game results for title " + title);
         }
         return gameList;
     }
 
-    public List<Game> getAllGamesByCollectionTitle(String collectionTitle) {
-        List<Game> gameList = dao.findByField("collection_name", collectionTitle);
+    public List<Game> getAllGamesByCollectionTitle(String collectionTitle, String username) {
+        List<Game> gameList = dao.findByField("collection_name", collectionTitle, username);
         if (gameList.isEmpty()) {
             throw new ResourceNotFoundException("No game results found for collection title " + collectionTitle);
         }
         return gameList;
     }
 
-    public List<Game> getAllGamesByGenre(String genre) {
-        List<Game> gameList = dao.findByField("genre", genre);
+    public List<Game> getAllGamesByGenre(String genre, String username) {
+        List<Game> gameList = dao.findByField("genre", genre, username);
         if (gameList.isEmpty()) {
             throw new ResourceNotFoundException("No fame results found for genre " + genre);
         }
         return gameList;
     }
 
-    public List<Game> getAll() {
-        List<Game> gameList = dao.findAll();
+    public List<Game> getAllByUsername(String username) {
+        List<Game> gameList = dao.findAllByUsername(username);
         if (gameList.isEmpty()) {
             throw new ResourceNotFoundException("No game data exists.");
         }
         return gameList;
     }
 
-    public Game getById(Long id) {
+    public Game getById(Long id, String username) {
         try {
-            return dao.findOne(id);
+            return dao.findOne(id, username);
         } catch (Exception e) {
             if(e.getClass().isInstance(EntityNotFoundException.class)) {
                 throw new ResourceNotFoundException("No game exists with id: " + id);
@@ -86,8 +86,8 @@ public class GameService {
         }
     }
 
-    public Game create(Game game) {
-        if (gameAlreadyExists(game)) {
+    public Game create(Game game, String username) {
+        if (gameAlreadyExists(game, username)) {
             throw new ResourceAlreadyExistsException("Cannot create game because games already exist: " + game);
         }
         Game gameToSave = cloneGame(game);
@@ -96,11 +96,11 @@ public class GameService {
         return dao.createOrUpdate(gameToSave);
     }
 
-    public Game update(Game updatedGame) {
-        if (!gameAlreadyExists(updatedGame)) {
+    public Game update(Game updatedGame, String username) {
+        if (!gameAlreadyExists(updatedGame, username)) {
             throw new ResourceNotFoundException("Cannot update game because game does not exist: " + updatedGame);
         }
-        Game existingGame = getById(updatedGame.getId());
+        Game existingGame = getById(updatedGame.getId(), username);
         if (verifyIfGameUpdate(existingGame, updatedGame)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Game: " + existingGame + " Update Game: " + updatedGame);
         }
@@ -110,12 +110,12 @@ public class GameService {
         return dao.createOrUpdate(updatedGame);
     }
 
-    public Game deleteById(Long id){
-       Game game = getById(id);
+    public Game deleteById(Long id, String username){
+       Game game = getById(id, username);
        if (game == null) {
            throw new ResourceNotFoundException("Cannot delete game because game does not exist.");
        }
-       dao.deleteById(id);
+       dao.deleteById(id, username);
        return game;
     }
 
@@ -125,8 +125,8 @@ public class GameService {
         return clonedGame;
     }
 
-    private boolean gameAlreadyExists(Game game) {
-        return getAllGamesByTitle(game.getTitle())
+    private boolean gameAlreadyExists(Game game, String username) {
+        return getAllGamesByTitle(game.getTitle(), username)
                 .stream()
                 .anyMatch(g -> game.getTitle().equals(g.getTitle()));
     }
