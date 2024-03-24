@@ -36,142 +36,152 @@ public class GameServiceTest {
 
     @Test
     public void getAllGamesByCollectionTitle() {
+        // GIVEN
         String collectionTitle = " Jamie's Stuff";
         List<Game> expectedGames = Arrays.asList(new Game(), new Game());
-
-        when(daoMock.findByField("collection_name", collectionTitle)).thenReturn(expectedGames);
-
-        List<Game> actualGames = underTest.getAllGamesByCollectionTitle(collectionTitle);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("collection_name", collectionTitle, username)).thenReturn(expectedGames);
+        List<Game> actualGames = underTest.getAllGamesByCollectionTitle(collectionTitle, username);
+        //THEN
         assertEquals(expectedGames, actualGames);
-        verify(daoMock, times(1)).findByField("collection_name", collectionTitle);
+        verify(daoMock, times(1)).findByField("collection_name", collectionTitle, username);
     }
 
     @Test
     public void getAllGamesByNumberOfPlayers() {
+        // GIVEN
         Integer numOfPlayers = 2;
         List<Game> expectedGames = Arrays.asList(new Game(), new Game());
-
-        when(daoMock.findByField("number_of_players", numOfPlayers)).thenReturn(expectedGames);
-
-        List<Game> actualGames = underTest.getAllGamesByNumberOfPlayers(numOfPlayers);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("number_of_players", numOfPlayers, username)).thenReturn(expectedGames);
+        List<Game> actualGames = underTest.getAllGamesByNumberOfPlayers(numOfPlayers, username);
+        // THEN
         assertEquals(expectedGames, actualGames);
-        verify(daoMock, times(1)).findByField("number_of_players", numOfPlayers);
+        verify(daoMock, times(1)).findByField("number_of_players", numOfPlayers, username);
     }
 
     @Test
     public void getAllGamesByConsole() {
+        // GIVEN
         List<String> consoles = Arrays.asList("Nintendo Switch");
         List<Game> expectedGames = Arrays.asList(new Game(), new Game());
-
-        when(daoMock.findByField("consoles", consoles)).thenReturn(expectedGames);
-
-        List<Game> actualGames = underTest.getAllGamesByConsole(consoles);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("consoles", consoles, username)).thenReturn(expectedGames);
+        List<Game> actualGames = underTest.getAllGamesByConsole(consoles, username);
+        //THEN
         assertEquals(expectedGames, actualGames);
-        verify(daoMock, times(1)).findByField("consoles", consoles);
+        verify(daoMock, times(1)).findByField("consoles", consoles, username);
     }
 
     @Test
     public void getAllGamesByTitle() {
+        // GIVEN
         String title = "It Takes Two";
         List<Game> expectedGames = Arrays.asList(new Game(), new Game());
-
-        when(daoMock.findByField("title", title)).thenReturn(expectedGames);
-
-        List<Game> actualGames = underTest.getAllGamesByTitle(title);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("title", title, username)).thenReturn(expectedGames);
+        List<Game> actualGames = underTest.getAllGamesByTitle(title, username);
+        // THEN
         assertEquals(expectedGames, actualGames);
-        verify(daoMock, times(1)).findByField("title", title);
+        verify(daoMock, times(1)).findByField("title", title, username);
     }
 
     @Test
     public void getAllGamesByGenre() {
+        // GIVEN
         String genre = "Adventure";
         List<Game> expectedGames = Arrays.asList(new Game(), new Game());
-
-        when(daoMock.findByField("genre", genre)).thenReturn(expectedGames);
-
-        List<Game> actualGames = underTest.getAllGamesByGenre(genre);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("genre", genre, username)).thenReturn(expectedGames);
+        List<Game> actualGames = underTest.getAllGamesByGenre(genre, username);
+        // THEN
         assertEquals(expectedGames, actualGames);
-        verify(daoMock, times(1)).findByField("genre", genre);
+        verify(daoMock, times(1)).findByField("genre", genre, username);
     }
 
     @Test
     public void getAllGames() {
+        // GIVEN
         List<Game> expectedGames = Arrays.asList(new Game(), new Game());
-
-        when(daoMock.findAll()).thenReturn(expectedGames);
-
-        List<Game> actualGames = underTest.getAll();
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findAllByUsername(username)).thenReturn(expectedGames);
+        List<Game> actualGames = underTest.getAllByUsername(username);
+        // THEN
         assertEquals(expectedGames, actualGames);
         verify(daoMock, times(1)).findAll();
     }
 
     @Test
     public void getGameById() {
+        // GIVEN
         Long gameId = 1L;
         Game expectedGame = new Game();
-
-        when(daoMock.findOne(gameId)).thenReturn(expectedGame);
-
-        Game actualGame = underTest.getById(gameId);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findOne(gameId, username)).thenReturn(expectedGame);
+        Game actualGame = underTest.getById(gameId, username);
+        // THEN
         assertEquals(expectedGame, actualGame);
-        verify(daoMock, times(1)).findOne(gameId);
+        verify(daoMock, times(1)).findOne(gameId, username);
     }
 
     @Test
     public void create(){
+        // GIVEN
         String title = "It Takes Two";
-        Game inputGame = new Game();
-        inputGame.setTitle(title);
-
-        when(daoMock.findByField("title", title)).thenReturn(Collections.emptyList());
+        Game inputGame = createGame(1L, 1, title);
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findByField("title", title, username)).thenReturn(Collections.emptyList());
         when(daoMock.createOrUpdate(inputGame)).thenReturn(inputGame);
-
-        Game savedGame = underTest.create(inputGame);
-
+        Game savedGame = underTest.create(inputGame, username);
+        // THEN
         assertNotNull(savedGame);
         assertEquals(inputGame.getTitle(), savedGame.getTitle());
     }
 
     @Test
     public void update(){
+        // GIVEN
         Integer expectedVersion = 2;
-        Game existingGame = new Game();
-        existingGame.setId(1L);
-        existingGame.setVersion(1);
-        existingGame.setTitle("It Takes Two");
-
-        Game updatedGame = new Game();
-        updatedGame.setId(1L);
-        updatedGame.setVersion(1);
-        updatedGame.setTitle("Updated It Takes Two");
-
-        when(daoMock.findOne(updatedGame.getId())).thenReturn(existingGame);
-        Game result = underTest.update(updatedGame);
-
+        Game existingGame = createGame(1L, 1, "It Takes Two");
+        Game updatedGame = createGame(1L, 1, "Updated It Takes Two");
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findOne(updatedGame.getId(), username)).thenReturn(existingGame);
+        Game result = underTest.update(updatedGame, username);
+        // THEN
         assertNotNull(result);
         assertEquals(updatedGame, result);
         assertEquals(expectedVersion, result.getVersion());
-
         verify(daoMock, times(1)).createOrUpdate(updatedGame);
     }
 
     @Test
     public void deleteGameById(){
+        // GIVEN
         Long gameId = 1L;
         Game gameToDelete = new Game();
-
-        when(daoMock.findOne(gameId)).thenReturn(gameToDelete);
-
-        Game result = underTest.deleteById(gameId);
-
+        String username = "jpompei";
+        // WHEN
+        when(daoMock.findOne(gameId, username)).thenReturn(gameToDelete);
+        Game result = underTest.deleteById(gameId, username);
+        // THEN
         assertNotNull(result);
-        verify(daoMock, times(1)).deleteById(gameId);
+        verify(daoMock, times(1)).deleteById(gameId, username);
+    }
+
+    private Game createGame(Long id, Integer version, String title){
+        Game game = new Game();
+        game.setId(id);
+        game.setVersion(version);
+        game.setTitle(title);
+        return game;
     }
 }
