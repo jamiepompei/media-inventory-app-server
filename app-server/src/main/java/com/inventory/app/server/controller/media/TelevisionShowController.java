@@ -34,7 +34,7 @@ public class TelevisionShowController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     ResponseEntity<List<MediaResponse>> findAllTelevisionShows(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = televisionService.getAll().stream()
+        List<MediaResponse> responseList = televisionService.getAllByUsername(userDetails.getUsername()).stream()
                 .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
@@ -46,7 +46,7 @@ public class TelevisionShowController {
         if (episodes.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Writers cannot be empty.");
         }
-        List<TelevisionShow> televisionShowsByEpisodes = televisionService.getAllTelevisionShowsByEpisode(episodes);
+        List<TelevisionShow> televisionShowsByEpisodes = televisionService.getAllTelevisionShowsByEpisode(episodes, userDetails.getUsername());
         List<MediaResponse> responseList = televisionShowsByEpisodes.stream()
                 .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
                 .collect(Collectors.toList());
@@ -59,7 +59,7 @@ public class TelevisionShowController {
     public ResponseEntity<MediaResponse> createTelevisionShow(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest televisionShowRequest) {
         log.info("Received request to create resource: " + televisionShowRequest);
         TelevisionShow televisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(televisionShowRequest);
-        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.create(televisionShow));
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.create(televisionShow, userDetails.getUsername()));
         log.info("Created new television show: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -70,7 +70,7 @@ public class TelevisionShowController {
     public ResponseEntity<MediaResponse> updateTelevisionShow(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest televisionShowRequest) {
         log.info("Received request to update resource: " + televisionShowRequest);
         TelevisionShow updatedTelevisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(televisionShowRequest);
-        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.update(updatedTelevisionShow));
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.update(updatedTelevisionShow, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -81,7 +81,7 @@ public class TelevisionShowController {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.deleteById(id));
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.deleteById(id, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

@@ -28,6 +28,11 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
     }
 
     @Override
+    public List<T> findByField(String field, Object value) {
+        return createQuery(field, value);
+    }
+
+    @Override
     public T findOneByField(String field, Object value, String username) {
         return findByField(field, value, username).stream().findFirst().get();
     }
@@ -42,6 +47,16 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
         query.setParameter("username", username);
         query.setParameter("value", fieldValue);
         return query.getResultList();
+    }
+
+    private List<T> createQuery(String fieldName, Object fieldValue) {
+        JpaEntityInformation<T, ?> entityInformation = JpaEntityInformationSupport.getEntityInformation(getClazz(), entityManager);
+        String entityName = entityInformation.getEntityName();
+        Class<T> entityType = entityInformation.getJavaType();
+
+        String queryString = String.format("FROM %s WHERE %s = :value", entityName, fieldName);
+        TypedQuery<T> query = entityManager.createQuery(queryString, entityType);
+        return query.setParameter("value", fieldValue).getResultList();
     }
 
     public final void setClazz(final Class<T> clazzToSet){
@@ -85,6 +100,11 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
     public void deleteById(final long entityId, final String username) {
         final T entity = findOne(entityId, username);
         delete(entity);
+    }
+
+    @Override
+    public List<T> findAll(){
+        return entityManager.createQuery("from " + clazz.getName()).getResultList();
     }
 
     public Class<T> getClazz() {

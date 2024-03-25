@@ -24,49 +24,49 @@ public class MovieService {
         dao.setClazz(Movie.class);
     }
 
-    public List<Movie> getAllMoviesByGenre(String genre){
-        List<Movie> movieList = dao.findByField("genre", genre);
+    public List<Movie> getAllMoviesByGenre(String genre, String username){
+        List<Movie> movieList = dao.findByField("genre", genre, username);
         if (movieList.isEmpty()) {
             throw new ResourceNotFoundException("No movie results found for genre " + genre);
         }
         return movieList;
     }
 
-    public List<Movie> getAllMoviesByTitle(String title){
-        List<Movie> movieList = dao.findByField("title", title);
+    public List<Movie> getAllMoviesByTitle(String title, String username){
+        List<Movie> movieList = dao.findByField("title", title, username);
         if (movieList.isEmpty()) {
             throw new ResourceNotFoundException("No movie results found for title " + title);
         }
         return movieList;
     }
 
-    public List<Movie> getAllMoviesByDirectors(List<String> directors){
-        List<Movie> movieList = dao.findByField("directors", directors);
+    public List<Movie> getAllMoviesByDirectors(List<String> directors, String username){
+        List<Movie> movieList = dao.findByField("directors", directors, username);
         if (movieList.isEmpty()) {
             throw new ResourceNotFoundException("No movie results found by directors " + directors);
         }
         return movieList;
     }
 
-    public List<Movie> getAllMoviesByCollectionTitle(String collectionTitle){
-        List<Movie> movieList = dao.findByField("title", collectionTitle);
+    public List<Movie> getAllMoviesByCollectionTitle(String collectionTitle, String username){
+        List<Movie> movieList = dao.findByField("title", collectionTitle, username);
         if (movieList.isEmpty()) {
             throw new ResourceNotFoundException("No movie results found for collection title " + collectionTitle);
         }
         return movieList;
     }
 
-    public List<Movie> getAll() {
-        List<Movie> movieList = dao.findAll();
+    public List<Movie> getAllByUsername(String username) {
+        List<Movie> movieList = dao.findAllByUsername(username);
         if (movieList.isEmpty()) {
             throw new ResourceNotFoundException("No movie data exists.");
         }
         return movieList;
     }
 
-    public Movie getById(Long id) {
+    public Movie getById(Long id, String username) {
         try {
-            return dao.findOne(id);
+            return dao.findOne(id, username);
         } catch (Exception e) {
             if (e.getClass().isInstance(EntityNotFoundException.class)){
                 throw new ResourceNotFoundException("No movie exists with id: " + id);
@@ -76,8 +76,8 @@ public class MovieService {
         }
     }
 
-    public Movie create(Movie movie) {
-       if (movieAlreadyExists(movie)) {
+    public Movie create(Movie movie, String username) {
+       if (movieAlreadyExists(movie, username)) {
            throw new ResourceAlreadyExistsException("Cannot create movie because movie already exists: " + movie);
        }
         Movie movieToSave = cloneMovie(movie);
@@ -86,11 +86,11 @@ public class MovieService {
         return dao.createOrUpdate(movieToSave);
     }
 
-    public Movie update(Movie updatedMovie) {
-        if (!movieAlreadyExists(updatedMovie)) {
+    public Movie update(Movie updatedMovie, String username) {
+        if (!movieAlreadyExists(updatedMovie, username)) {
             throw new ResourceNotFoundException("Cannot update movie because movie does not exist: " + updatedMovie);
         }
-        Movie existingMovie = getById(updatedMovie.getId());
+        Movie existingMovie = getById(updatedMovie.getId(), username);
         if (verifyIfMovieUpdated(existingMovie, updatedMovie)) {
             throw new NoChangesToUpdateException("No updates in movie to save. Will not proceed with update. Existing Movie: " + existingMovie + "Updated Movie: " + updatedMovie);
         }
@@ -100,17 +100,17 @@ public class MovieService {
         return dao.createOrUpdate(updatedMovie);
     }
 
-    public Movie deleteById(Long id){
-        Movie movie = getById(id);
+    public Movie deleteById(Long id, String username){
+        Movie movie = getById(id, username);
         if (movie == null ) {
             throw new ResourceNotFoundException("Cannot delete movie because movie does not exist.");
         }
-        dao.deleteById(id);
+        dao.deleteById(id, username);
         return movie;
     }
 
-    private boolean movieAlreadyExists(Movie movie) {
-        return getAllMoviesByDirectors(movie.getDirectors())
+    private boolean movieAlreadyExists(Movie movie, String username) {
+        return getAllMoviesByDirectors(movie.getDirectors(), username)
                 .stream()
                 .anyMatch(m -> movie.getTitle().equals(m.getTitle()));
     }

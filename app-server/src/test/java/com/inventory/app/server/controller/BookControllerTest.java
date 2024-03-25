@@ -2,6 +2,7 @@ package com.inventory.app.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
+import com.inventory.app.server.controller.media.BookController;
 import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.service.media.BookService;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 @WebMvcTest(controllers = BookController.class)
 @AutoConfigureMockMvc
 public class BookControllerTest {
+    //TODO take care of UserDetails object
 
     @MockBean
     private BookService bookService;
@@ -50,7 +52,7 @@ public class BookControllerTest {
         Book mockBook = createBook("Test", "hardcover", "Comedy", 1, Arrays.asList("Jon Snow"), "Jamie's Stuff", 2023 );
 
         // Mock the behavior of bookService.create
-        when(bookService.create(any())).thenReturn(mockBook);
+        when(bookService.create(any(), any())).thenReturn(mockBook);
 
         ConcurrentHashMap<String, Object> additionalBookAttributes = new ConcurrentHashMap<>();
         additionalBookAttributes.put(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), mockBook.getAuthors());
@@ -113,7 +115,7 @@ public class BookControllerTest {
         Book mockBook = createBook(1L, 1, "Title", "hardcover", "Comedy", 1, Arrays.asList("Jon Snow"), "Jamie's Stuff", 2023);
 
         // Mock the behavior of bookService.update
-        when(bookService.update(any())).thenReturn(mockBook);
+        when(bookService.update(any(), any())).thenReturn(mockBook);
 
         ConcurrentHashMap<String, Object> additionalBookAttributes = new ConcurrentHashMap<>();
         additionalBookAttributes.put(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), mockBook.getAuthors());
@@ -177,8 +179,9 @@ public class BookControllerTest {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         List<String> authors = Arrays.asList("Jessie Pinkman", "Jon Snow");
+        String username = "jpompei";
         Book book = new Book();
-        when(bookService.getAllBooksByAuthor(authors)).thenReturn(Arrays.asList(book));
+        when(bookService.getAllBooksByAuthor(authors,username)).thenReturn(Arrays.asList(book));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/books/{authors}",  String.join(",", authors))
                         .contentType(jsonMediaType))
@@ -193,7 +196,8 @@ public class BookControllerTest {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         Book book = new Book();
-        when(bookService.getAll()).thenReturn(Arrays.asList(book));
+        String username = "jpompei";
+        when(bookService.getAllByUsername(username)).thenReturn(Arrays.asList(book));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/books")
                         .contentType(jsonMediaType))
@@ -209,7 +213,8 @@ public class BookControllerTest {
 
         Book book = new Book();
         book.setId(1L);
-        when(bookService.deleteById(book.getId())).thenReturn(book);
+        String username = "jpompei";
+        when(bookService.deleteById(book.getId(), username)).thenReturn(book);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/books/{id}", book.getId())
                         .contentType(jsonMediaType))

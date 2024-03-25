@@ -63,10 +63,9 @@ public class BookService {
         return bookList;
     }
 
-    // TODO username
-    public Book getById(Long id) {
+    public Book getById(Long id, String username) {
         try {
-            return dao.findOne(id);
+            return dao.findOne(id, username);
         } catch(Exception e) {
             if ( e.getClass().isInstance(EntityNotFoundException.class)) {
                 throw new ResourceNotFoundException("No book exists with id: " + id);
@@ -90,7 +89,7 @@ public class BookService {
         if (!bookAlreadyExists(updatedBook, username)) {
             throw new ResourceNotFoundException("Cannot update book because book does not exist: " + updatedBook);
         }
-        Book existingBook = getById(updatedBook.getId());
+        Book existingBook = getById(updatedBook.getId(), username);
         if (verifyIfBookUpdated(existingBook, updatedBook)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingBook + "Updated Book: " + updatedBook);
         }
@@ -100,13 +99,12 @@ public class BookService {
         return dao.createOrUpdate(updatedBook);
     }
 
-    // TODO username
-    public Book deleteById(Long id){
-        Book book = getById(id);
+    public Book deleteById(Long id, String username){
+        Book book = getById(id, username);
         if (book == null) {
             throw new ResourceNotFoundException("Cannot delete book because book does not exist.");
         }
-        dao.deleteById(id);
+        dao.deleteById(id, username);
         return book;
     }
 
