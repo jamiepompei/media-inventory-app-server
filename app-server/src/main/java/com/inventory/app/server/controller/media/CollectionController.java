@@ -1,4 +1,4 @@
-package com.inventory.app.server.controller;
+package com.inventory.app.server.controller.media;
 
 import com.inventory.app.server.entity.collection.CollectionDetails;
 import com.inventory.app.server.entity.media.Media;
