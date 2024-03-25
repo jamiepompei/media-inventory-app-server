@@ -10,6 +10,8 @@ public interface IBaseDao<T extends Serializable> {
 
     List<T> findByField(final String field, final Object value, final String username);
 
+    List<T> findByField(final String field, final Object value);
+
     T findOneByField(final String field, final Object value, final String username);
 
     T findOne(final long id, final String username);
