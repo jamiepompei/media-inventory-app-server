@@ -4,15 +4,19 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface IBaseDao<T extends Serializable> {
-    void setClazz(Class< T > clazzToSet);
+    void setClazz(final Class< T > clazzToSet);
 
     Class<T> getClazz();
 
-    List<T> findByField(String field, Object value);
+    List<T> findByField(final String field, final Object value, final String username);
 
-    T findOneByField(String field, Object value);
+    List<T> findByField(final String field, final Object value);
 
-    T findOne(final long id);
+    T findOneByField(final String field, final Object value, final String username);
+
+    T findOne(final long id, final String username);
+
+    List<T> findAllByUsername(final String username);
 
     List<T> findAll();
 
@@ -20,5 +24,5 @@ public interface IBaseDao<T extends Serializable> {
 
     void delete(final T entity);
 
-    void deleteById(final long entityId);
+    void deleteById(final long entityId, final String username);
 }

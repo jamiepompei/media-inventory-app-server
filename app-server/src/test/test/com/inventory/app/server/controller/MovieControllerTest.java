@@ -2,6 +2,7 @@ package com.inventory.app.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
+import com.inventory.app.server.controller.media.MovieController;
 import com.inventory.app.server.entity.media.Movie;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.service.media.MovieService;
@@ -51,7 +52,7 @@ public class MovieControllerTest {
 
         Movie mockMovie = createMovie("The Goonies", "DVD", "Adventure", Arrays.asList("Jessie Pinkman"), "Jamie's Stuff", 2023);
 
-        when(movieService.create(any())).thenReturn(mockMovie);
+        when(movieService.create(any(), any())).thenReturn(mockMovie);
 
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
         additionalAttributes.put(MediaInventoryAdditionalAttributes.DIRECTORS.getJsonKey(), mockMovie.getDirectors());
@@ -106,8 +107,9 @@ public class MovieControllerTest {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         Movie mockMovie = createMovie(1L, 1, "The Goonies", "DVD", "Adventure", Arrays.asList("Jessie Pinkman"), "Jamie's Stuff", 2023);
+        String username = "jpompei";
 
-        when(movieService.update(mockMovie)).thenReturn(mockMovie);
+        when(movieService.update(mockMovie, username)).thenReturn(mockMovie);
 
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
         additionalAttributes.put(MediaInventoryAdditionalAttributes.DIRECTORS.getJsonKey(), mockMovie.getDirectors());
@@ -165,8 +167,9 @@ public class MovieControllerTest {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         Movie movie = new Movie();
+        String username = "jpompei";
 
-        when(movieService.getAll()).thenReturn(Arrays.asList(movie));
+        when(movieService.getAllByUsername(username)).thenReturn(Arrays.asList(movie));
 
         mockMvc.perform((MockMvcRequestBuilders.get("/movies"))
                 .contentType(jsonMediaType))
@@ -182,8 +185,9 @@ public class MovieControllerTest {
 
         Movie movie = new Movie();
         movie.setId(1L);
+        String username = "jpompei";
 
-        when(movieService.deleteById(movie.getId())).thenReturn(movie);
+        when(movieService.deleteById(movie.getId(), username)).thenReturn(movie);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/movie/{id}", movie.getId())
                         .contentType(jsonMediaType))

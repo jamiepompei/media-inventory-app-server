@@ -24,8 +24,9 @@ public class UserDAOService {
         dao.setClazz(UserInfo.class);
     }
 
+    //TODO fix this
     public UserInfo findByUsername(String username) {
-        return dao.findOneByField("username", username);
+        return dao.findOneByField("username", username, username);
     }
 
     public UserInfo saveUser(UserInfo userInfo) { return dao.createOrUpdate(userInfo);}

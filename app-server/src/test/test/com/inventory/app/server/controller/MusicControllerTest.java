@@ -2,6 +2,7 @@ package com.inventory.app.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
+import com.inventory.app.server.controller.media.MusicController;
 import com.inventory.app.server.entity.media.Music;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.service.media.MusicService;
@@ -51,7 +52,7 @@ public class MusicControllerTest {
 
         Music mockMusic = createMusic("Eye On The Bat", "Vinyl", "Rock", Arrays.asList("Palehound"), Arrays.asList("Good Sex", "The Clutch", "Eye On The Bat", "Independence Day", "Route 22", "Right About You", "You Want It You Got It", "Fadin"), "Jamie's Stuff", 2023);
 
-        when(musicService.create(any())).thenReturn(mockMusic);
+        when(musicService.create(any(), any())).thenReturn(mockMusic);
 
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
         additionalAttributes.put(MediaInventoryAdditionalAttributes.ARTISTS.getJsonKey(), mockMusic.getArtists());
@@ -109,7 +110,7 @@ public class MusicControllerTest {
 
         Music mockMusic = createMusic(1L, 1,"Eye On The Bat", "Vinyl", "Rock", Arrays.asList("Palehound"), Arrays.asList("Good Sex", "The Clutch", "Eye On The Bat", "Independence Day", "Route 22", "Right About You", "You Want It You Got It", "Fadin"), "Jamie's Stuff", 2023);
 
-        when(musicService.create(any())).thenReturn(mockMusic);
+        when(musicService.create(any(), any())).thenReturn(mockMusic);
 
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
         additionalAttributes.put(MediaInventoryAdditionalAttributes.ARTISTS.getJsonKey(), mockMusic.getArtists());
@@ -169,8 +170,9 @@ public class MusicControllerTest {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         Music music = new Music();
+        String username = "jpompei";
 
-        when(musicService.getAll()).thenReturn(Arrays.asList(music));
+        when(musicService.getAllByUsername(username)).thenReturn(Arrays.asList(music));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/music")
                 .contentType(jsonMediaType))
@@ -186,8 +188,9 @@ public class MusicControllerTest {
 
         Music music = new Music();
         music.setId(1L);
+        String username = "jpompei";
 
-        when(musicService.deleteById(music.getId())).thenReturn(music);
+        when(musicService.deleteById(music.getId(), username)).thenReturn(music);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/music/{id}", music.getId())
                 .contentType(jsonMediaType))

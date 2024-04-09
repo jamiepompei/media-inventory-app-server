@@ -2,6 +2,7 @@ package com.inventory.app.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
+import com.inventory.app.server.controller.media.TelevisionShowController;
 import com.inventory.app.server.entity.media.TelevisionShow;
 import com.inventory.app.server.entity.payload.request.MediaRequest;
 import com.inventory.app.server.service.media.TelevisionService;
@@ -49,7 +50,7 @@ public class TelevisionShowControllerTest {
 
         TelevisionShow mockTelevisionShow = createTelevisionShow("Test", "DVD", "Comedy", 1, Arrays.asList("Jon Snow, Jessie Pinkman"), "Jamie's Stuff", 2023);
 
-        when(televisionService.create(any())).thenReturn(mockTelevisionShow);
+        when(televisionService.create(any(), any())).thenReturn(mockTelevisionShow);
 
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
         additionalAttributes.put(MediaInventoryAdditionalAttributes.EPISODES.getJsonKey(), mockTelevisionShow.getEpisodes());
@@ -109,7 +110,7 @@ public class TelevisionShowControllerTest {
 
         TelevisionShow mockTelevisionShow = createTelevisionShow(1L, 1,"Test", "DVD", "Comedy", 1, Arrays.asList("Jon Snow, Jessie Pinkman"), "Jamie's Stuff", 2023);
 
-        when(televisionService.update(any())).thenReturn(mockTelevisionShow);
+        when(televisionService.update(any(), any())).thenReturn(mockTelevisionShow);
 
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
         additionalAttributes.put(MediaInventoryAdditionalAttributes.EPISODES.getJsonKey(), mockTelevisionShow.getEpisodes());
@@ -172,8 +173,9 @@ public class TelevisionShowControllerTest {
 
         List<String> episodes = Arrays.asList("Jessie Pinkman takes over", "Jon Snow wins the battle");
         TelevisionShow televisionShow = new TelevisionShow();
+        String username = "jpompei";
 
-        when(televisionService.getAllTelevisionShowsByEpisode(episodes)).thenReturn(Arrays.asList(televisionShow));
+        when(televisionService.getAllTelevisionShowsByEpisode(episodes, username)).thenReturn(Arrays.asList(televisionShow));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/televisionShows/{episodes}", String.join(",", episodes))
                 .contentType(jsonMediaType))
@@ -188,8 +190,9 @@ public class TelevisionShowControllerTest {
         MediaType jsonMediaType = new MediaType(MediaType.APPLICATION_JSON);
 
         TelevisionShow televisionShow = new TelevisionShow();
+        String username = "jpompei";
 
-        when(televisionService.getAll()).thenReturn(Arrays.asList(televisionShow));
+        when(televisionService.getAllByUsername(username)).thenReturn(Arrays.asList(televisionShow));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/televisionShows")
                         .contentType(jsonMediaType))
@@ -205,8 +208,9 @@ public class TelevisionShowControllerTest {
 
         TelevisionShow televisionShow = new TelevisionShow();
         televisionShow.setId(1L);
+        String username = "jpompei";
 
-        when(televisionService.deleteById(televisionShow.getId())).thenReturn(televisionShow);
+        when(televisionService.deleteById(televisionShow.getId(), username)).thenReturn(televisionShow);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/televisionShows/{id}", televisionShow.getId())
                 .contentType(jsonMediaType))

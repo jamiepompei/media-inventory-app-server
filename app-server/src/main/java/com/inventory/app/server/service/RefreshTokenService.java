@@ -38,8 +38,6 @@ public class RefreshTokenService {
         return refreshTokenDao.createOrUpdate(refreshToken);
     }
 
-
-
     public List<RefreshToken> findByToken(String token){
         return refreshTokenDao.findByField("token", token);
     }
