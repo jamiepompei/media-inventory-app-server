@@ -25,7 +25,7 @@ public class MediaResponse {
     @NotBlank(message = "Genre is mandatory.")
     private String genre;
     @NotBlank(message = "Collection Title is mandatory.")
-    private String collectionName;
+    private String collectionTitle;
     /**
      * This map contains additional media attributes that correspond to a specific media bean.
      * The enum class MediaInventoryAdditionalAttributes defines the keys that could be

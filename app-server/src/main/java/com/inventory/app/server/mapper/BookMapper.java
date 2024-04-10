@@ -2,7 +2,7 @@ package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Book;
-import com.inventory.app.server.entity.payload.request.MediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,11 +24,11 @@ public interface BookMapper {
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionName", target = "collectionName")
+    @Mapping(source = "collectionTitle", target = "collectionTitle")
     @Mapping(source = "additionalAttributes", target = "authors", qualifiedByName = "mapAuthors")
     @Mapping(source = "additionalAttributes", target = "copyrightYear", qualifiedByName = "mapCopyrightYear")
     @Mapping(source = "additionalAttributes", target = "edition", qualifiedByName = "mapEdition")
-    Book mapMediaRequestToBook(MediaRequest mediaRequest);
+    Book mapMediaRequestToBook(UpdateCreateMediaRequest mediaRequest);
 
 
     @Named("mapAuthors")
@@ -60,7 +60,7 @@ public interface BookMapper {
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionName", target = "collectionName")
+    @Mapping(source = "collectionTitle", target = "collectionTitle")
     MediaResponse mapBookToMediaResponse(Book book);
 
     @Named("mapBookToAdditionalAttributes")
