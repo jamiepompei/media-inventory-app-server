@@ -72,7 +72,7 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
         query.select(root)
                 .where(criteriaBuilder.and(
                         criteriaBuilder.equal(root.get("id"), id),
-                        criteriaBuilder.equal(root.get("username"), username)
+                        criteriaBuilder.equal(root.get("createdBy"), username)
                 ));
         return entityManager.createQuery(query).getSingleResult();
     }

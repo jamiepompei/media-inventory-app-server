@@ -1,7 +1,7 @@
 package com.inventory.app.server.service.media;
 
-import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Book;
+import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
@@ -13,7 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.AUTHORS;
 
 @Service
 @Transactional
@@ -31,71 +37,54 @@ public class BookService {
         dao.setClazz(Book.class);
     }
 
-    public List<Book> getAllBooksByCollectionTitle(String collectionTitle, String username) {
-        List<Book> bookList = dao.findByField("collection_name", collectionTitle, username);
-        if (bookList.isEmpty()){
-            throw new ResourceNotFoundException("No book results found with collection title " + collectionTitle);
-        }
-        return bookList;
-    }
+   public List<Book> searchBooks(SearchMediaRequest searchRequest) {
+       Optional<Predicate<Book>> searchPredicate = buildSearchPredicate(searchRequest);
+       return searchPredicate.map(bookPredicate -> dao.findAll().stream()
+               .filter(bookPredicate)
+               .collect(Collectors.toList())).orElse(Collections.emptyList());
+   }
 
-    public List<Book> getAllBooksByAuthor(List<String> author, String username) {
-        List<Book> bookList = dao.findByField(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), author, username);
-        if (bookList.isEmpty()) {
-            throw new ResourceNotFoundException("No book results found by author " + author);
+    private Optional<Predicate<Book>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
+        Predicate<Book> predicate = book -> true; // Default Predicate
+        if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
+            predicate = predicate.and((book -> book.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle())));
         }
-        return bookList;
-    }
-
-    public List<Book> getAllBooksByGenre(String genre, String username) {
-        List<Book> bookList = dao.findByField("genre", genre, username);
-        if (bookList.isEmpty()) {
-            throw new ResourceNotFoundException("No book data exists for genre " + genre);
+        if (searchMediaRequest.getGenre() != null && !searchMediaRequest.getGenre().isEmpty()) {
+            predicate = predicate.and((book -> book.getGenre().equals(searchMediaRequest.getGenre())));
         }
-        return  bookList;
-    }
-
-    public List<Book> getAllByUsername(String username) {
-        List<Book> bookList = dao.findAllByUsername(username);
-        if (bookList.isEmpty()) {
-            throw new ResourceNotFoundException("No book data exists.");
+        if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
+            predicate = predicate.and((book -> book.getFormat().equals(searchMediaRequest.getFormat())));
         }
-        return bookList;
+        if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS).toString().isEmpty()) {
+            predicate = predicate.and((book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS))));
+        }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and((book -> book.getCreatedBy().equals(searchMediaRequest.getUsername())));
+        }
+        return Optional.of(predicate);
     }
 
     public Book getById(Long id, String username) {
         try {
             return dao.findOne(id, username);
-        } catch(Exception e) {
-            if ( e.getClass().isInstance(EntityNotFoundException.class)) {
-                throw new ResourceNotFoundException("No book exists with id: " + id);
-            } else {
-                throw e;
-            }
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("No book exists with id: " + id);
         }
     }
 
-    public Book create(Book book, String username) {
-        if (bookAlreadyExists(book, username)) {
+    public Book create(Book book) {
+        if (bookAlreadyExists(book)) {
             throw new ResourceAlreadyExistsException("Cannot create book because book already exists: " + book);
         }
-        Book bookToSave = cloneBook(book);
-        bookToSave.setId(null);
-        bookToSave.setVersion(1);
-        return dao.createOrUpdate(bookToSave);
+        return dao.createOrUpdate(book);
     }
 
-    public Book update(Book updatedBook, String username) {
-        if (!bookAlreadyExists(updatedBook, username)) {
-            throw new ResourceNotFoundException("Cannot update book because book does not exist: " + updatedBook);
-        }
-        Book existingBook = getById(updatedBook.getId(), username);
+    public Book update(Book updatedBook) {
+        Book existingBook = getById(updatedBook.getId(), updatedBook.getCreatedBy());
+
         if (verifyIfBookUpdated(existingBook, updatedBook)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingBook + "Updated Book: " + updatedBook);
         }
-        updatedBook = cloneBook(updatedBook);
-        updatedBook.setId(existingBook.getId());
-        updatedBook.setVersion(existingBook.getVersion() + 1);
         return dao.createOrUpdate(updatedBook);
     }
 
@@ -114,10 +103,14 @@ public class BookService {
         return clonedBook;
     }
 
-    private boolean bookAlreadyExists(Book book, String username) {
-        return getAllBooksByAuthor(book.getAuthors(), username)
-                .stream()
-                .anyMatch(b -> book.getTitle().equals(b.getTitle()));
+    //TODO review this method - is this the best way to do this?
+    private boolean bookAlreadyExists(Book book) {
+        SearchMediaRequest searchMediaRequest = new SearchMediaRequest();
+        searchMediaRequest.setTitle(book.getTitle());
+        searchMediaRequest.setGenre(book.getGenre());
+        searchMediaRequest.setFormat(book.getFormat());
+        searchMediaRequest.setUsername(book.getCreatedBy());
+        return !searchBooks(searchMediaRequest).isEmpty();
     }
 
     private boolean verifyIfBookUpdated(Book existingBook, Book updatedBook){
