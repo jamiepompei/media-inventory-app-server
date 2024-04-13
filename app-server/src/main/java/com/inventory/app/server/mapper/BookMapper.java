@@ -24,6 +24,7 @@ public interface BookMapper {
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
+    @Mapping(source = "username", target = "createdBy")
     @Mapping(source = "collectionTitle", target = "collectionTitle")
     @Mapping(source = "additionalAttributes", target = "authors", qualifiedByName = "mapAuthors")
     @Mapping(source = "additionalAttributes", target = "copyrightYear", qualifiedByName = "mapCopyrightYear")

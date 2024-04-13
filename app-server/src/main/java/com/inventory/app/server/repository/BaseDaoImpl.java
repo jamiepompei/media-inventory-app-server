@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Qualifier(value = "genericDaoImpl")
 @Repository
 @Scope( BeanDefinition.SCOPE_PROTOTYPE )
-public class BaseDaoImpl<T extends Serializable> extends BaseDao<T> implements IBaseDao<T> {
+public class BaseDaoImpl<T extends Serializable> extends BaseDao<T> {
 
     public BaseDaoImpl(EntityManager entityManager) {
         super(entityManager);
