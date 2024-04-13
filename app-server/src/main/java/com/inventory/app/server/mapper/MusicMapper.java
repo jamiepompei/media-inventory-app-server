@@ -3,7 +3,7 @@ package com.inventory.app.server.mapper;
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Media;
 import com.inventory.app.server.entity.media.Music;
-import com.inventory.app.server.entity.payload.request.MediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,11 +25,11 @@ public interface MusicMapper {
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionName", target = "collectionName")
+    @Mapping(source = "collectionTitle", target = "collectionTitle")
     @Mapping(source = "additionalAttributes", target = "artists", qualifiedByName = "mapArtists")
     @Mapping(source = "additionalAttributes", target = "songList", qualifiedByName = "mapSongList")
     @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
-    Music mapMediaRequestToMusic(MediaRequest mediaRequest);
+    Music mapMediaRequestToMusic(UpdateCreateMediaRequest mediaRequest);
 
     @Named("mapArtists")
     default List<String> mapArtists(Map<String, Object> additionalAttributes) {
@@ -57,7 +57,7 @@ public interface MusicMapper {
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionName", target = "collectionName")
+    @Mapping(source = "collectionTitle", target = "collectionTitle")
     MediaResponse mapMusicIdToMediaId(Media entity);
 
 

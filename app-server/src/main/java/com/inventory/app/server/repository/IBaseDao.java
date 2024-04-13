@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface IBaseDao<T extends Serializable> {
+
     void setClazz(final Class< T > clazzToSet);
 
     Class<T> getClazz();
@@ -15,6 +16,7 @@ public interface IBaseDao<T extends Serializable> {
     T findOneByField(final String field, final Object value, final String username);
 
     T findOne(final long id, final String username);
+
 
     List<T> findAllByUsername(final String username);
 

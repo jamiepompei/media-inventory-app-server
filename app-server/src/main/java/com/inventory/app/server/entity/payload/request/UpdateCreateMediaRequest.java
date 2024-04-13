@@ -2,18 +2,14 @@ package com.inventory.app.server.entity.payload.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 @Builder
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class MediaRequest {
+public class UpdateCreateMediaRequest {
 
     private Long id;
     private Integer version;
@@ -24,7 +20,9 @@ public class MediaRequest {
     @NotBlank(message = "Genre is mandatory.")
     private String genre;
     @NotBlank(message = "Collection Title is mandatory.")
-    private String collectionName;
+    private String collectionTitle;
+    @NotBlank(message = "Username is mandatory.")
+    private String username;
     /**
      * This map contains additional media attributes that correspond to a specific media bean.
      * The enum class MediaInventoryAdditionalAttributes defines the keys that could be

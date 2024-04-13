@@ -1,7 +1,8 @@
 package com.inventory.app.server.controller.media;
 
 import com.inventory.app.server.entity.media.Book;
-import com.inventory.app.server.entity.payload.request.MediaRequest;
+import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.BookMapper;
 import com.inventory.app.server.service.media.BookService;
@@ -33,47 +34,9 @@ public class BookController {
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping
-    ResponseEntity<List<MediaResponse>> findAllBooks(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = bookService.getAllByUsername(userDetails.getUsername()).stream()
-                .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    @GetMapping(value = "/{collectionTitle}")
-    ResponseEntity<List<MediaResponse>> findByCollectionTitle(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("collectionTitle") final String collectionTitle) {
-        if (collectionTitle.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Collection title cannot be empty.");
-        }
-        List<Book> booksByCollection = bookService.getAllBooksByCollectionTitle(collectionTitle, userDetails.getUsername());
-        List<MediaResponse> responseList = booksByCollection.stream()
-                .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    @GetMapping(value = "/{authors}")
-    ResponseEntity<List<MediaResponse>> findByAuthor(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("authors") final List<String> authors) {
-        if (authors.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
-        }
-        List<Book> booksByAuthor = bookService.getAllBooksByAuthor(authors, userDetails.getUsername());
-        List<MediaResponse> responseList = booksByAuthor.stream()
-                .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    @GetMapping(value = "/{genre}")
-    ResponseEntity<List<MediaResponse>> findByGenre(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("genre") final String genre) {
-        if (genre.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
-        }
-        List<Book> booksByGenre = bookService.getAllBooksByGenre(genre, userDetails.getUsername());
-        List<MediaResponse> responseList = booksByGenre.stream()
+    ResponseEntity<List<MediaResponse>> searchBooks(@AuthenticationPrincipal UserDetails userDetails,
+                                                     @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
+        List<MediaResponse> responseList = bookService.searchBooks(searchMediaRequest).stream()
                 .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
@@ -82,10 +45,11 @@ public class BookController {
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createBook(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest bookRequest) {
+    public ResponseEntity<MediaResponse> createBook(@AuthenticationPrincipal UserDetails userDetails,
+                                                    @Valid @RequestBody final UpdateCreateMediaRequest bookRequest) {
         log.info("Received request to create resource: " + bookRequest);
         Book book = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
-        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book, userDetails.getUsername()));
+        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.create(book));
         log.info("Created new book: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -93,21 +57,23 @@ public class BookController {
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateBook(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest bookRequest) {
+    public ResponseEntity<MediaResponse> updateBook(@Valid @RequestBody final UpdateCreateMediaRequest bookRequest) {
         log.info("received request to update resource: " + bookRequest);
         Book updatedBook = BookMapper.INSTANCE.mapMediaRequestToBook(bookRequest);
-        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(updatedBook, userDetails.getUsername()));
+        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.update(updatedBook));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> deleteBook(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") final Long id){
+    public ResponseEntity<MediaResponse> deleteBook(@AuthenticationPrincipal UserDetails userDetails,
+                                                     @PathVariable("id") final Long id){
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.deleteById(id, userDetails.getUsername()));
+        //TODO fix
+        MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.deleteById(id, "username"));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

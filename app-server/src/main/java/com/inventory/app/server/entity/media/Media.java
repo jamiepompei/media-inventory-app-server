@@ -23,7 +23,10 @@ public abstract class Media implements Serializable {
     @Column(name = "genre")
     private String genre;
     @Column(name = "collection_name")
-    private String collectionName;
+    private String collectionTitle;
+    @Column(name = "created_by")
+    private String createdBy;
+    //TODO createdOn, modifiedBy, modifiedOn fields
 
     @Override
     public String toString() {
@@ -32,7 +35,7 @@ public abstract class Media implements Serializable {
                 ", title='" + title + '\'' +
                 ", format=" + format +
                 ", genre=" + genre +
-                ", collectionName=" + collectionName;
+                ", collectionName=" + collectionTitle;
     }
 
     @Override
@@ -44,7 +47,7 @@ public abstract class Media implements Serializable {
                 Objects.equals(getTitle(), media.getTitle()) &&
                 Objects.equals(getFormat(), media.getFormat()) &&
                 Objects.equals(getGenre(), media.getGenre()) &&
-                Objects.equals(getCollectionName(), media.getCollectionName());
+                Objects.equals(getCollectionTitle(), media.getCollectionTitle());
     }
 
     @Override
@@ -54,6 +57,6 @@ public abstract class Media implements Serializable {
                 getTitle(),
                 getFormat(),
                 getGenre(),
-                getCollectionName());
+                getCollectionTitle());
     }
 }
