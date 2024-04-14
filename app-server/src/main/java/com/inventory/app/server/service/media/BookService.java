@@ -82,6 +82,7 @@ public class BookService {
 
     public Book update(Book updatedBook) {
         Optional<Book> existingBook = getById(updatedBook.getId(), updatedBook.getCreatedBy());
+
         if (existingBook.isEmpty()) {
             throw new ResourceNotFoundException("Cannot update book because no book exists " + updatedBook);
         }
