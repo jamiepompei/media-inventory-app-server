@@ -6,7 +6,6 @@ import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -69,48 +68,36 @@ public class BookService {
         return Optional.of(predicate);
     }
 
-    //TODO consider returning an optional here, that way methods that use this method can throw their own exceptions
-    public Book getById(Long id, String username) {
-        try {
-            return dao.findOne(id, username);
-        } catch (EntityNotFoundException e) {
-            throw new ResourceNotFoundException("No book exists with id: " + id);
-        }
+    public Optional<Book> getById(Long id, String username) {
+        return Optional.of(dao.findOne(id, username));
     }
 
     public Book create(Book book) {
-        if (bookAlreadyExists(book)) {
+        Optional<Book> existingBook = getById(book.getId(), book.getCreatedBy());
+        if (existingBook.isPresent()) {
             throw new ResourceAlreadyExistsException("Cannot create book because book already exists: " + book);
         }
         return dao.createOrUpdate(book);
     }
 
     public Book update(Book updatedBook) {
-        Book existingBook = getById(updatedBook.getId(), updatedBook.getCreatedBy());
-
-        if (verifyIfBookUpdated(existingBook, updatedBook)) {
+        Optional<Book> existingBook = getById(updatedBook.getId(), updatedBook.getCreatedBy());
+        if (existingBook.isEmpty()) {
+            throw new ResourceNotFoundException("Cannot update book because no book exists " + updatedBook);
+        }
+        if (verifyIfBookUpdated(existingBook.get(), updatedBook)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingBook + "Updated Book: " + updatedBook);
         }
         return dao.createOrUpdate(updatedBook);
     }
 
     public Book deleteById(Long id, String username){
-        Book book = getById(id, username);
-        if (book == null) {
+        Optional<Book> book = getById(id, username);
+        if (book.isEmpty()) {
             throw new ResourceNotFoundException("Cannot delete book because book does not exist.");
         }
         dao.deleteById(id, username);
-        return book;
-    }
-
-    //TODO review this method - is this the best way to do this?
-    private boolean bookAlreadyExists(Book book) {
-        SearchMediaRequest searchMediaRequest = new SearchMediaRequest();
-        searchMediaRequest.setTitle(book.getTitle());
-        searchMediaRequest.setGenre(book.getGenre());
-        searchMediaRequest.setFormat(book.getFormat());
-        searchMediaRequest.setUsername(book.getCreatedBy());
-        return !searchBooks(searchMediaRequest).isEmpty();
+        return book.get();
     }
 
     private boolean verifyIfBookUpdated(Book existingBook, Book updatedBook){
