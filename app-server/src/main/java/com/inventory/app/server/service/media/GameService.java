@@ -66,47 +66,37 @@ public class GameService {
         return Optional.of(predicate);
     }
 
-    public Game getById(Long id, String username) {
-        try {
-            return dao.findOne(id, username);
-        } catch (EntityNotFoundException e) {
-            throw new ResourceNotFoundException("No book exists with id: " + id);
-        }
+    public Optional<Game> getById(Long id, String username) {
+        return Optional.of(dao.findOne(id, username));
     }
 
     public Game create(Game game) {
-        if (gameAlreadyExists(game)) {
+        Optional<Game> existingGame = getById(game.getId(), game.getCreatedBy());
+        if (existingGame.isPresent()) {
             throw new ResourceAlreadyExistsException("Cannot create game because games already exist: " + game);
         }
         return dao.createOrUpdate(game);
     }
 
     public Game update(Game updatedGame) {
-        Game existingGame = getById(updatedGame.getId(), updatedGame.getCreatedBy());
+        Optional<Game> existingGame = getById(updatedGame.getId(), updatedGame.getCreatedBy());
 
-        if (verifyIfGameUpdate(existingGame, updatedGame)) {
+        if (existingGame.isEmpty()) {
+            throw new ResourceNotFoundException("Cannot update game because no game exists " + updatedGame);
+        }
+        if (verifyIfGameUpdate(existingGame.get(), updatedGame)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Game: " + existingGame + " Update Game: " + updatedGame);
         }
         return dao.createOrUpdate(updatedGame);
     }
 
     public Game deleteById(Long id, String username){
-       Game game = getById(id, username);
-       if (game == null) {
+       Optional<Game> game = getById(id, username);
+       if (game.isEmpty()) {
            throw new ResourceNotFoundException("Cannot delete game because game does not exist.");
        }
        dao.deleteById(id, username);
-       return game;
-    }
-
-    //TODO review this method - is this the best way to do this?
-    private boolean gameAlreadyExists(Game game) {
-        SearchMediaRequest searchMediaRequest = new SearchMediaRequest();
-        searchMediaRequest.setTitle(game.getTitle());
-        searchMediaRequest.setGenre(game.getGenre());
-        searchMediaRequest.setFormat(game.getFormat());
-        searchMediaRequest.setUsername(game.getCreatedBy());
-        return !searchGames(searchMediaRequest).isEmpty();
+       return game.get();
     }
 
     private boolean verifyIfGameUpdate(Game existingGame, Game updatedGame) {
