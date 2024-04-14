@@ -8,7 +8,6 @@ import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.AUTHORS;
+import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.*;
 
 @Service
 @Transactional
@@ -58,12 +57,19 @@ public class BookService {
         if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS).toString().isEmpty()) {
             predicate = predicate.and((book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS))));
         }
+        if (searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR) != null) {
+            predicate = predicate.and((book -> book.getCopyrightYear().equals(searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR))));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(EDITION) != null) {
+            predicate = predicate.and((book -> book.getEdition().equals(searchMediaRequest.getAdditionalAttributes().get(EDITION))));
+        }
         if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
             predicate = predicate.and((book -> book.getCreatedBy().equals(searchMediaRequest.getUsername())));
         }
         return Optional.of(predicate);
     }
 
+    //TODO consider returning an optional here, that way methods that use this method can throw their own exceptions
     public Book getById(Long id, String username) {
         try {
             return dao.findOne(id, username);
@@ -95,12 +101,6 @@ public class BookService {
         }
         dao.deleteById(id, username);
         return book;
-    }
-
-    private Book cloneBook(Book updatedBook) {
-        Book clonedBook = new Book();
-        BeanUtils.copyProperties(updatedBook, clonedBook);
-        return clonedBook;
     }
 
     //TODO review this method - is this the best way to do this?
