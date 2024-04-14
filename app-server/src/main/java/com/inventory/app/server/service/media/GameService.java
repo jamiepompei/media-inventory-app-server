@@ -1,6 +1,7 @@
 package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Game;
+import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
@@ -10,7 +11,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.*;
 
 @Service
 public class GameService {
@@ -26,87 +33,60 @@ public class GameService {
         dao.setClazz(Game.class);
     }
 
-    public List<Game> getAllGamesByNumberOfPlayers(Integer numberOfPlayers, String username){
-        List<Game> gameList = dao.findByField("number_of_players", String.valueOf(numberOfPlayers), username);
-        if (gameList.isEmpty()) {
-            throw new ResourceNotFoundException("No games found with number of players: " + numberOfPlayers);
-        }
-        return gameList;
+    public List<Game> searchGames(SearchMediaRequest searchMediaRequest) {
+        Optional<Predicate<Game>> searchPredicate = buildSearchPredicate(searchMediaRequest);
+        return searchPredicate.map(gamePredicate -> dao.findAll().stream()
+                .filter(gamePredicate)
+                .collect(Collectors.toList())).orElse(Collections.emptyList());
     }
 
-    public List<Game> getAllGamesByConsole(List<String> console, String username){
-        List<Game> gameList = dao.findByField("consoles", console, username);
-        if (gameList.isEmpty()) {
-            throw new ResourceNotFoundException("No games found for consoles " + console );
+    private Optional<Predicate<Game>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
+        Predicate<Game> predicate = game -> true; // Defaul Predicate
+        if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
+            predicate = predicate.and((game -> game.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle())));
         }
-        return gameList;
-    }
-
-    public List<Game> getAllGamesByTitle(String title, String username){
-        List<Game> gameList = dao.findByField("title", title, username);
-        if (gameList.isEmpty()) {
-            throw new ResourceNotFoundException("No game results for title " + title);
+        if (searchMediaRequest.getGenre() != null && !searchMediaRequest.getGenre().isEmpty()) {
+            predicate = predicate.and((game -> game.getGenre().equals(searchMediaRequest.getGenre())));
         }
-        return gameList;
-    }
-
-    public List<Game> getAllGamesByCollectionTitle(String collectionTitle, String username) {
-        List<Game> gameList = dao.findByField("collection_name", collectionTitle, username);
-        if (gameList.isEmpty()) {
-            throw new ResourceNotFoundException("No game results found for collection title " + collectionTitle);
+        if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
+            predicate = predicate.and(((game -> game.getGenre().equals(searchMediaRequest.getGenre()))));
         }
-        return gameList;
-    }
-
-    public List<Game> getAllGamesByGenre(String genre, String username) {
-        List<Game> gameList = dao.findByField("genre", genre, username);
-        if (gameList.isEmpty()) {
-            throw new ResourceNotFoundException("No fame results found for genre " + genre);
+        if (searchMediaRequest.getAdditionalAttributes().get(CONSOLES) != null && !searchMediaRequest.getAdditionalAttributes().get(CONSOLES).toString().isEmpty()) {
+            predicate = predicate.and((game -> game.getConsoles().equals(searchMediaRequest.getAdditionalAttributes().get(CONSOLES))));
         }
-        return gameList;
-    }
-
-    public List<Game> getAllByUsername(String username) {
-        List<Game> gameList = dao.findAllByUsername(username);
-        if (gameList.isEmpty()) {
-            throw new ResourceNotFoundException("No game data exists.");
+        if (searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS) != null) {
+            predicate = predicate.and((game -> game.getNumberOfPlayers().equals(searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS))));
         }
-        return gameList;
+        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR) != null) {
+            predicate = predicate.and((game -> game.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR))));
+        }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and((game -> game.getCreatedBy().equals(searchMediaRequest.getUsername())));
+        }
+        return Optional.of(predicate);
     }
 
     public Game getById(Long id, String username) {
         try {
             return dao.findOne(id, username);
-        } catch (Exception e) {
-            if(e.getClass().isInstance(EntityNotFoundException.class)) {
-                throw new ResourceNotFoundException("No game exists with id: " + id);
-            } else {
-                throw e;
-            }
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("No book exists with id: " + id);
         }
     }
 
-    public Game create(Game game, String username) {
-        if (gameAlreadyExists(game, username)) {
+    public Game create(Game game) {
+        if (gameAlreadyExists(game)) {
             throw new ResourceAlreadyExistsException("Cannot create game because games already exist: " + game);
         }
-        Game gameToSave = cloneGame(game);
-        gameToSave.setId(null);
-        gameToSave.setVersion(1);
-        return dao.createOrUpdate(gameToSave);
+        return dao.createOrUpdate(game);
     }
 
-    public Game update(Game updatedGame, String username) {
-        if (!gameAlreadyExists(updatedGame, username)) {
-            throw new ResourceNotFoundException("Cannot update game because game does not exist: " + updatedGame);
-        }
-        Game existingGame = getById(updatedGame.getId(), username);
+    public Game update(Game updatedGame) {
+        Game existingGame = getById(updatedGame.getId(), updatedGame.getCreatedBy());
+
         if (verifyIfGameUpdate(existingGame, updatedGame)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Game: " + existingGame + " Update Game: " + updatedGame);
         }
-        updatedGame = cloneGame(updatedGame);
-        updatedGame.setId(existingGame.getId());
-        updatedGame.setVersion(existingGame.getVersion() + 1);
         return dao.createOrUpdate(updatedGame);
     }
 
@@ -119,16 +99,14 @@ public class GameService {
        return game;
     }
 
-    private Game cloneGame(Game game) {
-        Game clonedGame = new Game();
-        BeanUtils.copyProperties(game, clonedGame);
-        return clonedGame;
-    }
-
-    private boolean gameAlreadyExists(Game game, String username) {
-        return getAllGamesByTitle(game.getTitle(), username)
-                .stream()
-                .anyMatch(g -> game.getTitle().equals(g.getTitle()));
+    //TODO review this method - is this the best way to do this?
+    private boolean gameAlreadyExists(Game game) {
+        SearchMediaRequest searchMediaRequest = new SearchMediaRequest();
+        searchMediaRequest.setTitle(game.getTitle());
+        searchMediaRequest.setGenre(game.getGenre());
+        searchMediaRequest.setFormat(game.getFormat());
+        searchMediaRequest.setUsername(game.getCreatedBy());
+        return !searchGames(searchMediaRequest).isEmpty();
     }
 
     private boolean verifyIfGameUpdate(Game existingGame, Game updatedGame) {
