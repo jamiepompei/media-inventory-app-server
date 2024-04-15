@@ -6,9 +6,7 @@ import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -19,7 +17,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.AUTHORS;
+import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.*;
 
 @Service
 @Transactional
@@ -58,59 +56,49 @@ public class BookService {
         if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS).toString().isEmpty()) {
             predicate = predicate.and((book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS))));
         }
+        if (searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR) != null) {
+            predicate = predicate.and((book -> book.getCopyrightYear().equals(searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR))));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(EDITION) != null) {
+            predicate = predicate.and((book -> book.getEdition().equals(searchMediaRequest.getAdditionalAttributes().get(EDITION))));
+        }
         if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
             predicate = predicate.and((book -> book.getCreatedBy().equals(searchMediaRequest.getUsername())));
         }
         return Optional.of(predicate);
     }
 
-    public Book getById(Long id, String username) {
-        try {
-            return dao.findOne(id, username);
-        } catch (EntityNotFoundException e) {
-            throw new ResourceNotFoundException("No book exists with id: " + id);
-        }
+    public Optional<Book> getById(Long id, String username) {
+        return Optional.of(dao.findOne(id, username));
     }
 
     public Book create(Book book) {
-        if (bookAlreadyExists(book)) {
+        Optional<Book> existingBook = getById(book.getId(), book.getCreatedBy());
+        if (existingBook.isPresent()) {
             throw new ResourceAlreadyExistsException("Cannot create book because book already exists: " + book);
         }
         return dao.createOrUpdate(book);
     }
 
     public Book update(Book updatedBook) {
-        Book existingBook = getById(updatedBook.getId(), updatedBook.getCreatedBy());
+        Optional<Book> existingBook = getById(updatedBook.getId(), updatedBook.getCreatedBy());
 
-        if (verifyIfBookUpdated(existingBook, updatedBook)) {
+        if (existingBook.isEmpty()) {
+            throw new ResourceNotFoundException("Cannot update book because no book exists " + updatedBook);
+        }
+        if (verifyIfBookUpdated(existingBook.get(), updatedBook)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingBook + "Updated Book: " + updatedBook);
         }
         return dao.createOrUpdate(updatedBook);
     }
 
     public Book deleteById(Long id, String username){
-        Book book = getById(id, username);
-        if (book == null) {
+        Optional<Book> book = getById(id, username);
+        if (book.isEmpty()) {
             throw new ResourceNotFoundException("Cannot delete book because book does not exist.");
         }
         dao.deleteById(id, username);
-        return book;
-    }
-
-    private Book cloneBook(Book updatedBook) {
-        Book clonedBook = new Book();
-        BeanUtils.copyProperties(updatedBook, clonedBook);
-        return clonedBook;
-    }
-
-    //TODO review this method - is this the best way to do this?
-    private boolean bookAlreadyExists(Book book) {
-        SearchMediaRequest searchMediaRequest = new SearchMediaRequest();
-        searchMediaRequest.setTitle(book.getTitle());
-        searchMediaRequest.setGenre(book.getGenre());
-        searchMediaRequest.setFormat(book.getFormat());
-        searchMediaRequest.setUsername(book.getCreatedBy());
-        return !searchBooks(searchMediaRequest).isEmpty();
+        return book.get();
     }
 
     private boolean verifyIfBookUpdated(Book existingBook, Book updatedBook){

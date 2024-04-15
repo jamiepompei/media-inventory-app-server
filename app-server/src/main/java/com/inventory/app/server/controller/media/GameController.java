@@ -1,7 +1,9 @@
+
 package com.inventory.app.server.controller.media;
 
 import com.inventory.app.server.entity.media.Game;
-import com.inventory.app.server.entity.payload.request.MediaRequest;
+import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.GameMapper;
 import com.inventory.app.server.service.media.GameService;
@@ -32,89 +34,23 @@ public class GameController {
         this.gameService = gameService;
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findAllGames(@AuthenticationPrincipal UserDetails userDetails) {
-        log.info("Received a request to get all games");
-        List<MediaResponse> responseList = gameService.getAllByUsername(userDetails.getUsername()).stream()
-                .map(g -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(g))
+    ResponseEntity<List<MediaResponse>> searchGames(@AuthenticationPrincipal UserDetails userDetails,
+                                                    @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
+        List<MediaResponse> responseList = gameService.searchGames(searchMediaRequest).stream()
+                .map(b -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
-
-    @GetMapping(value = "/{consoles}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByConsole(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("consoles") final List<String> consoles) {
-        if (consoles.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Consoles cannot be empty.");
-        }
-        List<Game> gamesByConsole = gameService.getAllGamesByConsole(consoles, userDetails.getUsername());
-        List<MediaResponse> responseList = gamesByConsole.stream()
-                .map(g -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(g))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @GetMapping(value = "/{title}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByTitle(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("title") final String title) {
-        if (title.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Title cannot be empty.");
-        }
-        List<Game> gamesByTitle = gameService.getAllGamesByTitle(title, userDetails.getUsername());
-        List<MediaResponse> responseList = gamesByTitle.stream()
-                .map(g -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(g))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @GetMapping(value = "/{collectionTitle}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByCollectionTitle(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("collectionTitle") final String collectionTitle) {
-        if (collectionTitle.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Collection title cannot be empty.");
-        }
-        List<Game> gamesByCollectionTitle = gameService.getAllGamesByCollectionTitle(collectionTitle, userDetails.getUsername());
-        List<MediaResponse> responseList = gamesByCollectionTitle.stream()
-                .map(g -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(g))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @GetMapping(value = "/{genre}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByGenre(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("genre") final String genre) {
-        if (genre.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Genre cannot be empty.");
-        }
-        List<Game> gamesByGenre = gameService.getAllGamesByGenre(genre, userDetails.getUsername());
-        List<MediaResponse> responseList = gamesByGenre.stream()
-                .map(g -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(g))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @GetMapping(value = "/{numberOfPlayers}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByNumberOfPlayers(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("numberOfPlayers") final Integer numberOfPlayers) {
-        if (numberOfPlayers == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Authors cannot be empty.");
-        }
-        List<Game> gamesByNumberOfPlayers = gameService.getAllGamesByNumberOfPlayers(numberOfPlayers, userDetails.getUsername());
-        List<MediaResponse> responseList = gamesByNumberOfPlayers.stream()
-                .map(g -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(g))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createGame(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest gameRequest) {
+    public ResponseEntity<MediaResponse> createGame(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest gameRequest) {
         log.info("Received request to create resource: " + gameRequest);
         Game game = GameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
-        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.create(game, userDetails.getUsername()));
+        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.create(game));
         log.info("Created new game: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -122,10 +58,10 @@ public class GameController {
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MediaResponse> updateGame(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest gameRequest) {
+    public ResponseEntity<MediaResponse> updateGame(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest gameRequest) {
         log.info("received request to update resource: " + gameRequest);
         Game updatedGame = GameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
-        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.update(updatedGame, userDetails.getUsername()));
+        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.update(updatedGame));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -140,3 +76,4 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
+
