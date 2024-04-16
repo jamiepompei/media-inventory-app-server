@@ -1,7 +1,9 @@
+
 package com.inventory.app.server.controller.media;
 
 import com.inventory.app.server.entity.media.Music;
-import com.inventory.app.server.entity.payload.request.MediaRequest;
+import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.MusicMapper;
 import com.inventory.app.server.service.media.MusicService;
@@ -33,21 +35,8 @@ public class MusicController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findAllMusic(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = musicService.getAllByUsername(userDetails.getUsername()).stream()
-                .map(m -> MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(m))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @GetMapping(value = "/{artists}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByArtist(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("artists") final List<String> artists) {
-        if (artists.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Artists cannot be empty.");
-        }
-        List<Music> musicByArtists = musicService.getAllMusicByArtist(artists, userDetails.getUsername());
-        List<MediaResponse> responseList = musicByArtists.stream()
+    ResponseEntity<List<MediaResponse>> searchMusic(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
+        List<MediaResponse> responseList = musicService.searchMusic(searchMediaRequest).stream()
                 .map(m -> MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(m))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
@@ -56,10 +45,10 @@ public class MusicController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
-    public ResponseEntity<MediaResponse> createMusic(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest musicRequest) {
+    public ResponseEntity<MediaResponse> createMusic(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest musicRequest) {
         log.info("Received a request to create resource: " + musicRequest);
         Music music = MusicMapper.INSTANCE.mapMediaRequestToMusic(musicRequest);
-        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.create(music, userDetails.getUsername()));
+        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.create(music));
         log.info("Created new music: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -67,10 +56,10 @@ public class MusicController {
     @PutMapping(value = "{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
-    public ResponseEntity<MediaResponse> updateMusic(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest musicRequest) {
+    public ResponseEntity<MediaResponse> updateMusic(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest musicRequest) {
         log.info("received request to update resource: " + musicRequest);
         Music updatedMusic = MusicMapper.INSTANCE.mapMediaRequestToMusic(musicRequest);
-        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.update(updatedMusic, userDetails.getUsername()));
+        MediaResponse response = MusicMapper.INSTANCE.mapMusicToMediaResponseWithAdditionalAttributes(musicService.update(updatedMusic));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -85,3 +74,4 @@ public class MusicController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
+

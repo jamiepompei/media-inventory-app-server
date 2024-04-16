@@ -45,25 +45,28 @@ public class BookService {
     private Optional<Predicate<Book>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
         Predicate<Book> predicate = book -> true; // Default Predicate
         if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
-            predicate = predicate.and((book -> book.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle())));
+            predicate = predicate.and(book -> book.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
+        }
+        if (searchMediaRequest.getTitle() != null && !searchMediaRequest.getTitle().isEmpty()) {
+            predicate = predicate.and(book -> book.getTitle().equals(searchMediaRequest.getTitle()));
         }
         if (searchMediaRequest.getGenre() != null && !searchMediaRequest.getGenre().isEmpty()) {
-            predicate = predicate.and((book -> book.getGenre().equals(searchMediaRequest.getGenre())));
+            predicate = predicate.and(book -> book.getGenre().equals(searchMediaRequest.getGenre()));
         }
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
-            predicate = predicate.and((book -> book.getFormat().equals(searchMediaRequest.getFormat())));
+            predicate = predicate.and(book -> book.getFormat().equals(searchMediaRequest.getFormat()));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS).toString().isEmpty()) {
-            predicate = predicate.and((book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS))));
+            predicate = predicate.and(book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS)));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR) != null) {
-            predicate = predicate.and((book -> book.getCopyrightYear().equals(searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR))));
+            predicate = predicate.and(book -> book.getCopyrightYear().equals(searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR)));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(EDITION) != null) {
-            predicate = predicate.and((book -> book.getEdition().equals(searchMediaRequest.getAdditionalAttributes().get(EDITION))));
+            predicate = predicate.and(book -> book.getEdition().equals(searchMediaRequest.getAdditionalAttributes().get(EDITION)));
         }
         if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
-            predicate = predicate.and((book -> book.getCreatedBy().equals(searchMediaRequest.getUsername())));
+            predicate = predicate.and(book -> book.getCreatedBy().equals(searchMediaRequest.getUsername()));
         }
         return Optional.of(predicate);
     }

@@ -43,25 +43,28 @@ public class GameService {
     private Optional<Predicate<Game>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
         Predicate<Game> predicate = game -> true; // Defaul Predicate
         if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
-            predicate = predicate.and((game -> game.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle())));
+            predicate = predicate.and(game -> game.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
+        }
+        if (searchMediaRequest.getTitle() != null && !searchMediaRequest.getTitle().isEmpty()) {
+            predicate = predicate.and(game -> game.getTitle().equals(searchMediaRequest.getTitle()));
         }
         if (searchMediaRequest.getGenre() != null && !searchMediaRequest.getGenre().isEmpty()) {
-            predicate = predicate.and((game -> game.getGenre().equals(searchMediaRequest.getGenre())));
+            predicate = predicate.and(game -> game.getGenre().equals(searchMediaRequest.getGenre()));
         }
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
-            predicate = predicate.and(((game -> game.getGenre().equals(searchMediaRequest.getGenre()))));
+            predicate = predicate.and(game -> game.getGenre().equals(searchMediaRequest.getGenre()));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(CONSOLES) != null && !searchMediaRequest.getAdditionalAttributes().get(CONSOLES).toString().isEmpty()) {
-            predicate = predicate.and((game -> game.getConsoles().equals(searchMediaRequest.getAdditionalAttributes().get(CONSOLES))));
+            predicate = predicate.and(game -> game.getConsoles().equals(searchMediaRequest.getAdditionalAttributes().get(CONSOLES)));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS) != null) {
-            predicate = predicate.and((game -> game.getNumberOfPlayers().equals(searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS))));
+            predicate = predicate.and(game -> game.getNumberOfPlayers().equals(searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS)));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR) != null) {
-            predicate = predicate.and((game -> game.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR))));
+            predicate = predicate.and(game -> game.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR)));
         }
         if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
-            predicate = predicate.and((game -> game.getCreatedBy().equals(searchMediaRequest.getUsername())));
+            predicate = predicate.and(game -> game.getCreatedBy().equals(searchMediaRequest.getUsername()));
         }
         return Optional.of(predicate);
     }
