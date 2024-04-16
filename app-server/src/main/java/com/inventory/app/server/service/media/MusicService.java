@@ -51,14 +51,14 @@ public class MusicService {
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(music -> music.getFormat().equals(searchMediaRequest.getFormat()));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(ARTISTS) != null && !searchMediaRequest.getAdditionalAttributes().get(ARTISTS).toString().isEmpty()) {
-            predicate = predicate.and(music -> music.getArtists().equals(searchMediaRequest.getAdditionalAttributes().get(ARTISTS)));
+        if (searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(music -> music.getArtists().equals(searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey())));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(SONG_LIST) != null && !searchMediaRequest.getAdditionalAttributes().get(SONG_LIST).toString().isEmpty()) {
-            predicate = predicate.and(music -> music.getSongList().equals(searchMediaRequest.getAdditionalAttributes().get(SONG_LIST)));
+        if (searchMediaRequest.getAdditionalAttributes().get(SONG_LIST.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(SONG_LIST.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(music -> music.getSongList().equals(searchMediaRequest.getAdditionalAttributes().get(SONG_LIST.getJsonKey())));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR) != null) {
-            predicate = predicate.and(music -> music.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR)));
+        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey()) != null) {
+            predicate = predicate.and(music -> music.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey())));
         }
         return Optional.of(predicate);
     }

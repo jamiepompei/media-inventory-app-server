@@ -51,11 +51,11 @@ public class MovieService {
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(movie -> movie.getFormat().equals(searchMediaRequest.getFormat()));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(DIRECTORS) != null && !searchMediaRequest.getAdditionalAttributes().get(DIRECTORS).toString().isEmpty()) {
-            predicate = predicate.and(movie -> movie.getDirectors().equals(searchMediaRequest.getAdditionalAttributes().get(DIRECTORS)));
+        if (searchMediaRequest.getAdditionalAttributes().get(DIRECTORS.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(DIRECTORS.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(movie -> movie.getDirectors().equals(searchMediaRequest.getAdditionalAttributes().get(DIRECTORS.getJsonKey())));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR) != null) {
-            predicate = predicate.and(movie -> movie.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR)));
+        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey()) != null) {
+            predicate = predicate.and(movie -> movie.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey())));
         }
         return Optional.of(predicate);
     }

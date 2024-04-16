@@ -54,14 +54,14 @@ public class GameService {
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(game -> game.getGenre().equals(searchMediaRequest.getGenre()));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(CONSOLES) != null && !searchMediaRequest.getAdditionalAttributes().get(CONSOLES).toString().isEmpty()) {
-            predicate = predicate.and(game -> game.getConsoles().equals(searchMediaRequest.getAdditionalAttributes().get(CONSOLES)));
+        if (searchMediaRequest.getAdditionalAttributes().get(CONSOLES.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(CONSOLES.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(game -> game.getConsoles().equals(searchMediaRequest.getAdditionalAttributes().get(CONSOLES.getJsonKey())));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS) != null) {
-            predicate = predicate.and(game -> game.getNumberOfPlayers().equals(searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS)));
+        if (searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS.getJsonKey()) != null) {
+            predicate = predicate.and(game -> game.getNumberOfPlayers().equals(searchMediaRequest.getAdditionalAttributes().get(NUMBER_OF_PLAYERS.getJsonKey())));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR) != null) {
-            predicate = predicate.and(game -> game.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR)));
+        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey()) != null) {
+            predicate = predicate.and(game -> game.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey())));
         }
         if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
             predicate = predicate.and(game -> game.getCreatedBy().equals(searchMediaRequest.getUsername()));
