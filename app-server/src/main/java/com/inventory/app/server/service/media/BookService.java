@@ -56,14 +56,14 @@ public class BookService {
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(book -> book.getFormat().equals(searchMediaRequest.getFormat()));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS).toString().isEmpty()) {
-            predicate = predicate.and(book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS)));
+        if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey())));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR) != null) {
-            predicate = predicate.and(book -> book.getCopyrightYear().equals(searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR)));
+        if (searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR.getJsonKey()) != null) {
+            predicate = predicate.and(book -> book.getCopyrightYear().equals(searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR.getJsonKey())));
         }
-        if (searchMediaRequest.getAdditionalAttributes().get(EDITION) != null) {
-            predicate = predicate.and(book -> book.getEdition().equals(searchMediaRequest.getAdditionalAttributes().get(EDITION)));
+        if (searchMediaRequest.getAdditionalAttributes().get(EDITION.getJsonKey()) != null) {
+            predicate = predicate.and(book -> book.getEdition().equals(searchMediaRequest.getAdditionalAttributes().get(EDITION.getJsonKey())));
         }
         if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
             predicate = predicate.and(book -> book.getCreatedBy().equals(searchMediaRequest.getUsername()));
