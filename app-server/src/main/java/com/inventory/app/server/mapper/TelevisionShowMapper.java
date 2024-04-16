@@ -2,7 +2,7 @@ package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.TelevisionShow;
-import com.inventory.app.server.entity.payload.request.MediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,11 +24,11 @@ public interface TelevisionShowMapper {
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionName", target = "collectionName")
+    @Mapping(source = "collectionTitle", target = "collectionTitle")
     @Mapping(source = "additionalAttributes", target = "episodes", qualifiedByName = "mapEpisodes")
     @Mapping(source = "additionalAttributes", target = "season", qualifiedByName = "mapSeason")
     @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
-    TelevisionShow mapMediaRequestToTelevisionShow(MediaRequest mediaRequest);
+    TelevisionShow mapMediaRequestToTelevisionShow(UpdateCreateMediaRequest mediaRequest);
 
 
     @Named("mapEpisodes")
@@ -60,7 +60,7 @@ public interface TelevisionShowMapper {
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionName", target = "collectionName")
+    @Mapping(source = "collectionTitle", target = "collectionTitle")
     MediaResponse mapTelevisionShowIdToMediaId(TelevisionShow televisionShow);
 
     @Named("mapGameToAdditionalAttributes")
