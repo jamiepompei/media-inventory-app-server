@@ -72,7 +72,8 @@ public class BookService {
     }
 
     public Optional<Book> getById(Long id, String username) {
-        return Optional.of(dao.findOne(id, username));
+        Book book = dao.findOne(id, username);
+        return book == null ? Optional.empty() : Optional.of(book);
     }
 
     public Book create(Book book) {

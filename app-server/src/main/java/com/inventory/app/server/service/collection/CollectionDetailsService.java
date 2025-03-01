@@ -57,9 +57,9 @@ public class CollectionDetailsService {
         return dao.createOrUpdate(resource);
     }
 
-    public CollectionDetails getById(Long id) {
+    public CollectionDetails getById(Long id, String username) {
         try {
-            return dao.findOne(id);
+            return dao.findOne(id, username);
         } catch (Exception e) {
           if (e.getClass().isInstance(EntityNotFoundException.class)) {
               throw new ResourceNotFoundException("No media collection exists with id " + id);
@@ -73,7 +73,7 @@ public class CollectionDetailsService {
         if (!collectionAlreadyExists(updatedCollectionDetails)) {
             throw new ResourceNotFoundException("Cannot update media collection details because collection does not exist.");
         }
-        CollectionDetails existingCollectionDetails = getById(updatedCollectionDetails.getId());
+        CollectionDetails existingCollectionDetails = getById(updatedCollectionDetails.getId(), updatedCollectionDetails.getCreatedBy());
         if (verifyIfCollectionDetailsUpdated(existingCollectionDetails, updatedCollectionDetails)) {
             throw new NoChangesToUpdateException("No updates in media collection details to save. Will not proceed with update. Existing media collection details: " + existingCollectionDetails);
         }

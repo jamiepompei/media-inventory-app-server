@@ -70,7 +70,8 @@ public class GameService {
     }
 
     public Optional<Game> getById(Long id, String username) {
-        return Optional.of(dao.findOne(id, username));
+        Game game =  dao.findOne(id, username);
+       return game == null ? Optional.empty() : Optional.of(game);
     }
 
     public Game create(Game game) {

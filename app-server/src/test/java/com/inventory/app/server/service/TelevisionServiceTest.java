@@ -1,7 +1,8 @@
-package com.inventory.app.server.service.media;
+package com.inventory.app.server.service;
 
-import com.inventory.app.server.entity.media.Movie;
+import com.inventory.app.server.entity.media.TelevisionShow;
 import com.inventory.app.server.repository.IBaseDao;
+import com.inventory.app.server.service.media.TelevisionService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,14 +12,12 @@ import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.reset;
 
-
-public class MovieServiceTest {
-
+public class TelevisionServiceTest {
     @Mock
-    private IBaseDao<Movie> daoMock;
+    private IBaseDao<TelevisionShow> daoMock;
 
     @InjectMocks
-    private MovieService underTest;
+    private TelevisionService underTest;
 
     @Before
     public void setUp() {
@@ -41,7 +40,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getAllMoviesByGenre() {
+    public void getAllBooksByCollectionTitle() {
         // GIVEN
 
         // WHEN
@@ -50,7 +49,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getAllMoviesByTitle() {
+    public void getAllTelevisionShowsByEpisode() {
         // GIVEN
 
         // WHEN
@@ -59,16 +58,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getAllMoviesByDirectors() {
-        // GIVEN
-
-        // WHEN
-
-        // THEN
-    }
-
-    @Test
-    public void getAllMoviesByCollectionTitle() {
+    public void getAllTelevisionShowsByGenre() {
         // GIVEN
 
         // WHEN

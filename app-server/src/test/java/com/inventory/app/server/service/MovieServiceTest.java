@@ -1,7 +1,8 @@
-package com.inventory.app.server.service.media;
+package com.inventory.app.server.service;
 
-import com.inventory.app.server.entity.media.Music;
+import com.inventory.app.server.entity.media.Movie;
 import com.inventory.app.server.repository.IBaseDao;
+import com.inventory.app.server.service.media.MovieService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,13 +12,14 @@ import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.reset;
 
-public class MusicServiceTest {
+
+public class MovieServiceTest {
 
     @Mock
-    private IBaseDao<Music> daoMock;
+    private IBaseDao<Movie> daoMock;
 
     @InjectMocks
-    private MusicService underTest;
+    private MovieService underTest;
 
     @Before
     public void setUp() {
@@ -31,7 +33,7 @@ public class MusicServiceTest {
     }
 
     @Test
-    public void getAllMusicByArtist() {
+    public void setDao() {
         // GIVEN
 
         // WHEN
@@ -40,7 +42,7 @@ public class MusicServiceTest {
     }
 
     @Test
-    public void getAllMusicByGenre(){
+    public void getAllMoviesByGenre() {
         // GIVEN
 
         // WHEN
@@ -49,7 +51,25 @@ public class MusicServiceTest {
     }
 
     @Test
-    public void getAllMusicByCollectionTitle() {
+    public void getAllMoviesByTitle() {
+        // GIVEN
+
+        // WHEN
+
+        // THEN
+    }
+
+    @Test
+    public void getAllMoviesByDirectors() {
+        // GIVEN
+
+        // WHEN
+
+        // THEN
+    }
+
+    @Test
+    public void getAllMoviesByCollectionTitle() {
         // GIVEN
 
         // WHEN
@@ -64,21 +84,10 @@ public class MusicServiceTest {
         // WHEN
 
         // THEN
-
     }
 
     @Test
-    public void getById(){
-        // GIVEN
-
-        // WHEN
-
-        // THEN
-
-    }
-
-    @Test
-    public void create(){
+    public void getById() {
         // GIVEN
 
         // WHEN
@@ -87,7 +96,7 @@ public class MusicServiceTest {
     }
 
     @Test
-    public void update(){
+    public void create() {
         // GIVEN
 
         // WHEN
@@ -96,7 +105,16 @@ public class MusicServiceTest {
     }
 
     @Test
-    public void deleteById(){
+    public void update() {
+        // GIVEN
+
+        // WHEN
+
+        // THEN
+    }
+
+    @Test
+    public void deleteById() {
         // GIVEN
 
         // WHEN
