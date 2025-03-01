@@ -10,10 +10,10 @@ import lombok.Data;
 import java.util.List;
 import java.util.Objects;
 
-@Entity(name = "game")
-@Table(name = "game")
+@Entity(name = "videogame")
+@Table(name = "videgame")
 @Data
-public class Game extends Media {
+public class VideoGame extends Media {
     @Convert(converter = StringListConverter.class)
     @Column(name = "consoles")
     private List<String> consoles;
@@ -36,7 +36,7 @@ public class Game extends Media {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Game game)) return false;
+        if (!(o instanceof VideoGame game)) return false;
 
         // Compare fields from the superclass (Media)
         if(!super.equals(o)) return false;

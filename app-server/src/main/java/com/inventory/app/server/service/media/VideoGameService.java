@@ -6,8 +6,6 @@ import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +18,10 @@ import java.util.stream.Collectors;
 import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.*;
 
 @Service
-public class GameService {
+public class VideoGameService {
     private IBaseDao<Game> dao;
 
-    public GameService(IBaseDao<Game> dao) {
+    public VideoGameService(IBaseDao<Game> dao) {
         this.dao = dao;
     }
 

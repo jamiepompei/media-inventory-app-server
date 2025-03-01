@@ -6,7 +6,7 @@ import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.GameMapper;
-import com.inventory.app.server.service.media.GameService;
+import com.inventory.app.server.service.media.VideoGameService;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,21 +24,21 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/games")
 @Log4j2
-public class GameController {
+public class VideoGameController {
     //TODO figure out the logs for exceptions
 
-    private GameService gameService;
+    private VideoGameService videoGameService;
 
     @Autowired
-    public GameController(GameService gameService) {
-        this.gameService = gameService;
+    public VideoGameController(VideoGameService videoGameService) {
+        this.videoGameService = videoGameService;
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping
     ResponseEntity<List<MediaResponse>> searchGames(@AuthenticationPrincipal UserDetails userDetails,
                                                     @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
-        List<MediaResponse> responseList = gameService.searchGames(searchMediaRequest).stream()
+        List<MediaResponse> responseList = videoGameService.searchGames(searchMediaRequest).stream()
                 .map(b -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
@@ -50,7 +50,7 @@ public class GameController {
     public ResponseEntity<MediaResponse> createGame(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest gameRequest) {
         log.info("Received request to create resource: " + gameRequest);
         Game game = GameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
-        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.create(game));
+        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.create(game));
         log.info("Created new game: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -61,7 +61,7 @@ public class GameController {
     public ResponseEntity<MediaResponse> updateGame(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest gameRequest) {
         log.info("received request to update resource: " + gameRequest);
         Game updatedGame = GameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
-        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.update(updatedGame));
+        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.update(updatedGame));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -72,7 +72,7 @@ public class GameController {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(gameService.deleteById(id, userDetails.getUsername()));
+        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.deleteById(id, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

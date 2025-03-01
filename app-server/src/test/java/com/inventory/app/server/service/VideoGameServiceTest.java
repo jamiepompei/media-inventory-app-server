@@ -4,7 +4,7 @@ import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.Game;
 import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.repository.IBaseDao;
-import com.inventory.app.server.service.media.GameService;
+import com.inventory.app.server.service.media.VideoGameService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,12 +20,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
-public class GameServiceTest {
+public class VideoGameServiceTest {
     @Mock
     private IBaseDao<Game> daoMock;
 
     @InjectMocks
-    private GameService underTest;
+    private VideoGameService underTest;
     private Game expectedGame;
     private Game expectedGame2;
     private SearchMediaRequest searchMediaRequest;
