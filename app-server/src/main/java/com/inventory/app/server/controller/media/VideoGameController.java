@@ -5,7 +5,6 @@ import com.inventory.app.server.entity.media.VideoGame;
 import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
-import com.inventory.app.server.mapper.GameMapper;
 import com.inventory.app.server.mapper.VideoGameMapper;
 import com.inventory.app.server.service.media.VideoGameService;
 import jakarta.validation.Valid;
@@ -40,7 +39,7 @@ public class VideoGameController {
     ResponseEntity<List<MediaResponse>> searchGames(@AuthenticationPrincipal UserDetails userDetails,
                                                     @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
         List<MediaResponse> responseList = videoGameService.searchGames(searchMediaRequest).stream()
-                .map(b -> GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(b))
+                .map(b -> VideoGameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(b))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
