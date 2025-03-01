@@ -1,7 +1,7 @@
 package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
-import com.inventory.app.server.entity.media.Game;
+import com.inventory.app.server.entity.media.VideoGame;
 import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Mapper
-public interface GameMapper {
+public interface VideoGameMapper {
 
-    GameMapper INSTANCE = Mappers.getMapper(GameMapper.class);
+    VideoGameMapper INSTANCE = Mappers.getMapper(VideoGameMapper.class);
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "version", target = "version")
@@ -28,7 +28,7 @@ public interface GameMapper {
     @Mapping(source = "additionalAttributes", target = "consoles", qualifiedByName = "mapConsoles")
     @Mapping(source = "additionalAttributes", target = "numberOfPlayers", qualifiedByName = "mapNumberOfPlayers")
     @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
-    Game mapMediaRequestToGame(UpdateCreateMediaRequest mediaRequest);
+    VideoGame mapMediaRequestToGame(UpdateCreateMediaRequest mediaRequest);
 
 
     @Named("mapConsoles")
@@ -49,7 +49,7 @@ public interface GameMapper {
         return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) : null;
     }
 
-    default MediaResponse mapGameToMediaResponseWithAdditionalAttributes(Game game) {
+    default MediaResponse mapGameToMediaResponseWithAdditionalAttributes(VideoGame game) {
         MediaResponse mediaResponse = mapGameIdToMediaId(game);
         mediaResponse.setAdditionalAttributes(mapGameToAdditionalAttributes(game));
         return mediaResponse;
@@ -61,10 +61,10 @@ public interface GameMapper {
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionTitle", target = "collectionTitle")
-    MediaResponse mapGameIdToMediaId(Game game);
+    MediaResponse mapGameIdToMediaId(VideoGame game);
 
     @Named("mapGameToAdditionalAttributes")
-    default ConcurrentHashMap<String, Object> mapGameToAdditionalAttributes(Game game) {
+    default ConcurrentHashMap<String, Object> mapGameToAdditionalAttributes(VideoGame game) {
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
 
         // Map authors if available

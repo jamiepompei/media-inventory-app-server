@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "videogame")
-@Table(name = "videgame")
+@Table(name = "videogame")
 @Data
 public class VideoGame extends Media {
     @Convert(converter = StringListConverter.class)

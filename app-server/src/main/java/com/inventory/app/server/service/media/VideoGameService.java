@@ -1,6 +1,6 @@
 package com.inventory.app.server.service.media;
 
-import com.inventory.app.server.entity.media.Game;
+import com.inventory.app.server.entity.media.VideoGame;
 import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
@@ -19,27 +19,27 @@ import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes
 
 @Service
 public class VideoGameService {
-    private IBaseDao<Game> dao;
+    private IBaseDao<VideoGame> dao;
 
-    public VideoGameService(IBaseDao<Game> dao) {
+    public VideoGameService(IBaseDao<VideoGame> dao) {
         this.dao = dao;
     }
 
     @Autowired
-    public void setDao(IBaseDao<Game> daoToSet) {
+    public void setDao(IBaseDao<VideoGame> daoToSet) {
         dao = daoToSet;
-        dao.setClazz(Game.class);
+        dao.setClazz(VideoGame.class);
     }
 
-    public List<Game> searchGames(SearchMediaRequest searchMediaRequest) {
-        Optional<Predicate<Game>> searchPredicate = buildSearchPredicate(searchMediaRequest);
+    public List<VideoGame> searchGames(SearchMediaRequest searchMediaRequest) {
+        Optional<Predicate<VideoGame>> searchPredicate = buildSearchPredicate(searchMediaRequest);
         return searchPredicate.map(gamePredicate -> dao.findAll().stream()
                 .filter(gamePredicate)
                 .collect(Collectors.toList())).orElse(Collections.emptyList());
     }
 
-    private Optional<Predicate<Game>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
-        Predicate<Game> predicate = game -> true; // Defaul Predicate
+    private Optional<Predicate<VideoGame>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
+        Predicate<VideoGame> predicate = game -> true; // Defaul Predicate
         if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
             predicate = predicate.and(game -> game.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
         }
@@ -67,21 +67,21 @@ public class VideoGameService {
         return Optional.of(predicate);
     }
 
-    public Optional<Game> getById(Long id, String username) {
-        Game game =  dao.findOne(id, username);
+    public Optional<VideoGame> getById(Long id, String username) {
+        VideoGame game =  dao.findOne(id, username);
        return game == null ? Optional.empty() : Optional.of(game);
     }
 
-    public Game create(Game game) {
-        Optional<Game> existingGame = getById(game.getId(), game.getCreatedBy());
+    public VideoGame create(VideoGame game) {
+        Optional<VideoGame> existingGame = getById(game.getId(), game.getCreatedBy());
         if (existingGame.isPresent()) {
             throw new ResourceAlreadyExistsException("Cannot create game because games already exist: " + game);
         }
         return dao.createOrUpdate(game);
     }
 
-    public Game update(Game updatedGame) {
-        Optional<Game> existingGame = getById(updatedGame.getId(), updatedGame.getCreatedBy());
+    public VideoGame update(VideoGame updatedGame) {
+        Optional<VideoGame> existingGame = getById(updatedGame.getId(), updatedGame.getCreatedBy());
 
         if (existingGame.isEmpty()) {
             throw new ResourceNotFoundException("Cannot update game because no game exists " + updatedGame);
@@ -92,8 +92,8 @@ public class VideoGameService {
         return dao.createOrUpdate(updatedGame);
     }
 
-    public Game deleteById(Long id, String username){
-       Optional<Game> game = getById(id, username);
+    public VideoGame deleteById(Long id, String username){
+       Optional<VideoGame> game = getById(id, username);
        if (game.isEmpty()) {
            throw new ResourceNotFoundException("Cannot delete game because game does not exist.");
        }
@@ -101,7 +101,7 @@ public class VideoGameService {
        return game.get();
     }
 
-    private boolean verifyIfGameUpdate(Game existingGame, Game updatedGame) {
+    private boolean verifyIfGameUpdate(VideoGame existingGame, VideoGame updatedGame) {
         return existingGame.equals(updatedGame);
     }
 }

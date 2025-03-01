@@ -1,11 +1,12 @@
 
 package com.inventory.app.server.controller.media;
 
-import com.inventory.app.server.entity.media.Game;
+import com.inventory.app.server.entity.media.VideoGame;
 import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.GameMapper;
+import com.inventory.app.server.mapper.VideoGameMapper;
 import com.inventory.app.server.service.media.VideoGameService;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
@@ -49,8 +50,8 @@ public class VideoGameController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<MediaResponse> createGame(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest gameRequest) {
         log.info("Received request to create resource: " + gameRequest);
-        Game game = GameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
-        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.create(game));
+        VideoGame game = VideoGameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
+        MediaResponse response = VideoGameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.create(game));
         log.info("Created new game: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -60,8 +61,8 @@ public class VideoGameController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> updateGame(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest gameRequest) {
         log.info("received request to update resource: " + gameRequest);
-        Game updatedGame = GameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
-        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.update(updatedGame));
+        VideoGame updatedGame = VideoGameMapper.INSTANCE.mapMediaRequestToGame(gameRequest);
+        MediaResponse response = VideoGameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.update(updatedGame));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -72,7 +73,7 @@ public class VideoGameController {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-        MediaResponse response = GameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.deleteById(id, userDetails.getUsername()));
+        MediaResponse response = VideoGameMapper.INSTANCE.mapGameToMediaResponseWithAdditionalAttributes(videoGameService.deleteById(id, userDetails.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
