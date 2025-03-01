@@ -63,7 +63,8 @@ public class TelevisionService {
     }
 
     public Optional<TelevisionShow> getById(Long id, String username) {
-        return Optional.of(dao.findOne(id, username));
+        TelevisionShow televisionShow = dao.findOne(id, username);
+        return televisionShow == null ? Optional.empty() : Optional.of(televisionShow);
     }
 
     public TelevisionShow create(TelevisionShow televisionShow) {

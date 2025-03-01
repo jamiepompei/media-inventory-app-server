@@ -61,7 +61,8 @@ public class MovieService {
     }
 
     public Optional<Movie> getById(Long id, String username) {
-       return Optional.of(dao.findOne(id, username));
+       Movie movie = dao.findOne(id, username);
+       return movie == null ? Optional.empty() : Optional.of(movie);
     }
 
     public Movie create(Movie movie) {

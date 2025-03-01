@@ -64,7 +64,8 @@ public class MusicService {
     }
 
     public Optional<Music> getById(Long id, String username){
-        return Optional.of(dao.findOne(id, username));
+        Music music = dao.findOne(id, username);
+        return music == null? Optional.empty() : Optional.of(music);
     }
 
     public Music create(Music music) {
