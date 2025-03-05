@@ -1,19 +1,23 @@
 package com.inventory.app.server.service.media;
 
-import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
 import com.inventory.app.server.entity.media.TelevisionShow;
+import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.*;
 
 @Service
 @Transactional
@@ -25,93 +29,74 @@ public class TelevisionService {
         dao.setClazz(TelevisionShow.class);
     }
 
-    public List<TelevisionShow> getAllBooksByCollectionTitle(String collectionTitle, String username) {
-        List<TelevisionShow> televisionShowList = dao.findByField("collection_name", collectionTitle, username);
-        if (televisionShowList.isEmpty()) {
-            throw new ResourceNotFoundException("No television show results found with collection title " + collectionTitle);
-        }
-        return televisionShowList;
+    public List<TelevisionShow> searchTelevisionShows(SearchMediaRequest searchMediaRequest) {
+        Optional<Predicate<TelevisionShow>> searchPredicate = buildSearchPredicate(searchMediaRequest);
+        return searchPredicate.map(televisionShowPredicate -> dao.findAll().stream()
+                .filter(televisionShowPredicate)
+                .collect(Collectors.toList())).orElse(Collections.emptyList());
     }
 
-    public List<TelevisionShow> getAllTelevisionShowsByEpisode(List<String> episodes, String username) {
-        List<TelevisionShow> televisionShowList = dao.findByField(MediaInventoryAdditionalAttributes.EPISODES.getJsonKey(), episodes, username);
-        if (televisionShowList.isEmpty()) {
-            throw new ResourceNotFoundException("No television show results found with episode(s) " + episodes);
+    private Optional<Predicate<TelevisionShow>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
+        Predicate<TelevisionShow> predicate = televisionShow -> true; // Default Predicate
+        if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
+            predicate = predicate.and(televisionShow -> televisionShow.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
         }
-        return televisionShowList;
+        if (searchMediaRequest.getTitle() != null && !searchMediaRequest.getTitle().isEmpty()) {
+            predicate = predicate.and(televisionShow -> televisionShow.getTitle().equals(searchMediaRequest.getTitle()));
+        }
+        if (searchMediaRequest.getGenre() != null && !searchMediaRequest.getGenre().isEmpty()) {
+            predicate = predicate.and(televisionShow -> televisionShow.getGenre().equals(searchMediaRequest.getGenre()));
+        }
+        if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
+            predicate = predicate.and(televisionShow -> televisionShow.getFormat().equals(searchMediaRequest.getFormat()));
+        }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and(televisionShow -> televisionShow.getCreatedBy().equals(searchMediaRequest.getUsername()));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(EPISODES.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(EPISODES.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(televisionShow -> televisionShow.getEpisodes().equals(searchMediaRequest.getAdditionalAttributes().get(EPISODES.getJsonKey())));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(SEASON.getJsonKey()) != null) {
+            predicate = predicate.and(televisionShow -> televisionShow.getEpisodes().equals(searchMediaRequest.getAdditionalAttributes().get(SEASON.getJsonKey())));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey()) != null) {
+            predicate = predicate.and(televisionShow -> televisionShow.getEpisodes().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey())));
+        }
+      return Optional.of(predicate);
     }
 
-    public List<TelevisionShow> getAllTelevisionShowsByGenre(String genre, String username) {
-        List<TelevisionShow> televisionShowList = dao.findByField("genre", genre, username);
-        if (televisionShowList.isEmpty()) {
-            throw new ResourceNotFoundException("No television show results found for genre " + genre);
-        }
-        return televisionShowList;
+    public Optional<TelevisionShow> getById(Long id, String username) {
+        TelevisionShow televisionShow = dao.findOne(id, username);
+        return televisionShow == null ? Optional.empty() : Optional.of(televisionShow);
     }
 
-    public List<TelevisionShow> getAllByUsername(String username) {
-        List<TelevisionShow> televisionShowList = dao.findAllByUsername(username);
-        if (televisionShowList.isEmpty()) {
-            throw new ResourceNotFoundException("No television show data exists.");
-        }
-        return televisionShowList;
-    }
-
-    public TelevisionShow getById(Long id, String username) {
-        try {
-            return dao.findOne(id, username);
-        } catch (Exception e) {
-            if ( e.getClass().isInstance(EntityNotFoundException.class)) {
-                throw new ResourceNotFoundException("No book exists with id: " + id);
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    public TelevisionShow create(TelevisionShow televisionShow, String username) {
-        if(televisionShowAlreadyExists(televisionShow, username)) {
+    public TelevisionShow create(TelevisionShow televisionShow) {
+        Optional<TelevisionShow> existingTelevisionShow = getById(televisionShow.getId(), televisionShow.getCreatedBy());
+        if(existingTelevisionShow.isPresent()) {
             throw new ResourceAlreadyExistsException("Cannot create television show because television show already exists: " + televisionShow);
         }
-        TelevisionShow televisionShowToSave = cloneTelevisionShow(televisionShow);
-        televisionShowToSave.setId(null);
-        televisionShowToSave.setVersion(1);
-        return dao.createOrUpdate(televisionShowToSave);
+        return dao.createOrUpdate(televisionShow);
     }
 
-    public TelevisionShow update(TelevisionShow updatedTelevisionShow, String username) {
-        if (!televisionShowAlreadyExists(updatedTelevisionShow, username)) {
+    public TelevisionShow update(TelevisionShow updatedTelevisionShow) {
+        Optional<TelevisionShow> existingTelevisionShow = getById(updatedTelevisionShow.getId(), updatedTelevisionShow.getCreatedBy());
+
+        if (existingTelevisionShow.isEmpty()) {
             throw new ResourceNotFoundException("Cannot update television show because television show does not exist: " + updatedTelevisionShow);
         }
-        TelevisionShow existingTelevisionShow = getById(updatedTelevisionShow.getId(), username);
-        if (verifyIfTelevisionShowUpdated(existingTelevisionShow, updatedTelevisionShow)) {
+        if (verifyIfTelevisionShowUpdated(existingTelevisionShow.get(), updatedTelevisionShow)) {
             throw new NoChangesToUpdateException("No updates in television show to save. Will not proceed with update. Existing Television Show: " + existingTelevisionShow + "Updated Television Show: " + updatedTelevisionShow);
         }
-        updatedTelevisionShow = cloneTelevisionShow(updatedTelevisionShow);
-        updatedTelevisionShow.setId(existingTelevisionShow.getId());
-        updatedTelevisionShow.setVersion(existingTelevisionShow.getVersion() + 1);
         return dao.createOrUpdate(updatedTelevisionShow);
     }
 
     public TelevisionShow deleteById(Long id, String username){
-        TelevisionShow televisionShow = getById(id, username);
-        if (televisionShow == null) {
+        Optional<TelevisionShow> televisionShow = getById(id, username);
+        if (televisionShow.isEmpty()) {
             throw new ResourceNotFoundException("Cannot delete television show because television show does not exist.");
         }
         dao.deleteById(id, username);
-        return televisionShow;
-    }
-
-    private TelevisionShow cloneTelevisionShow(TelevisionShow televisionShow) {
-        TelevisionShow clonedTelevisionShow = new TelevisionShow();
-        BeanUtils.copyProperties(televisionShow, clonedTelevisionShow);
-        return clonedTelevisionShow;
-    }
-
-    private boolean televisionShowAlreadyExists(TelevisionShow televisionShow, String username) {
-        return getAllTelevisionShowsByEpisode(televisionShow.getEpisodes(), username)
-                .stream()
-                .anyMatch(t -> televisionShow.getTitle().equals(t.getTitle()));
+        return televisionShow.get();
     }
 
     private boolean verifyIfTelevisionShowUpdated(TelevisionShow existingTelevisionShow, TelevisionShow updatedTelevisionShow) {

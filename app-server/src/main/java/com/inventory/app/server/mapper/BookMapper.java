@@ -26,19 +26,18 @@ public interface BookMapper {
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "username", target = "createdBy")
     @Mapping(source = "collectionTitle", target = "collectionTitle")
+    @Mapping(source = "createdAsOf", target = "createdAsOf")
+    @Mapping(source = "modifiedBy", target = "modifiedBy")
+    @Mapping(source = "modifiedAsOf", target = "modifiedAsOf")
+    @Mapping(source = "completed", target = "completed")
+    @Mapping(source = "onLoan", target = "onLoan")
+    @Mapping(source = "tags", target = "tags")
+    @Mapping(source = "reviewRating", target = "reviewRating")
+    @Mapping(source = "reviewDescription", target = "reviewDescription")
     @Mapping(source = "additionalAttributes", target = "authors", qualifiedByName = "mapAuthors")
     @Mapping(source = "additionalAttributes", target = "copyrightYear", qualifiedByName = "mapCopyrightYear")
     @Mapping(source = "additionalAttributes", target = "edition", qualifiedByName = "mapEdition")
     Book mapMediaRequestToBook(UpdateCreateMediaRequest mediaRequest);
-
-
-    @Named("mapAuthors")
-    default List<String> mapAuthors(Map<String, Object> additionalAttributes) {
-        Object authorsValue = additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), Collections.emptyList());
-        @SuppressWarnings("unchecked")
-        List<String> authorsList = authorsValue instanceof List<?> ? (List<String>) authorsValue : Collections.emptyList();
-        return authorsList;
-    }
 
     @Named("mapCopyrightYear")
     default Integer mapCopyrightYear(Map<String, Object> additionalAttributes) {
@@ -48,6 +47,14 @@ public interface BookMapper {
     @Named("mapEdition")
     default Integer mapEdition(Map<String, Object> additionalAttributes) {
         return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.EDITION.getJsonKey()) : null;
+    }
+
+    @Named("mapAuthors")
+    default List<String> mapAuthors(Map<String, Object> additionalAttributes) {
+        Object consolesValue = additionalAttributes.getOrDefault(MediaInventoryAdditionalAttributes.AUTHORS.getJsonKey(), Collections.emptyList());
+        @SuppressWarnings("unchecked")
+        List<String> consoleList = consolesValue instanceof List<?> ? (List<String>) consolesValue : Collections.emptyList();
+        return consoleList;
     }
 
     default MediaResponse mapBookToMediaResponseWithAdditionalAttributes(Book book) {
@@ -62,6 +69,16 @@ public interface BookMapper {
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionTitle", target = "collectionTitle")
+    @Mapping(source = "createdBy", target = "username")
+    @Mapping(source = "createdAsOf", target = "createdAsOf")
+    @Mapping(source = "modifiedBy", target = "modifiedBy")
+    @Mapping(source = "modifiedAsOf", target = "modifiedAsOf")
+    @Mapping(source = "completed", target = "completed")
+    @Mapping(source = "onLoan", target = "onLoan")
+    @Mapping(source = "tags", target = "tags")
+    @Mapping(source = "reviewRating", target = "reviewRating")
+    @Mapping(source = "reviewDescription", target = "reviewDescription")
+    @Mapping(source = "book", target = "additionalAttributes", qualifiedByName = "mapBookToAdditionalAttributes")
     MediaResponse mapBookToMediaResponse(Book book);
 
     @Named("mapBookToAdditionalAttributes")

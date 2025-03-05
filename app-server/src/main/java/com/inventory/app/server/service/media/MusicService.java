@@ -1,18 +1,23 @@
 package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Music;
+import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.*;
 
 @Service
 @Transactional
@@ -20,98 +25,78 @@ public class MusicService {
     private IBaseDao<Music> dao;
 
     @Autowired
-    public void setDao(@Qualifier("genericDaoImpl") IBaseDao<Music> daoToSet) {
+    public void setDao(@Qualifier("genericDaoImpl")  IBaseDao<Music> daoToSet) {
         dao = daoToSet;
         dao.setClazz(Music.class);
     }
 
-    public List<Music> getAllMusicByArtist(List<String> artist, String username){
-       List<Music> musicList = dao.findByField("artist", artist, username);
-       if (musicList.isEmpty()) {
-           throw new ResourceNotFoundException("No music found by artist(s) " + artist);
+    public List<Music> searchMusic(SearchMediaRequest searchMediaRequest){
+        Optional<Predicate<Music>> searchPredicate = buildSearchPredicate(searchMediaRequest);
+        return searchPredicate.map(musicPredicate -> dao.findAll().stream()
+                .filter(musicPredicate)
+                .collect(Collectors.toList())).orElse(Collections.emptyList());
+    }
+
+    private Optional<Predicate<Music>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
+        Predicate<Music> predicate = music -> true; // Default Predicate
+        if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
+            predicate = predicate.and(music -> music.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
+        }
+        if (searchMediaRequest.getTitle() != null && !searchMediaRequest.getTitle().isEmpty()) {
+            predicate = predicate.and(music -> music.getTitle().equals(searchMediaRequest.getTitle()));
+        }
+        if (searchMediaRequest.getGenre() != null && !searchMediaRequest.getGenre().isEmpty()) {
+            predicate = predicate.and(music -> music.getGenre().equals(searchMediaRequest.getGenre()));
+        }
+        if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
+            predicate = predicate.and(music -> music.getFormat().equals(searchMediaRequest.getFormat()));
+        }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and(music -> music.getCreatedBy().equals(searchMediaRequest.getUsername()));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(music -> music.getArtists().equals(searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey())));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(SONG_LIST.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(SONG_LIST.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(music -> music.getSongList().equals(searchMediaRequest.getAdditionalAttributes().get(SONG_LIST.getJsonKey())));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey()) != null) {
+            predicate = predicate.and(music -> music.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey())));
+        }
+        return Optional.of(predicate);
+    }
+
+    public Optional<Music> getById(Long id, String username){
+        Music music = dao.findOne(id, username);
+        return music == null? Optional.empty() : Optional.of(music);
+    }
+
+    public Music create(Music music) {
+       Optional<Music> existingMusic = getById(music.getId(), music.getCreatedBy());
+       if (existingMusic.isPresent()) {
+           throw new ResourceAlreadyExistsException("Cannot create music because movie already exists: " + music);
        }
-        return musicList;
+       return dao.createOrUpdate(music);
     }
 
-    public List<Music> getAllMusicByGenre(String genre, String username){
-        List<Music> musicList = dao.findByField("genre", genre, username);
-        if (musicList.isEmpty()) {
-            throw new ResourceNotFoundException("No music found with genre " + genre);
-        }
-        return musicList;
-    }
-
-    public List<Music> getAllMusicByCollectionTitle(String collectionTitle, String username){
-        List<Music> musicList = dao.findByField("collection_name", collectionTitle, username);
-        if (musicList.isEmpty()) {
-            throw new ResourceNotFoundException("No music found with collection title " + collectionTitle);
-        }
-        return musicList;
-    }
-
-    public List<Music> getAllByUsername(String username) {
-        List<Music> musicList = dao.findAllByUsername(username);
-        if (musicList.isEmpty()) {
-            throw new ResourceNotFoundException("No music data exists.");
-        }
-        return musicList;
-    }
-
-    public Music getById(Long id, String username){
-        try {
-            return dao.findOne(id, username);
-        } catch (Exception e) {
-            if (e.getClass().isInstance(EntityNotFoundException.class)) {
-                throw new ResourceNotFoundException("No music exists with id: " + id);
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    public Music create(Music music, String username) {
-       if (musicAlreadyExists(music, username)) {
-           throw new ResourceAlreadyExistsException("Cannot create music because music already exists: " + music);
-        }
-        Music musicToSave = cloneMusic(music);
-        musicToSave.setId(null);
-        musicToSave.setVersion(1);
-        return dao.createOrUpdate(musicToSave);
-    }
-
-    public Music update(Music updatedMusic, String username) {
-        if (!musicAlreadyExists(updatedMusic, username)) {
+    public Music update(Music updatedMusic) {
+        Optional<Music> existingMusic = getById(updatedMusic.getId(), updatedMusic.getCreatedBy());
+        if (existingMusic.isEmpty()) {
             throw new ResourceNotFoundException("Cannot update music because music does not exist: " + updatedMusic);
         }
-        Music existingMusic = getById(updatedMusic.getId(),username);
-        if (verifyIfMusicUpdated(existingMusic, updatedMusic)) {
+        if (verifyIfMusicUpdated(existingMusic.get(), updatedMusic)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingMusic+ "Updated Book: " + updatedMusic);
         }
-        updatedMusic = cloneMusic(updatedMusic);
-        updatedMusic.setId(existingMusic.getId());
-        updatedMusic.setVersion(existingMusic.getVersion() + 1);
         return dao.createOrUpdate(updatedMusic);
     }
 
     public Music deleteById(Long id, String username){
-        Music music = getById(id, username);
-        if (music == null) {
+        Optional<Music> music = getById(id, username);
+        if (music.isEmpty()) {
             throw new ResourceNotFoundException("Cannot delete music because music does not exist.");
         }
         dao.deleteById(id, username);
-        return music;
-    }
-
-    private boolean musicAlreadyExists(Music music, String username) {
-        return getAllMusicByArtist(music.getArtists(), username)
-                .stream()
-                .anyMatch(m -> music.getTitle().equals(m.getTitle()));
-    }
-
-    private Music cloneMusic(Music music) {
-        Music clonedMusic = new Music();
-        BeanUtils.copyProperties(music, clonedMusic);
-        return clonedMusic;
+        return music.get();
     }
 
     private boolean verifyIfMusicUpdated(Music existingMusic, Music updatedMusic) {

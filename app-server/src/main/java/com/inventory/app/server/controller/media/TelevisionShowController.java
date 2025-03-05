@@ -1,7 +1,9 @@
+
 package com.inventory.app.server.controller.media;
 
 import com.inventory.app.server.entity.media.TelevisionShow;
-import com.inventory.app.server.entity.payload.request.MediaRequest;
+import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.mapper.TelevisionShowMapper;
 import com.inventory.app.server.service.media.TelevisionService;
@@ -33,21 +35,8 @@ public class TelevisionShowController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findAllTelevisionShows(@AuthenticationPrincipal UserDetails userDetails) {
-        List<MediaResponse> responseList = televisionService.getAllByUsername(userDetails.getUsername()).stream()
-                .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-    }
-
-    @GetMapping(value = "/{episodes}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
-    ResponseEntity<List<MediaResponse>> findByEpisode(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("episodes") final List<String> episodes) {
-        if (episodes.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Writers cannot be empty.");
-        }
-        List<TelevisionShow> televisionShowsByEpisodes = televisionService.getAllTelevisionShowsByEpisode(episodes, userDetails.getUsername());
-        List<MediaResponse> responseList = televisionShowsByEpisodes.stream()
+    ResponseEntity<List<MediaResponse>> searchTelevisionShow(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
+        List<MediaResponse> responseList = televisionService.searchTelevisionShows(searchMediaRequest).stream()
                 .map(t -> TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(t))
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
@@ -56,10 +45,10 @@ public class TelevisionShowController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
-    public ResponseEntity<MediaResponse> createTelevisionShow(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest televisionShowRequest) {
+    public ResponseEntity<MediaResponse> createTelevisionShow(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest televisionShowRequest) {
         log.info("Received request to create resource: " + televisionShowRequest);
         TelevisionShow televisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(televisionShowRequest);
-        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.create(televisionShow, userDetails.getUsername()));
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.create(televisionShow));
         log.info("Created new television show: " + response);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -67,10 +56,10 @@ public class TelevisionShowController {
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
-    public ResponseEntity<MediaResponse> updateTelevisionShow(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final MediaRequest televisionShowRequest) {
+    public ResponseEntity<MediaResponse> updateTelevisionShow(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest televisionShowRequest) {
         log.info("Received request to update resource: " + televisionShowRequest);
         TelevisionShow updatedTelevisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(televisionShowRequest);
-        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.update(updatedTelevisionShow, userDetails.getUsername()));
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponseWithAdditionalAttributes(televisionService.update(updatedTelevisionShow));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -85,3 +74,4 @@ public class TelevisionShowController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
+
