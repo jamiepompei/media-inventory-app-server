@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 
 @MappedSuperclass
 @Getter
@@ -26,7 +28,22 @@ public abstract class Media implements Serializable {
     private String collectionTitle;
     @Column(name = "created_by")
     private String createdBy;
-    //TODO createdOn, modifiedBy, modifiedOn fields
+    @Column(name = "created_as_of")
+    private LocalDateTime createdAsOf;
+    @Column(name = "modified_by")
+    private String modifiedBy;
+    @Column(name = "modified_as_of")
+    private LocalDateTime modifiedAsOf;
+    @Column(name = "completed")
+    private boolean completed;
+    @Column(name = "onLoan")
+    private boolean onLoan;
+    @Column(name = "tags")
+    private Set<String> tags;
+    @Column(name = "review_rating")
+    private Integer reviewRating;
+    @Column(name = "review_description")
+    private String reviewDescription;
 
     @Override
     public String toString() {

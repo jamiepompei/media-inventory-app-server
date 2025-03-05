@@ -22,7 +22,7 @@ public class BookValidator implements Validator {
         if (checkInputString(book.getGenre())) {
             errors.rejectValue("genre", "genre.empty");
         }
-        if (checkInputString(book.getCollectionName())) {
+        if (checkInputString(book.getCollectionTitle())) {
             errors.rejectValue("collectionName", "collectionName.empty");
         }
     }

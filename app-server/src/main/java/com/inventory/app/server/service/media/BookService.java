@@ -25,10 +25,6 @@ public class BookService {
 
     private IBaseDao<Book> dao;
 
-    public BookService(IBaseDao<Book> dao) {
-        this.dao = dao;
-    }
-
     @Autowired
     public void setDao(@Qualifier("genericDaoImpl") IBaseDao<Book> daoToSet) {
         dao = daoToSet;
@@ -45,31 +41,38 @@ public class BookService {
     private Optional<Predicate<Book>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
         Predicate<Book> predicate = book -> true; // Default Predicate
         if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
-            predicate = predicate.and((book -> book.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle())));
+            predicate = predicate.and(book -> book.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
+        }
+        if (searchMediaRequest.getTitle() != null && !searchMediaRequest.getTitle().isEmpty()) {
+            predicate = predicate.and(book -> book.getTitle().equals(searchMediaRequest.getTitle()));
         }
         if (searchMediaRequest.getGenre() != null && !searchMediaRequest.getGenre().isEmpty()) {
-            predicate = predicate.and((book -> book.getGenre().equals(searchMediaRequest.getGenre())));
+            predicate = predicate.and(book -> book.getGenre().equals(searchMediaRequest.getGenre()));
         }
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
-            predicate = predicate.and((book -> book.getFormat().equals(searchMediaRequest.getFormat())));
-        }
-        if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS).toString().isEmpty()) {
-            predicate = predicate.and((book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS))));
-        }
-        if (searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR) != null) {
-            predicate = predicate.and((book -> book.getCopyrightYear().equals(searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR))));
-        }
-        if (searchMediaRequest.getAdditionalAttributes().get(EDITION) != null) {
-            predicate = predicate.and((book -> book.getEdition().equals(searchMediaRequest.getAdditionalAttributes().get(EDITION))));
+            predicate = predicate.and(book -> book.getFormat().equals(searchMediaRequest.getFormat()));
         }
         if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
-            predicate = predicate.and((book -> book.getCreatedBy().equals(searchMediaRequest.getUsername())));
+            predicate = predicate.and(book -> book.getCreatedBy().equals(searchMediaRequest.getUsername()));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey()).toString().isEmpty()) {
+            predicate = predicate.and(book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey())));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR.getJsonKey()) != null) {
+            predicate = predicate.and(book -> book.getCopyrightYear().equals(searchMediaRequest.getAdditionalAttributes().get(COPYRIGHT_YEAR.getJsonKey())));
+        }
+        if (searchMediaRequest.getAdditionalAttributes().get(EDITION.getJsonKey()) != null) {
+            predicate = predicate.and(book -> book.getEdition().equals(searchMediaRequest.getAdditionalAttributes().get(EDITION.getJsonKey())));
+        }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and(book -> book.getCreatedBy().equals(searchMediaRequest.getUsername()));
         }
         return Optional.of(predicate);
     }
 
     public Optional<Book> getById(Long id, String username) {
-        return Optional.of(dao.findOne(id, username));
+        Book book = dao.findOne(id, username);
+        return book == null ? Optional.empty() : Optional.of(book);
     }
 
     public Book create(Book book) {

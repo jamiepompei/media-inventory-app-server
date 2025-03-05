@@ -1,7 +1,7 @@
 package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
-import com.inventory.app.server.entity.media.Game;
+import com.inventory.app.server.entity.media.VideoGame;
 import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
 import org.mapstruct.Mapper;
@@ -15,20 +15,29 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Mapper
-public interface GameMapper {
+public interface VideoGameMapper {
 
-    GameMapper INSTANCE = Mappers.getMapper(GameMapper.class);
+    VideoGameMapper INSTANCE = Mappers.getMapper(VideoGameMapper.class);
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "version", target = "version")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
+    @Mapping(source = "username", target = "createdBy")
+    @Mapping(source = "createdAsOf", target = "createdAsOf")
+    @Mapping(source = "modifiedBy", target = "modifiedBy")
+    @Mapping(source = "modifiedAsOf", target = "modifiedAsOf")
+    @Mapping(source = "completed", target = "completed")
+    @Mapping(source = "onLoan", target = "onLoan")
+    @Mapping(source = "tags", target = "tags")
+    @Mapping(source = "reviewRating", target = "reviewRating")
+    @Mapping(source = "reviewDescription", target = "reviewDescription")
     @Mapping(source = "collectionTitle", target = "collectionTitle")
     @Mapping(source = "additionalAttributes", target = "consoles", qualifiedByName = "mapConsoles")
     @Mapping(source = "additionalAttributes", target = "numberOfPlayers", qualifiedByName = "mapNumberOfPlayers")
     @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
-    Game mapMediaRequestToGame(UpdateCreateMediaRequest mediaRequest);
+    VideoGame mapMediaRequestToGame(UpdateCreateMediaRequest mediaRequest);
 
 
     @Named("mapConsoles")
@@ -49,22 +58,27 @@ public interface GameMapper {
         return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) : null;
     }
 
-    default MediaResponse mapGameToMediaResponseWithAdditionalAttributes(Game game) {
-        MediaResponse mediaResponse = mapGameIdToMediaId(game);
-        mediaResponse.setAdditionalAttributes(mapGameToAdditionalAttributes(game));
-        return mediaResponse;
-    }
-
+    // Map VideoGame fields back into additionalAttributes in MediaResponse
     @Mapping(source = "id", target = "id")
     @Mapping(source = "version", target = "version")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "collectionTitle", target = "collectionTitle")
-    MediaResponse mapGameIdToMediaId(Game game);
+    @Mapping(source = "createdBy", target = "username")
+    @Mapping(source = "createdAsOf", target = "createdAsOf")
+    @Mapping(source = "modifiedBy", target = "modifiedBy")
+    @Mapping(source = "modifiedAsOf", target = "modifiedAsOf")
+    @Mapping(source = "completed", target = "completed")
+    @Mapping(source = "onLoan", target = "onLoan")
+    @Mapping(source = "tags", target = "tags")
+    @Mapping(source = "reviewRating", target = "reviewRating")
+    @Mapping(source = "reviewDescription", target = "reviewDescription")
+    @Mapping(source = "game", target = "additionalAttributes", qualifiedByName = "mapGameToAdditionalAttributes")
+    MediaResponse mapGameToMediaResponse(VideoGame game);
 
     @Named("mapGameToAdditionalAttributes")
-    default ConcurrentHashMap<String, Object> mapGameToAdditionalAttributes(Game game) {
+    default ConcurrentHashMap<String, Object> mapGameToAdditionalAttributes(VideoGame game) {
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
 
         // Map authors if available

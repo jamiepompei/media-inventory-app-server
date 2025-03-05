@@ -22,10 +22,10 @@ public class CollectionController {
         this.collectionService = collectionService;
     }
 
-    @GetMapping
-    ResponseEntity<List<CollectionDetails>> findAllCollections(){
-        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getAllCollectionsByUser());
-    }
+//    @GetMapping
+//    ResponseEntity<List<CollectionDetails>> findAllCollections(){
+//        return ResponseEntity.status(HttpStatus.OK).body(collectionService.getAllCollectionsByUser());
+//    }
 
     @GetMapping(value = "/collection/all/{collection_name}")
     ResponseEntity<List<Media>> findAllMediaByCollectionName(@PathVariable("collection_name") final String collectionName){

@@ -22,21 +22,6 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
         this.entityManager = entityManager;
     }
 
-    @Override
-    public List<T> findByField(String field, Object value, String username) {
-        return createQuery(field, value, username);
-    }
-
-    @Override
-    public List<T> findByField(String field, Object value) {
-        return createQuery(field, value);
-    }
-
-    @Override
-    public T findOneByField(String field, Object value, String username) {
-        return findByField(field, value, username).stream().findFirst().get();
-    }
-
     private List<T> createQuery(String fieldName, Object fieldValue, String username) {
         JpaEntityInformation<T, ?> entityInformation = JpaEntityInformationSupport.getEntityInformation(getClazz(), entityManager);
         String entityName = entityInformation.getEntityName();
@@ -49,7 +34,7 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
         return query.getResultList();
     }
 
-    private List<T> createQuery(String fieldName, Object fieldValue) {
+    public List<T> createQuery(String fieldName, Object fieldValue) {
         JpaEntityInformation<T, ?> entityInformation = JpaEntityInformationSupport.getEntityInformation(getClazz(), entityManager);
         String entityName = entityInformation.getEntityName();
         Class<T> entityType = entityInformation.getJavaType();
@@ -77,12 +62,18 @@ public abstract class BaseDao<T extends Serializable>  implements IBaseDao< T >{
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<T> findAllByUsername(String username){
-        return entityManager.createQuery("from " + clazz.getName() + " where username = :username")
-                .setParameter("username", username)
-                .getResultList();
+    public T findById(final long id) {
+//        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+//        CriteriaQuery<T> query = criteriaBuilder.createQuery(clazz);
+//        Root<T> root = query.from(clazz);
+//
+//        query.select(root)
+//                .where(criteriaBuilder.and(
+//                        criteriaBuilder.equal(root.get("id"), id)
+//                ));
+       return entityManager.find(clazz, id);
+       // return entityManager.createQuery(query).getSingleResult();
     }
 
     @Override

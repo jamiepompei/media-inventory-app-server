@@ -8,6 +8,7 @@ import com.inventory.app.server.entity.user.RefreshToken;
 import com.inventory.app.server.entity.user.UserInfo;
 
 import com.inventory.app.server.error.ErrorResponse;
+import com.inventory.app.server.mapper.UserMapper;
 import com.inventory.app.server.service.RefreshTokenService;
 import com.inventory.app.server.service.authorization.JwtService;
 import com.inventory.app.server.service.user.UserDAOService;
@@ -45,9 +46,9 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(@RequestBody UserRequest userRequest) {
         try {
-            UserInfo userInfo = mapUserInto(userRequest);
+            UserInfo userInfo = UserMapper.INSTANCE.mapUserRequestToUserInfo(userRequest);
             UserInfo userInfoResponse = userService.saveUser(userInfo);
-            UserResponse userResponse = mapUserResponse(userInfoResponse);
+            UserResponse userResponse = UserMapper.INSTANCE.mapUserInfoToUserResponse(userInfoResponse);
 
             return ResponseEntity.ok(userResponse);
         } catch (Exception e) {
@@ -83,7 +84,7 @@ public class UserController {
             List<UserInfo> userList = userService.getAllUsers();
             List<UserResponse> userResponseList = userList
                     .stream()
-                    .map(this::mapUserResponse)
+                    .map(UserMapper.INSTANCE::mapUserInfoToUserResponse)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(userResponseList);
         } catch (Exception e) {
@@ -117,22 +118,5 @@ public class UserController {
         String message = e.getMessage();
         ErrorResponse errorResponse = new com.inventory.app.server.error.ErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR.value());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UserResponse.builder().errorResponse(errorResponse).build());
-    }
-
-    //TODO refactor into mapper class
-    private UserResponse mapUserResponse(UserInfo userInfo) {
-        return UserResponse.builder()
-                .username(userInfo.getUsername())
-                .roles(userInfo.getRoles())
-                .build();
-    }
-
-    //TODO refactor into mapper class
-    private UserInfo mapUserInto(UserRequest userRequest) {
-        UserInfo userInfo = new UserInfo();
-        userInfo.setPassword(userRequest.getPassword());
-        userInfo.setUsername(userRequest.getUsername());
-        userInfo.setRoles(userRequest.getRoles());
-        return userInfo;
     }
 }

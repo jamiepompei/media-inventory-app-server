@@ -27,15 +27,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      *
      * The CustomUserDetails object is used by Spring Security for authentication and authorization checks.
      *
-     * @param email
+     * @param username
      * @return
      * @throws UsernameNotFoundException
      */
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserInfo userInfo = userDaoService.findByUsername(email);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserInfo userInfo = userDaoService.findByUsername(username);
         if (userInfo == null) {
-            throw new UsernameNotFoundException("User does not exist. Email: "+ email);
+            throw new UsernameNotFoundException("User does not exist. Email: " + username);
         }
         return new CustomUserDetails(userInfo);
     }

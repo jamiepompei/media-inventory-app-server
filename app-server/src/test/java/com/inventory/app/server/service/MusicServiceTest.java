@@ -1,7 +1,8 @@
-package com.inventory.app.server.service.media;
+package com.inventory.app.server.service;
 
-import com.inventory.app.server.entity.media.TelevisionShow;
+import com.inventory.app.server.entity.media.Music;
 import com.inventory.app.server.repository.IBaseDao;
+import com.inventory.app.server.service.media.MusicService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,12 +12,13 @@ import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.reset;
 
-public class TelevisionServiceTest {
+public class MusicServiceTest {
+
     @Mock
-    private IBaseDao<TelevisionShow> daoMock;
+    private IBaseDao<Music> daoMock;
 
     @InjectMocks
-    private TelevisionService underTest;
+    private MusicService underTest;
 
     @Before
     public void setUp() {
@@ -30,7 +32,7 @@ public class TelevisionServiceTest {
     }
 
     @Test
-    public void setDao() {
+    public void getAllMusicByArtist() {
         // GIVEN
 
         // WHEN
@@ -39,7 +41,7 @@ public class TelevisionServiceTest {
     }
 
     @Test
-    public void getAllBooksByCollectionTitle() {
+    public void getAllMusicByGenre(){
         // GIVEN
 
         // WHEN
@@ -48,16 +50,7 @@ public class TelevisionServiceTest {
     }
 
     @Test
-    public void getAllTelevisionShowsByEpisode() {
-        // GIVEN
-
-        // WHEN
-
-        // THEN
-    }
-
-    @Test
-    public void getAllTelevisionShowsByGenre() {
+    public void getAllMusicByCollectionTitle() {
         // GIVEN
 
         // WHEN
@@ -72,10 +65,21 @@ public class TelevisionServiceTest {
         // WHEN
 
         // THEN
+
     }
 
     @Test
-    public void getById() {
+    public void getById(){
+        // GIVEN
+
+        // WHEN
+
+        // THEN
+
+    }
+
+    @Test
+    public void create(){
         // GIVEN
 
         // WHEN
@@ -84,7 +88,7 @@ public class TelevisionServiceTest {
     }
 
     @Test
-    public void create() {
+    public void update(){
         // GIVEN
 
         // WHEN
@@ -93,16 +97,7 @@ public class TelevisionServiceTest {
     }
 
     @Test
-    public void update() {
-        // GIVEN
-
-        // WHEN
-
-        // THEN
-    }
-
-    @Test
-    public void deleteById() {
+    public void deleteById(){
         // GIVEN
 
         // WHEN

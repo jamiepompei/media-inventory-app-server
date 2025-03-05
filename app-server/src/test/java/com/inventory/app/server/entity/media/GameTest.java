@@ -1,8 +1,9 @@
 package com.inventory.app.server.entity.media;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,11 +12,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class GameTest {
+public class GameTest {
     private Game game1;
     private Game game2;
 
-    @BeforeEach
+    @Before
     public void setUp() {
         // Create two identical games
         game1 = new Game();
@@ -35,7 +36,7 @@ class GameTest {
         game2.setReleaseYear(2022);
     }
 
-    @AfterEach
+    @After
     public void tearDown() {
         // Reset the objects to null
         game1 = null;
