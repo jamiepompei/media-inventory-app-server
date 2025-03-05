@@ -25,19 +25,15 @@ import java.util.stream.Collectors;
 @Log4j2
 public class BookController {
 
-    private BookService bookService;
-
     @Autowired
-    public BookController(BookService bookService) {
-        this.bookService = bookService;
-    }
+    private BookService bookService;
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping
     ResponseEntity<List<MediaResponse>> searchBooks(@AuthenticationPrincipal UserDetails userDetails,
                                                      @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
         List<MediaResponse> responseList = bookService.searchBooks(searchMediaRequest).stream()
-                .map(b -> BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(b))
+                .map(BookMapper.INSTANCE::mapBookToMediaResponseWithAdditionalAttributes)
                 .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
@@ -72,7 +68,6 @@ public class BookController {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
-        //TODO fix
         MediaResponse response = BookMapper.INSTANCE.mapBookToMediaResponseWithAdditionalAttributes(bookService.deleteById(id, "username"));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

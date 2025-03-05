@@ -25,10 +25,6 @@ public class BookService {
 
     private IBaseDao<Book> dao;
 
-    public BookService(IBaseDao<Book> dao) {
-        this.dao = dao;
-    }
-
     @Autowired
     public void setDao(@Qualifier("genericDaoImpl") IBaseDao<Book> daoToSet) {
         dao = daoToSet;
@@ -55,6 +51,9 @@ public class BookService {
         }
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(book -> book.getFormat().equals(searchMediaRequest.getFormat()));
+        }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and(book -> book.getCreatedBy().equals(searchMediaRequest.getUsername()));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey()).toString().isEmpty()) {
             predicate = predicate.and(book -> book.getAuthors().equals(searchMediaRequest.getAdditionalAttributes().get(AUTHORS.getJsonKey())));

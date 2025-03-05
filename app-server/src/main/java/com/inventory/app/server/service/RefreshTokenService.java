@@ -1,53 +1,62 @@
 package com.inventory.app.server.service;
 
 import com.inventory.app.server.entity.user.RefreshToken;
-import com.inventory.app.server.repository.IBaseDao;
+import com.inventory.app.server.entity.user.UserInfo;
+import com.inventory.app.server.repository.RefreshTokenDao;
 import com.inventory.app.server.service.user.UserDAOService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 @Service
 public class RefreshTokenService {
     @Autowired
-    IBaseDao<RefreshToken> refreshTokenDao;
-
+    RefreshTokenDao refreshTokenDao;
     @Autowired
-    UserDAOService userDao;
+    UserDAOService userDAOService;
 
-    public RefreshTokenService(IBaseDao<RefreshToken> refreshTokenDao, UserDAOService userDao) {
+    public RefreshTokenService(RefreshTokenDao refreshTokenDao, UserDAOService userDAOService) {
         this.refreshTokenDao = refreshTokenDao;
-        this.userDao = userDao;
-    }
-
-    @Autowired
-    public void setDao(@Qualifier("genericDaoImpl") IBaseDao<RefreshToken> daoToSet) {
-        refreshTokenDao = daoToSet;
-        refreshTokenDao.setClazz(RefreshToken.class);
+        this.userDAOService = userDAOService;
     }
 
     public RefreshToken createRefreshToken(String username){
+        UserInfo userInfo = userDAOService.findByUsername(username);
+
         RefreshToken refreshToken = RefreshToken.builder()
-                .userInfo(userDao.findByUsername(username))
+                .userInfo(userInfo)
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusMillis(600000))
                 .build();
-        return refreshTokenDao.createOrUpdate(refreshToken);
+        return refreshTokenDao.save(refreshToken);
     }
 
-    public List<RefreshToken> findByToken(String token){
-        return refreshTokenDao.findByField("token", token);
+    public Optional<RefreshToken> findByToken(String token){
+        return refreshTokenDao.findByToken(token);
     }
 
     public RefreshToken verifyExpiration(RefreshToken token){
-        if(token.getExpiryDate().compareTo(Instant.now())<0){
+        if (token.isExpired()){
             refreshTokenDao.delete(token);
-            throw new RuntimeException(token.getToken() + " Refresh token is expired. Please make a new login..!");
+            throw new RuntimeException(token.getToken() + " Refresh token is expired. Please login again.");
         }
         return token;
+    }
 
+    @Transactional
+    public RefreshToken generateNewRefreshToken(UserInfo userInfo) {
+        // invalidate old token
+        refreshTokenDao.deleteByUserInfo(userInfo);
+        // generate new token
+        return createRefreshToken(userInfo.getUsername());
+    }
+
+    @Transactional
+    public void deleteRefreshToken(String token){
+        refreshTokenDao.findByToken(token)
+                .ifPresent(refreshTokenDao::delete);
     }
 }

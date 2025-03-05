@@ -25,7 +25,7 @@ public class MusicService {
     private IBaseDao<Music> dao;
 
     @Autowired
-    public void setDao(@Qualifier("genericDaoImpl") IBaseDao<Music> daoToSet) {
+    public void setDao(@Qualifier("genericDaoImpl")  IBaseDao<Music> daoToSet) {
         dao = daoToSet;
         dao.setClazz(Music.class);
     }
@@ -50,6 +50,9 @@ public class MusicService {
         }
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(music -> music.getFormat().equals(searchMediaRequest.getFormat()));
+        }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and(music -> music.getCreatedBy().equals(searchMediaRequest.getUsername()));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey()).toString().isEmpty()) {
             predicate = predicate.and(music -> music.getArtists().equals(searchMediaRequest.getAdditionalAttributes().get(ARTISTS.getJsonKey())));

@@ -7,6 +7,7 @@ import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -21,12 +22,8 @@ import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes
 public class VideoGameService {
     private IBaseDao<VideoGame> dao;
 
-    public VideoGameService(IBaseDao<VideoGame> dao) {
-        this.dao = dao;
-    }
-
     @Autowired
-    public void setDao(IBaseDao<VideoGame> daoToSet) {
+    public void setDao(@Qualifier("genericDaoImpl") IBaseDao<VideoGame> daoToSet) {
         dao = daoToSet;
         dao.setClazz(VideoGame.class);
     }
@@ -52,6 +49,9 @@ public class VideoGameService {
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(game -> game.getGenre().equals(searchMediaRequest.getGenre()));
         }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and(game -> game.getCreatedBy().equals(searchMediaRequest.getUsername()));
+        }
         if (searchMediaRequest.getAdditionalAttributes().get(CONSOLES.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(CONSOLES.getJsonKey()).toString().isEmpty()) {
             predicate = predicate.and(game -> game.getConsoles().equals(searchMediaRequest.getAdditionalAttributes().get(CONSOLES.getJsonKey())));
         }
@@ -60,9 +60,6 @@ public class VideoGameService {
         }
         if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey()) != null) {
             predicate = predicate.and(game -> game.getReleaseYear().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey())));
-        }
-        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
-            predicate = predicate.and(game -> game.getCreatedBy().equals(searchMediaRequest.getUsername()));
         }
         return Optional.of(predicate);
     }

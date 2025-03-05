@@ -8,6 +8,7 @@ import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.repository.IBaseDao;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -25,7 +26,7 @@ public class MovieService {
     private IBaseDao<Movie> dao;
 
     @Autowired
-    public void setDao(IBaseDao<Movie> daoToSet) {
+    public void setDao(@Qualifier("genericDaoImpl") IBaseDao<Movie> daoToSet) {
         dao = daoToSet;
         dao.setClazz(Movie.class);
     }
@@ -50,6 +51,9 @@ public class MovieService {
         }
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(movie -> movie.getFormat().equals(searchMediaRequest.getFormat()));
+        }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and(movie -> movie.getCreatedBy().equals(searchMediaRequest.getUsername()));
         }
         if (searchMediaRequest.getAdditionalAttributes().get(DIRECTORS.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(DIRECTORS.getJsonKey()).toString().isEmpty()) {
             predicate = predicate.and(movie -> movie.getDirectors().equals(searchMediaRequest.getAdditionalAttributes().get(DIRECTORS.getJsonKey())));

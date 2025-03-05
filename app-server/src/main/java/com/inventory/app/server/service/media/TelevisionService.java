@@ -50,6 +50,9 @@ public class TelevisionService {
         if (searchMediaRequest.getFormat() != null && !searchMediaRequest.getFormat().isEmpty()) {
             predicate = predicate.and(televisionShow -> televisionShow.getFormat().equals(searchMediaRequest.getFormat()));
         }
+        if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
+            predicate = predicate.and(televisionShow -> televisionShow.getCreatedBy().equals(searchMediaRequest.getUsername()));
+        }
         if (searchMediaRequest.getAdditionalAttributes().get(EPISODES.getJsonKey()) != null && !searchMediaRequest.getAdditionalAttributes().get(EPISODES.getJsonKey()).toString().isEmpty()) {
             predicate = predicate.and(televisionShow -> televisionShow.getEpisodes().equals(searchMediaRequest.getAdditionalAttributes().get(EPISODES.getJsonKey())));
         }

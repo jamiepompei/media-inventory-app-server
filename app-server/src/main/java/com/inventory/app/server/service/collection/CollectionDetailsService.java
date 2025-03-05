@@ -2,7 +2,6 @@ package com.inventory.app.server.service.collection;
 
 import com.inventory.app.server.entity.collection.CollectionDetails;
 import com.inventory.app.server.entity.media.Media;
-import com.inventory.app.server.entity.user.UserInfo;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
@@ -10,6 +9,7 @@ import com.inventory.app.server.repository.IBaseDao;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,32 +20,13 @@ public class CollectionDetailsService {
     private IBaseDao<CollectionDetails> dao;
 
     @Autowired
-    public void setDao(IBaseDao<CollectionDetails> daoToSet) {
+    public void setDao(@Qualifier("genericDaoImpl") IBaseDao<CollectionDetails> daoToSet) {
         dao = daoToSet;
         dao.setClazz(daoToSet.getClazz());
     }
 
-    public List<CollectionDetails> getByTitle(String title) {
-        List<CollectionDetails> collectionDetails = dao.findByField("title", title);
-        if (collectionDetails.isEmpty()) {
-            throw new ResourceNotFoundException("No media collection exists with title: " + title);
-        }
-        return collectionDetails;
-    }
-    public List<CollectionDetails> getCollectionsByCreatedBy(String createdBy){
-        List<CollectionDetails> collectionDetails = dao.findByField("created_by", createdBy);
-        if (collectionDetails.isEmpty()) {
-            throw new ResourceNotFoundException("No media collection exists created by: " + createdBy);
-        }
-        return collectionDetails;
-    }
-    public List<CollectionDetails> getByTag(String tag){
-        List<CollectionDetails> collectionDetails = dao.findByField("tag", tag);
-        if (collectionDetails.isEmpty()) {
-            throw new ResourceNotFoundException("No media collection exists with the tag " + tag);
-        }
-        return collectionDetails;
-    }
+    //TODO re-write the get method to be a search type of requestwith a predicate similar to the other service
+
 
     public CollectionDetails create(CollectionDetails resource) {
         if (collectionAlreadyExists(resource)) {
@@ -83,12 +64,6 @@ public class CollectionDetailsService {
         return  dao.createOrUpdate(updatedCollectionDetails);
     }
 
-    public List<CollectionDetails> getAllCollectionsByUser() {
-        //TODO get the current user
-        UserInfo user = new UserInfo();
-        return getCollectionsByCreatedBy(user.getUsername());
-    }
-
     public List<Media> getAllMediaByCollectionName() {
         //ensure the current user has view permissions for all the collections
         //query each media repo for the media with the collection_name
@@ -96,7 +71,9 @@ public class CollectionDetailsService {
     }
 
     private boolean collectionAlreadyExists(CollectionDetails collectionDetails) {
-        return getByTitle(collectionDetails.getTitle()).isEmpty();
+       //todo fix this once search methods exist
+        return true;
+        // return getByTitle(collectionDetails.getTitle()).isEmpty();
     }
 
     private boolean verifyIfCollectionDetailsUpdated(CollectionDetails existingCollectionDetails, CollectionDetails updatedCollectionDetails) {

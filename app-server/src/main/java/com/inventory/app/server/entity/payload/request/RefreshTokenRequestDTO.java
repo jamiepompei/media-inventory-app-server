@@ -1,12 +1,10 @@
 package com.inventory.app.server.entity.payload.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class RefreshTokenRequestDTO {
     private String token;
 }
