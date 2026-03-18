@@ -83,10 +83,10 @@ public class VideoGameService implements BaseService<VideoGame>{
         log.info("Initiating retrieval of video game with ID: {} for user: {}", id, username);
         VideoGame game =  dao.findOne(id, username);
         if (game == null) {
-            log.warn("Book with ID: {} not found for user: {}", id, username);
+            log.warn("Video Game with ID: {} not found for user: {}", id, username);
             return Optional.empty();
         } else {
-            log.info("Book with ID: {} retrieved successfully for user: {}", id, username);
+            log.info("Video game with ID: {} retrieved successfully for user: {}", id, username);
             return Optional.of(game);
         }
     }
@@ -95,8 +95,8 @@ public class VideoGameService implements BaseService<VideoGame>{
         VideoGame game = VideoGameMapper.INSTANCE.mapMediaRequestToVideoGame(updateCreateMediaRequest);
         Optional<VideoGame> existingGame = getById(game.getId(), game.getCreatedBy());
         if (existingGame.isPresent()) {
-            log.warn("Attempting to create a book with an id that already exists. Video game: " + game);
-            throw new ResourceAlreadyExistsException("Cannot create game because games already exist: " + game);
+            log.warn("Attempting to create a video game with an id that already exists. Video game: " + game);
+            throw new ResourceAlreadyExistsException("Cannot create video game because games already exist: " + game);
         }
         log.info("Initiating video game POST request. Video game to be created: {}", game);
         MediaResponse response = VideoGameMapper.INSTANCE.mapVideoGameToMediaResponse(dao.createOrUpdate(game));
