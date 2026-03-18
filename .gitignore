@@ -25,3 +25,6 @@ replay_pid*
 
 #IDEA Files
 *.idea/
+
+### Mac ###
+.DS_Store
