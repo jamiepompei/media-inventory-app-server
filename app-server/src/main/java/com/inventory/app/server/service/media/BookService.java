@@ -117,7 +117,7 @@ public class BookService implements BaseService<Book> {
         if (existingBook.isEmpty()) {
             throw new ResourceNotFoundException("Cannot update book because no book exists " + updatedBook);
         }
-        if (verifyIfBookUpdated(existingBook.get(), updatedBook)) {
+        if (!verifyIfBookUpdated(existingBook.get(), updatedBook)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingBook + "Updated Book: " + updatedBook);
         }
         log.info("Initiating book PUT request for book with ID: {}. Updated book details: {}", updatedBook.getId(), updatedBook);
@@ -139,6 +139,9 @@ public class BookService implements BaseService<Book> {
     }
 
     private boolean verifyIfBookUpdated(Book existingBook, Book updatedBook){
-        return existingBook.equals(updatedBook);
+        log.info("Verifying if book with ID: {} has updates. Existing book details: {} Updated book details: {}", existingBook.getId(), existingBook, updatedBook);
+        boolean updatesExist = !existingBook.equals(updatedBook);
+        log.info("Book with ID: {} has updates: {}", existingBook.getId(), updatesExist);
+        return updatesExist;
     }
 }
