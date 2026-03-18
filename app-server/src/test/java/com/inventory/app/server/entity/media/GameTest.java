@@ -13,23 +13,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class GameTest {
-    private Game game1;
-    private Game game2;
+    private VideoGame game1;
+    private VideoGame game2;
 
     @Before
     public void setUp() {
         // Create two identical games
-        game1 = new Game();
+        game1 = new VideoGame();
         game1.setId(1L);
-        game1.setVersion(1);
         game1.setTitle("Sample Game");
         game1.setConsoles(List.of("Console1", "Console2"));
         game1.setNumberOfPlayers(2);
         game1.setReleaseYear(2022);
 
-        game2 = new Game();
+        game2 = new VideoGame();
         game2.setId(1L);
-        game2.setVersion(1);
         game2.setTitle("Sample Game");
         game2.setConsoles(List.of("Console1", "Console2"));
         game2.setNumberOfPlayers(2);

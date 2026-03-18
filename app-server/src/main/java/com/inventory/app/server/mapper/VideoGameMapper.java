@@ -20,24 +20,20 @@ public interface VideoGameMapper {
     VideoGameMapper INSTANCE = Mappers.getMapper(VideoGameMapper.class);
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "version", target = "version")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
     @Mapping(source = "username", target = "createdBy")
-    @Mapping(source = "createdAsOf", target = "createdAsOf")
-    @Mapping(source = "modifiedBy", target = "modifiedBy")
-    @Mapping(source = "modifiedAsOf", target = "modifiedAsOf")
+    @Mapping(source = "username", target = "modifiedBy")
     @Mapping(source = "completed", target = "completed")
     @Mapping(source = "onLoan", target = "onLoan")
     @Mapping(source = "tags", target = "tags")
     @Mapping(source = "reviewRating", target = "reviewRating")
     @Mapping(source = "reviewDescription", target = "reviewDescription")
-    @Mapping(source = "collectionTitle", target = "collectionTitle")
     @Mapping(source = "additionalAttributes", target = "consoles", qualifiedByName = "mapConsoles")
     @Mapping(source = "additionalAttributes", target = "numberOfPlayers", qualifiedByName = "mapNumberOfPlayers")
     @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
-    VideoGame mapMediaRequestToGame(UpdateCreateMediaRequest mediaRequest);
+    VideoGame mapMediaRequestToVideoGame(UpdateCreateMediaRequest mediaRequest);
 
 
     @Named("mapConsoles")
@@ -60,22 +56,20 @@ public interface VideoGameMapper {
 
     // Map VideoGame fields back into additionalAttributes in MediaResponse
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "version", target = "version")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionTitle", target = "collectionTitle")
     @Mapping(source = "createdBy", target = "username")
-    @Mapping(source = "createdAsOf", target = "createdAsOf")
+    @Mapping(source = "createdOn", target = "createdOn")
     @Mapping(source = "modifiedBy", target = "modifiedBy")
-    @Mapping(source = "modifiedAsOf", target = "modifiedAsOf")
+    @Mapping(source = "modifiedOn", target = "modifiedOn")
     @Mapping(source = "completed", target = "completed")
     @Mapping(source = "onLoan", target = "onLoan")
     @Mapping(source = "tags", target = "tags")
     @Mapping(source = "reviewRating", target = "reviewRating")
     @Mapping(source = "reviewDescription", target = "reviewDescription")
-    @Mapping(source = "game", target = "additionalAttributes", qualifiedByName = "mapGameToAdditionalAttributes")
-    MediaResponse mapGameToMediaResponse(VideoGame game);
+    @Mapping(source = "videoGame", target = "additionalAttributes", qualifiedByName = "mapGameToAdditionalAttributes")
+    MediaResponse mapVideoGameToMediaResponse(VideoGame videoGame);
 
     @Named("mapGameToAdditionalAttributes")
     default ConcurrentHashMap<String, Object> mapGameToAdditionalAttributes(VideoGame game) {

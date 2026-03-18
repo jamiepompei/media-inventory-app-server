@@ -140,16 +140,16 @@ public class SecurityConfig {
     private void customCSRFProtection(CsrfConfigurer<HttpSecurity> httpSecurityCsrfConfigurer) {
         // Exclude CSRF protection for authentication endpoints
         httpSecurityCsrfConfigurer
-                .ignoringRequestMatchers("/api/auth/**");
+                .ignoringRequestMatchers("/auth/**");
     }
 
     private void customAuthorizeRequests(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry) {
         registry
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // Permit access to static resources
-                .requestMatchers("/api/auth/**").permitAll() // Permit access to authentication endpoints
-                .requestMatchers("/signup").permitAll() // Permit access to signup page
+                .requestMatchers("/auth/**").permitAll() // Permit access to authentication endpoints
                 .requestMatchers("/admin/**").hasRole("ADMIN") // Restrict access to admin endpoints
                 .requestMatchers("/user/**").hasRole("USER") // Restrict access to user endpoints
+                .requestMatchers("/users/test").permitAll() // Permit access to test endpoint
                 .anyRequest().authenticated();
     }
 }

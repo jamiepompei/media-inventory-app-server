@@ -2,9 +2,12 @@ package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Music;
 import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
+import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
+import com.inventory.app.server.mapper.MusicMapper;
 import com.inventory.app.server.repository.IBaseDao;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +24,7 @@ import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes
 
 @Service
 @Transactional
-public class MusicService {
+public class MusicService implements BaseService<Music> {
     private IBaseDao<Music> dao;
 
     @Autowired
@@ -30,18 +33,18 @@ public class MusicService {
         dao.setClazz(Music.class);
     }
 
-    public List<Music> searchMusic(SearchMediaRequest searchMediaRequest){
+    public List<MediaResponse> search(SearchMediaRequest searchMediaRequest){
         Optional<Predicate<Music>> searchPredicate = buildSearchPredicate(searchMediaRequest);
         return searchPredicate.map(musicPredicate -> dao.findAll().stream()
                 .filter(musicPredicate)
-                .collect(Collectors.toList())).orElse(Collections.emptyList());
+                .map(MusicMapper.INSTANCE::mapMusicToMediaResponse)
+                .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     private Optional<Predicate<Music>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
         Predicate<Music> predicate = music -> true; // Default Predicate
-        if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
-            predicate = predicate.and(music -> music.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
-        }
+
         if (searchMediaRequest.getTitle() != null && !searchMediaRequest.getTitle().isEmpty()) {
             predicate = predicate.and(music -> music.getTitle().equals(searchMediaRequest.getTitle()));
         }
@@ -71,32 +74,34 @@ public class MusicService {
         return music == null? Optional.empty() : Optional.of(music);
     }
 
-    public Music create(Music music) {
+    public MediaResponse create(UpdateCreateMediaRequest updateCreateMediaRequest) {
+        Music music = MusicMapper.INSTANCE.mapMediaRequestToMusic(updateCreateMediaRequest);
        Optional<Music> existingMusic = getById(music.getId(), music.getCreatedBy());
        if (existingMusic.isPresent()) {
            throw new ResourceAlreadyExistsException("Cannot create music because movie already exists: " + music);
        }
-       return dao.createOrUpdate(music);
+       return MusicMapper.INSTANCE.mapMusicToMediaResponse(dao.createOrUpdate(music));
     }
 
-    public Music update(Music updatedMusic) {
-        Optional<Music> existingMusic = getById(updatedMusic.getId(), updatedMusic.getCreatedBy());
+    public MediaResponse update(UpdateCreateMediaRequest updatedMusic) {
+        Music music = MusicMapper.INSTANCE.mapMediaRequestToMusic(updatedMusic);
+        Optional<Music> existingMusic = getById(music.getId(), music.getCreatedBy());
         if (existingMusic.isEmpty()) {
             throw new ResourceNotFoundException("Cannot update music because music does not exist: " + updatedMusic);
         }
-        if (verifyIfMusicUpdated(existingMusic.get(), updatedMusic)) {
+        if (verifyIfMusicUpdated(existingMusic.get(), music)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingMusic+ "Updated Book: " + updatedMusic);
         }
-        return dao.createOrUpdate(updatedMusic);
+        return MusicMapper.INSTANCE.mapMusicToMediaResponse(dao.createOrUpdate(music));
     }
 
-    public Music deleteById(Long id, String username){
+    public Long deleteById(Long id, String username){
         Optional<Music> music = getById(id, username);
         if (music.isEmpty()) {
             throw new ResourceNotFoundException("Cannot delete music because music does not exist.");
         }
         dao.deleteById(id, username);
-        return music.get();
+        return music.get().getId();
     }
 
     private boolean verifyIfMusicUpdated(Music existingMusic, Music updatedMusic) {

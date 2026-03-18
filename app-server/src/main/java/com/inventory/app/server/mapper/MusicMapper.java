@@ -1,7 +1,6 @@
 package com.inventory.app.server.mapper;
 
 import com.inventory.app.server.config.MediaInventoryAdditionalAttributes;
-import com.inventory.app.server.entity.media.Media;
 import com.inventory.app.server.entity.media.Music;
 import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
 import com.inventory.app.server.entity.payload.response.MediaResponse;
@@ -21,11 +20,16 @@ public interface MusicMapper {
     MusicMapper INSTANCE = Mappers.getMapper(MusicMapper.class);
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "version", target = "version")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionTitle", target = "collectionTitle")
+    @Mapping(source = "username", target = "createdBy")
+    @Mapping(source = "username", target = "modifiedBy")
+    @Mapping(source = "completed", target = "completed")
+    @Mapping(source = "onLoan", target = "onLoan")
+    @Mapping(source = "tags", target = "tags")
+    @Mapping(source = "reviewRating", target = "reviewRating")
+    @Mapping(source = "reviewDescription", target = "reviewDescription")
     @Mapping(source = "additionalAttributes", target = "artists", qualifiedByName = "mapArtists")
     @Mapping(source = "additionalAttributes", target = "songList", qualifiedByName = "mapSongList")
     @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
@@ -53,19 +57,20 @@ public interface MusicMapper {
     }
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "version", target = "version")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionTitle", target = "collectionTitle")
-    MediaResponse mapMusicIdToMediaId(Media entity);
-
-
-    default MediaResponse mapMusicToMediaResponseWithAdditionalAttributes(Music music){
-        MediaResponse mediaResponse = mapMusicIdToMediaId(music);
-        mediaResponse.setAdditionalAttributes(mapMusicToAdditionalAttributes(music));
-        return mediaResponse;
-    }
+    @Mapping(source = "createdBy", target = "username")
+    @Mapping(source = "createdOn", target = "createdOn")
+    @Mapping(source = "modifiedBy", target = "modifiedBy")
+    @Mapping(source = "modifiedOn", target = "modifiedOn")
+    @Mapping(source = "completed", target = "completed")
+    @Mapping(source = "onLoan", target = "onLoan")
+    @Mapping(source = "tags", target = "tags")
+    @Mapping(source = "reviewRating", target = "reviewRating")
+    @Mapping(source = "reviewDescription", target = "reviewDescription")
+    @Mapping(source = "music", target = "additionalAttributes", qualifiedByName = "mapMusicToAdditionalAttributes")
+    MediaResponse mapMusicToMediaResponse(Music music);
 
     @Named("mapMusicToAdditionalAttributes")
     default ConcurrentHashMap<String, Object> mapMusicToAdditionalAttributes(Music music) {

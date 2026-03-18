@@ -1,79 +1,112 @@
 package com.inventory.app.server.entity.media;
 
+import com.inventory.app.server.entity.collection.Collection;
+import com.inventory.app.server.entity.collection.Tag;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@MappedSuperclass
+import static com.inventory.app.server.util.MediaServerUtility.getCurrentUsername;
+
+@Entity
+@Table(name = "media", uniqueConstraints = @UniqueConstraint(columnNames = {"title", "created_by"}))
 @Getter
 @Setter
+@Inheritance(strategy = InheritanceType.JOINED) // Allows different types of media
 public abstract class Media implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Version
-    private Integer version;
-    @Column(name = "title")
+
+    @Column(name = "title", nullable = false)
     private String title;
-    @Column(name = "format")
-    private String format;
+
     @Column(name = "genre")
     private String genre;
-    @Column(name = "collection_name")
-    private String collectionTitle;
-    @Column(name = "created_by")
+
+    @Column(name = "format")
+    private String format;
+
+    @Column(name = "created_by", nullable = false)
     private String createdBy;
-    @Column(name = "created_as_of")
-    private LocalDateTime createdAsOf;
-    @Column(name = "modified_by")
+
+    @Column(name = "created_on", updatable = false)
+    private LocalDateTime createdOn;
+
+    @Column(name = "modified_by", nullable = false)
     private String modifiedBy;
-    @Column(name = "modified_as_of")
-    private LocalDateTime modifiedAsOf;
+
+    @Column(name = "modified_on")
+    private LocalDateTime modifiedOn;
+
     @Column(name = "completed")
-    private boolean completed;
+    private Boolean completed;
+
     @Column(name = "onLoan")
-    private boolean onLoan;
-    @Column(name = "tags")
-    private Set<String> tags;
-    @Column(name = "review_rating")
+    private Boolean onLoan;
+
+    @Column(name = "reviewRating")
     private Integer reviewRating;
-    @Column(name = "review_description")
+
+    @Column(name = "reviewDescription")
     private String reviewDescription;
+
+    @ManyToMany(mappedBy = "media", cascade = CascadeType.ALL)
+    private List<Collection> collections;
+
+    @ManyToMany(mappedBy = "media", cascade = CascadeType.ALL)
+    private Set<Tag> tags;
+
+    @PrePersist
+    public void onCreate(){
+        this.createdBy = getCurrentUsername();
+        this.createdOn = LocalDateTime.now();
+        this.modifiedBy = getCurrentUsername();
+        this.modifiedOn = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onModify(){
+        this.modifiedBy = getCurrentUsername();
+        this.modifiedOn = LocalDateTime.now();
+    }
 
     @Override
     public String toString() {
-        return "id=" + id +
-                ", version=" + version +
+        return "Media{" +
+                "id=" + id +
                 ", title='" + title + '\'' +
-                ", format=" + format +
-                ", genre=" + genre +
-                ", collectionName=" + collectionTitle;
+                ", genre='" + genre + '\'' +
+                ", format='" + format + '\'' +
+                ", createdBy='" + createdBy + '\'' +
+                ", createdOn=" + createdOn +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                ", modifiedOn=" + modifiedOn +
+                ", completed=" + completed +
+                ", onLoan=" + onLoan +
+                ", reviewRating=" + reviewRating +
+                ", reviewDescription='" + reviewDescription + '\'' +
+                ", collections=" + collections +
+                ", tags=" + tags +
+                '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Media media)) return false;
-        return Objects.equals(getId(), media.getId()) &&
-                Objects.equals(getVersion(), media.getVersion()) &&
-                Objects.equals(getTitle(), media.getTitle()) &&
-                Objects.equals(getFormat(), media.getFormat()) &&
-                Objects.equals(getGenre(), media.getGenre()) &&
-                Objects.equals(getCollectionTitle(), media.getCollectionTitle());
+        return Objects.equals(getId(), media.getId()) && Objects.equals(getTitle(), media.getTitle()) && Objects.equals(getGenre(), media.getGenre()) && Objects.equals(getFormat(), media.getFormat()) && Objects.equals(getCreatedBy(), media.getCreatedBy()) && Objects.equals(getCreatedOn(), media.getCreatedOn()) && Objects.equals(getModifiedBy(), media.getModifiedBy()) && Objects.equals(getModifiedOn(), media.getModifiedOn()) && Objects.equals(getCompleted(), media.getCompleted()) && Objects.equals(getOnLoan(), media.getOnLoan()) && Objects.equals(getReviewRating(), media.getReviewRating()) && Objects.equals(getReviewDescription(), media.getReviewDescription()) && Objects.equals(getCollections(), media.getCollections()) && Objects.equals(getTags(), media.getTags());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(),
-                getVersion(),
-                getTitle(),
-                getFormat(),
-                getGenre(),
-                getCollectionTitle());
+        return Objects.hash(getId(), getTitle(), getGenre(), getFormat(), getCreatedBy(), getCreatedOn(), getModifiedBy(), getModifiedOn(), getCompleted(), getOnLoan(), getReviewRating(), getReviewDescription(), getCollections(), getTags());
     }
 }
