@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,48 +38,74 @@ public class UserController {
     private AuthenticationManager authenticationManager;
 
 
-
-    //TODO is this endpoint required?
+    /**
+     * Retrieves all users from the system.
+     *
+     * @return A ResponseEntity containing a list of all users.
+     */
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
+    public ResponseEntity<?> getAllUsers() {
+        log.info("Received request to fetch all users.");
         try {
             List<UserInfo> userList = userService.getAllUsers();
             List<UserResponse> userResponseList = userList
                     .stream()
                     .map(UserMapper.INSTANCE::mapUserInfoToUserResponse)
                     .collect(Collectors.toList());
+            log.info("Successfully retrieved {} users.", userResponseList.size());
             return ResponseEntity.ok(userResponseList);
         } catch (Exception e) {
-            return (ResponseEntity<List<UserResponse>>) Arrays.asList(createErrorResponse(e));
-        }
-    }
-
-    @GetMapping("/profile")
-    public ResponseEntity<UserResponse> getUserProfile() {
-        UserResponse userResponse;
-        try {
-            userResponse = userService.getUser();
-            return ResponseEntity.ok(userResponse);
-        } catch (Exception e) {
+            log.error("Error occurred while fetching all users: {}", e.getMessage(), e);
             return createErrorResponse(e);
         }
     }
 
-    //test
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
+    /**
+     * Retrieves the profile of the currently authenticated user.
+     *
+     * @return A ResponseEntity containing the user's profile.
+     */
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile() {
+        log.info("Received request to fetch user profile.");
         try {
-            log.info("Testing admin access...");
-            return ResponseEntity.ok("Welcome!");
+            UserResponse userResponse = userService.getUser();
+            log.info("Successfully retrieved user profile for user: {}", userResponse.getUsername());
+            return ResponseEntity.ok(userResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((e.getMessage()));
+            log.error("Error occurred while fetching user profile: {}", e.getMessage(), e);
+            return createErrorResponse(e);
         }
     }
 
+    /**
+     * Test endpoint to verify admin access.
+     *
+     * @return A ResponseEntity containing a test message.
+     */
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        log.info("Testing admin access...");
+        try {
+            log.info("Admin access verified successfully.");
+            return ResponseEntity.ok("Welcome!");
+        } catch (Exception e) {
+            log.error("Error occurred during admin access test: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    /**
+     * Creates a standardized error response for exceptions.
+     *
+     * @param e The exception to handle.
+     * @return A ResponseEntity containing the error response.
+     */
     private ResponseEntity<UserResponse> createErrorResponse(Exception e) {
         String message = e.getMessage();
-        ErrorResponse errorResponse = new com.inventory.app.server.error.ErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        log.error("Creating error response: {}", message, e);
+        ErrorResponse errorResponse = new ErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR.value());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UserResponse.builder().errorResponse(errorResponse).build());
     }
 }
