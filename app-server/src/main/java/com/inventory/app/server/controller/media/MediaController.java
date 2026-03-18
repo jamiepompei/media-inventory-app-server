@@ -7,9 +7,10 @@ import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.factory.ServiceFactory;
 import com.inventory.app.server.service.media.BaseService;
 import jakarta.validation.Valid;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ import static com.inventory.app.server.util.MediaServerUtility.setUsername;
 
 @RestController
 @RequestMapping("/media")
-@Log4j2
+@Slf4j
 public class MediaController<T> {
 
     private final ServiceFactory serviceFactory;
@@ -30,59 +31,102 @@ public class MediaController<T> {
         this.serviceFactory = serviceFactory;
     }
 
-   // @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
+    /**
+     * Endpoint to search for media resources based on the provided criteria.
+     *
+     * @param userDetails The authenticated user details.
+     * @param searchMediaRequest The search criteria, including entity type and other filters.
+     * @return ResponseEntity containing a list of media resources matching the criteria.
+     * @throws ResponseStatusException If an error occurs during the search.
+     */
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping
     ResponseEntity<List<MediaResponse>> search(@AuthenticationPrincipal UserDetails userDetails,
-                                                    @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
+                                               @Valid @RequestBody final SearchMediaRequest searchMediaRequest) {
+        log.info("Received search request for entity type: {} by user: {}", searchMediaRequest.getEntityType(), userDetails.getUsername());
         BaseService<T> service = serviceFactory.getService(searchMediaRequest.getEntityType());
         setUsername(userDetails, searchMediaRequest);
-        List<MediaResponse> responseList = (List<MediaResponse>) service.search(searchMediaRequest);
-                
+        log.info("Delegating search request to service for entity type: {}", searchMediaRequest.getEntityType());
+        List<MediaResponse> responseList = service.search(searchMediaRequest);
+        log.info("Search completed successfully. Number of results: {}", responseList.size());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
-
-
+    /**
+     * Endpoint to create a new media resource.
+     *
+     * @param userDetails The authenticated user details.
+     * @param updateCreateMediaRequest The media resource data to be created.
+     * @return ResponseEntity containing the created media resource.
+     * @throws ResponseStatusException If an error occurs during the creation process.
+     */
     @PostMapping
-   // @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MediaResponse> createMedia(//@AuthenticationPrincipal UserDetails userDetails,
-                                                    @Valid @RequestBody final UpdateCreateMediaRequest updateCreateMediaRequest) {
-        log.info("Received request to create resource: " + updateCreateMediaRequest);
+    public ResponseEntity<MediaResponse> createMedia(@AuthenticationPrincipal UserDetails userDetails,
+                                                     @Valid @RequestBody final UpdateCreateMediaRequest updateCreateMediaRequest) {
+        log.info("Received create request for entity type: {}", updateCreateMediaRequest.getEntityType());
         try {
-            //  setUsername(userDetails, updateCreateMediaRequest);
+            setUsername(userDetails, updateCreateMediaRequest);
+            log.info("Delegating create request to service for entity type: {}", updateCreateMediaRequest.getEntityType());
             BaseService<T> service = serviceFactory.getService(updateCreateMediaRequest.getEntityType());
-            MediaResponse response = (MediaResponse) service.create(updateCreateMediaRequest);
-            log.info("Created new book: " + response);
+            MediaResponse response = service.create(updateCreateMediaRequest);
+            log.info("Resource created successfully with ID: {}", response.getId());
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
-            log.error("Error creating resource: " + e.getMessage(), e);
+            log.error("Error occurred while creating resource: {}", e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the resource.");
         }
     }
 
+    /**
+     * Endpoint to update an existing media resource.
+     *
+     * @param userDetails The authenticated user details.
+     * @param updateMediaRequest The updated media resource data.
+     * @return ResponseEntity containing the updated media resource.
+     * @throws ResponseStatusException If an error occurs during the update process.
+     */
     @PutMapping(value = "/{id}")
-  //  @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<MediaResponse> updateMedia(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody final UpdateCreateMediaRequest updateMediaRequest) {
-        log.info("received request to update resource: " + updateMediaRequest);
-        setUsername(userDetails, updateMediaRequest);
-        BaseService<T> service = serviceFactory.getService(updateMediaRequest.getEntityType());
-        MediaResponse response = service.update(updateMediaRequest);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        log.info("Received update request for entity type: {}", updateMediaRequest.getEntityType());
+        try {
+            setUsername(userDetails, updateMediaRequest);
+            log.info("Delegating update request to service for entity type: {}", updateMediaRequest.getEntityType());
+            BaseService<T> service = serviceFactory.getService(updateMediaRequest.getEntityType());
+            MediaResponse response = service.update(updateMediaRequest);
+            log.info("Resource updated successfully with ID: {}", response.getId());
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            log.error("Error occurred while updating resource: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while updating the resource.");
+        }
     }
 
+    /**
+     * Endpoint to delete a media resource by its ID.
+     *
+     * @param userDetails The authenticated user details.
+     * @param deleteMediaRequest The request containing the ID of the media resource to be deleted.
+     * @return ResponseEntity containing the ID of the deleted media resource.
+     * @throws ResponseStatusException If the ID is null or an error occurs during the deletion process.
+     */
     @DeleteMapping(value = "/{id}")
-   // @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Long> deleteMedia(@AuthenticationPrincipal UserDetails userDetails,
-                                                    @PathVariable("id") final DeleteMediaRequest deleteMediaRequest){
+                                            @PathVariable("id") final DeleteMediaRequest deleteMediaRequest) {
         if (deleteMediaRequest.getId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
+        log.info("Received delete request for entity type: {} with ID: {} by user: {}", deleteMediaRequest.getEntityType(), deleteMediaRequest.getId(), userDetails.getUsername());
         setUsername(userDetails, deleteMediaRequest);
         BaseService<T> service = serviceFactory.getService(deleteMediaRequest.getEntityType());
+        log.info("Delegating delete request to service for entity type: {}", deleteMediaRequest.getEntityType());
         Long response = service.deleteById(deleteMediaRequest.getId(), userDetails.getUsername());
+        log.info("Resource with ID: {} deleted successfully by user: {}", response, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
