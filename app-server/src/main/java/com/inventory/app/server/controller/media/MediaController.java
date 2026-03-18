@@ -47,7 +47,7 @@ public class MediaController<T> {
         BaseService<T> service = serviceFactory.getService(searchMediaRequest.getEntityType());
         setUsername(userDetails, searchMediaRequest);
         log.info("Delegating search request to service for entity type: {}", searchMediaRequest.getEntityType());
-        List<MediaResponse> responseList = (List<MediaResponse>) service.search(searchMediaRequest);
+        List<MediaResponse> responseList = service.search(searchMediaRequest);
         log.info("Search completed successfully. Number of results: {}", responseList.size());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
@@ -70,7 +70,7 @@ public class MediaController<T> {
             setUsername(userDetails, updateCreateMediaRequest);
             log.info("Delegating create request to service for entity type: {}", updateCreateMediaRequest.getEntityType());
             BaseService<T> service = serviceFactory.getService(updateCreateMediaRequest.getEntityType());
-            MediaResponse response = (MediaResponse) service.create(updateCreateMediaRequest);
+            MediaResponse response = service.create(updateCreateMediaRequest);
             log.info("Resource created successfully with ID: {}", response.getId());
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {

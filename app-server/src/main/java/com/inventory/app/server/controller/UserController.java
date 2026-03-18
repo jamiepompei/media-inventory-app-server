@@ -43,6 +43,7 @@ public class UserController {
      *
      * @return A ResponseEntity containing a list of all users.
      */
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
         log.info("Received request to fetch all users.");
@@ -65,6 +66,7 @@ public class UserController {
      *
      * @return A ResponseEntity containing the user's profile.
      */
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile() {
         log.info("Received request to fetch user profile.");
@@ -84,7 +86,7 @@ public class UserController {
      * @return A ResponseEntity containing a test message.
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @GetMapping("/test")
+    @GetMapping("/test/admin")
     public ResponseEntity<String> test() {
         log.info("Testing admin access...");
         try {
@@ -92,6 +94,42 @@ public class UserController {
             return ResponseEntity.ok("Welcome!");
         } catch (Exception e) {
             log.error("Error occurred during admin access test: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    /**
+     * Test endpoint to verify role access.
+     *
+     * @return A ResponseEntity containing a test message.
+     */
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @GetMapping("/test/role")
+    public ResponseEntity<String> testUser() {
+        log.info("Testing role access...");
+        try {
+            log.info("Role access verified successfully.");
+            return ResponseEntity.ok("Welcome!");
+        } catch (Exception e) {
+            log.error("Error occurred during role access test: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    /**
+     * Test endpoint to verify role access.
+     *
+     * @return A ResponseEntity containing a test message.
+     */
+    @PreAuthorize("hasAuthority('ROLE_VIEW')")
+    @GetMapping("/test/view")
+    public ResponseEntity<String> testView() {
+        log.info("Testing view access...");
+        try {
+            log.info("View access verified successfully.");
+            return ResponseEntity.ok("Welcome!");
+        } catch (Exception e) {
+            log.error("Error occurred during view access test: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
