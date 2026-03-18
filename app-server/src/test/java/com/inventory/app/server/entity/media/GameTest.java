@@ -5,7 +5,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +42,6 @@ public class GameTest {
 
     @Test
     public void testEquals() {
-        // Test that equals method works correctly
         assertEquals(game1, game2);
     }
 
@@ -58,22 +56,12 @@ public class GameTest {
 
     @Test
     public void testHashCode() {
-        // Test that hashCode method works correctly
         assertThat(game1.hashCode()).isEqualTo(game2.hashCode());
     }
 
     @Test
     public void testToString() {
-        // Test that toString method works correctly
-        String expectedToString = "Game{consoles=[Console1, Console2], numberOfPlayers=2, " +
-                "releaseDate=2022-01-30 " +
-                "id=1, " +
-                "version=1, " +
-                "title='Sample Game', " +
-                "format=" + null + ", " +
-                "genre=" + null + ", " +
-                "collectionName=" + null +
-                "}";
+        String expectedToString = "Game{consoles=[Console1, Console2], numberOfPlayers=2, releaseDate=2022 Media{id=1, title='Sample Game', genre='null', format='null', createdBy='null', createdOn=null, modifiedBy='null', modifiedOn=null, completed=null, onLoan=null, reviewRating=null, reviewDescription='null', collections=null, tags=null}}";
         assertEquals(expectedToString, game1.toString());
     }
 
@@ -82,7 +70,7 @@ public class GameTest {
         // Test getters and setters
         assertThat(game1.getConsoles()).containsExactly("Console1", "Console2");
         assertEquals(2, game1.getNumberOfPlayers());
-        assertEquals(LocalDate.of(2022, 1, 30), game1.getReleaseYear());
+        assertEquals(2022, game1.getReleaseYear());
 
         // Modify values using setters
         game1.setConsoles(List.of("NewConsole"));
@@ -92,6 +80,6 @@ public class GameTest {
         // Test that values have been updated
         assertThat(game1.getConsoles()).containsExactly("NewConsole");
         assertEquals(4, game1.getNumberOfPlayers());
-        assertEquals(LocalDate.of(2023, 1, 30), game1.getReleaseYear());
+        assertEquals(2023, game1.getReleaseYear());
     }
 }

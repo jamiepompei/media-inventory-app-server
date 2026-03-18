@@ -89,13 +89,8 @@ public class UserController {
     @GetMapping("/test/admin")
     public ResponseEntity<String> test() {
         log.info("Testing admin access...");
-        try {
-            log.info("Admin access verified successfully.");
-            return ResponseEntity.ok("Welcome!");
-        } catch (Exception e) {
-            log.error("Error occurred during admin access test: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        log.info("Admin access verified successfully.");
+        return ResponseEntity.ok("Welcome!");
     }
 
     /**
@@ -107,13 +102,8 @@ public class UserController {
     @GetMapping("/test/role")
     public ResponseEntity<String> testUser() {
         log.info("Testing role access...");
-        try {
-            log.info("Role access verified successfully.");
-            return ResponseEntity.ok("Welcome!");
-        } catch (Exception e) {
-            log.error("Error occurred during role access test: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        log.info("Role access verified successfully.");
+        return ResponseEntity.ok("Welcome!");
     }
 
     /**
@@ -125,13 +115,8 @@ public class UserController {
     @GetMapping("/test/view")
     public ResponseEntity<String> testView() {
         log.info("Testing view access...");
-        try {
-            log.info("View access verified successfully.");
-            return ResponseEntity.ok("Welcome!");
-        } catch (Exception e) {
-            log.error("Error occurred during view access test: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        log.info("View access verified successfully.");
+        return ResponseEntity.ok("Welcome!");
     }
 
     /**

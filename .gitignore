@@ -25,6 +25,11 @@ replay_pid*
 
 #IDEA Files
 *.idea/
+*.iml
+HELP.md
 
 ### Mac ###
 .DS_Store
+
+# Ignore Maven target directory
+target/

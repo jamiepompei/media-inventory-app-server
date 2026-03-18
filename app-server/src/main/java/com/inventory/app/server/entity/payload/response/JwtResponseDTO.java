@@ -8,4 +8,12 @@ import lombok.*;
 public class JwtResponseDTO {
     private String accessToken;
     private String refreshToken;
+
+    @Override
+    public String toString() {
+        return "JwtResponseDTO{" +
+                "accessToken='" + accessToken + '\'' +
+                ", refreshToken='" + refreshToken + '\'' +
+                '}';
+    }
 }

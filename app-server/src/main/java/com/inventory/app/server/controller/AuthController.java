@@ -155,18 +155,4 @@ public class AuthController {
         ErrorResponse errorResponse = new com.inventory.app.server.error.ErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR.value());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UserResponse.builder().errorResponse(errorResponse).build());
     }
-
-    /**
-     * Handles unhandled exceptions globally. Logs the exception and returns a standardized
-     * error response with an HTTP 500 status.
-     *
-     * @param e The unhandled exception.
-     * @return A ResponseEntity containing the error response.
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.error("Unhandled exception: {}", e.getMessage(), e);
-        ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
 }
