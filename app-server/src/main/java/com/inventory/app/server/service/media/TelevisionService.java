@@ -10,6 +10,7 @@ import com.inventory.app.server.error.ResourceNotFoundException;
 import com.inventory.app.server.mapper.TelevisionShowMapper;
 import com.inventory.app.server.repository.IBaseDao;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes
 
 @Service
 @Transactional
+@Slf4j
 public class TelevisionService implements BaseService<TelevisionShow>{
     private IBaseDao<TelevisionShow> dao;
     @Autowired
@@ -33,12 +35,19 @@ public class TelevisionService implements BaseService<TelevisionShow>{
     }
 
     public List<MediaResponse> search(SearchMediaRequest searchMediaRequest) {
+        log.info("Initiating search for tv shows with search criteria: {}", searchMediaRequest);
         Optional<Predicate<TelevisionShow>> searchPredicate = buildSearchPredicate(searchMediaRequest);
-        return searchPredicate.map(televisionShowPredicate -> dao.findAll().stream()
+        List<MediaResponse> mediaResponses = searchPredicate.map(televisionShowPredicate -> dao.findAll().stream()
                 .filter(televisionShowPredicate)
                 .map(TelevisionShowMapper.INSTANCE::mapTelevisionShowToMediaResponse)
                 .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
+        if (mediaResponses.isEmpty()) {
+            log.info("No tv shows found matchin search criteria: {}", searchMediaRequest);
+        } else {
+            log.info("Search completed successfully. Number of tv shows found: {}", mediaResponses.size());
+        }
+        return mediaResponses;
     }
 
     private Optional<Predicate<TelevisionShow>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
@@ -65,21 +74,33 @@ public class TelevisionService implements BaseService<TelevisionShow>{
         if (searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey()) != null) {
             predicate = predicate.and(televisionShow -> televisionShow.getEpisodes().equals(searchMediaRequest.getAdditionalAttributes().get(RELEASE_YEAR.getJsonKey())));
         }
+        log.info("Search predicate: {} built successfully for search criteria: {}", predicate, searchMediaRequest);
       return Optional.of(predicate);
     }
 
     public Optional<TelevisionShow> getById(Long id, String username) {
+        log.info("Initiating retrieval of book with ID: {} for user: {}", id, username);
         TelevisionShow televisionShow = dao.findOne(id, username);
-        return televisionShow == null ? Optional.empty() : Optional.of(televisionShow);
+        if (televisionShow == null) {
+            log.warn("TV show with ID: {} not found for user: {}", id, username);
+            return Optional.empty();
+        } else {
+            log.info("TV show with ID: {} retrieved successfully for user: {}", id, username);
+            return Optional.of(televisionShow);
+        }
     }
 
     public MediaResponse create(UpdateCreateMediaRequest updateCreateMediaRequest) {
         TelevisionShow televisionShow = TelevisionShowMapper.INSTANCE.mapMediaRequestToTelevisionShow(updateCreateMediaRequest);
         Optional<TelevisionShow> existingTelevisionShow = getById(televisionShow.getId(), televisionShow.getCreatedBy());
         if(existingTelevisionShow.isPresent()) {
+            log.warn("Attempting to create a TV show with an id that already exists. TV show: {}", televisionShow);
             throw new ResourceAlreadyExistsException("Cannot create television show because television show already exists: " + televisionShow);
         }
-        return TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponse(dao.createOrUpdate(televisionShow));
+        log.info("Initiating tv show POST request. TV show to be created: {}", televisionShow);
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponse(dao.createOrUpdate(televisionShow));
+        log.info("Televisio show created successfully with ID: {}", televisionShow.getId());
+        return response;
     }
 
     public MediaResponse update(UpdateCreateMediaRequest updateCreateMediaRequest) {
@@ -92,15 +113,21 @@ public class TelevisionService implements BaseService<TelevisionShow>{
         if (verifyIfTelevisionShowUpdated(existingTelevisionShow.get(), updatedTelevisionShow)) {
             throw new NoChangesToUpdateException("No updates in television show to save. Will not proceed with update. Existing Television Show: " + existingTelevisionShow + "Updated Television Show: " + updatedTelevisionShow);
         }
-        return TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponse(dao.createOrUpdate(updatedTelevisionShow));
+        log.info("Initiating tv show PUT request for tv show with ID: {}. Updated tv show details: {}", updatedTelevisionShow.getId(), updatedTelevisionShow);
+        MediaResponse response = TelevisionShowMapper.INSTANCE.mapTelevisionShowToMediaResponse(dao.createOrUpdate(updatedTelevisionShow));
+        log.info("TV show with ID: {} updated successfully", updatedTelevisionShow.getId());
+        return response;
     }
 
     public Long deleteById(Long id, String username){
+        log.info("Initiating tv show DELTE request for tv show with ID: {} by user: {}", id, username);
         Optional<TelevisionShow> televisionShow = getById(id, username);
         if (televisionShow.isEmpty()) {
+            log.warn("Attempting to delete a tv show that does not exist. TV show ID: {}, User: {}", id, username);
             throw new ResourceNotFoundException("Cannot delete television show because television show does not exist.");
         }
         dao.deleteById(id, username);
+        log.info("TV show with ID: {} deleted successfully by user: {}", id, username);
         return televisionShow.get().getId();
     }
 
