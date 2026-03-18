@@ -31,6 +31,14 @@ public class MediaController<T> {
         this.serviceFactory = serviceFactory;
     }
 
+    /**
+     * Endpoint to search for media resources based on the provided criteria.
+     *
+     * @param userDetails The authenticated user details.
+     * @param searchMediaRequest The search criteria, including entity type and other filters.
+     * @return ResponseEntity containing a list of media resources matching the criteria.
+     * @throws ResponseStatusException If an error occurs during the search.
+     */
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER, 'ROLE_VIEW')")
     @GetMapping
     ResponseEntity<List<MediaResponse>> search(@AuthenticationPrincipal UserDetails userDetails,
@@ -44,6 +52,14 @@ public class MediaController<T> {
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
+    /**
+     * Endpoint to create a new media resource.
+     *
+     * @param userDetails The authenticated user details.
+     * @param updateCreateMediaRequest The media resource data to be created.
+     * @return ResponseEntity containing the created media resource.
+     * @throws ResponseStatusException If an error occurs during the creation process.
+     */
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.CREATED)
@@ -63,6 +79,14 @@ public class MediaController<T> {
         }
     }
 
+    /**
+     * Endpoint to update an existing media resource.
+     *
+     * @param userDetails The authenticated user details.
+     * @param updateMediaRequest The updated media resource data.
+     * @return ResponseEntity containing the updated media resource.
+     * @throws ResponseStatusException If an error occurs during the update process.
+     */
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)
@@ -81,6 +105,14 @@ public class MediaController<T> {
         }
     }
 
+    /**
+     * Endpoint to delete a media resource by its ID.
+     *
+     * @param userDetails The authenticated user details.
+     * @param deleteMediaRequest The request containing the ID of the media resource to be deleted.
+     * @return ResponseEntity containing the ID of the deleted media resource.
+     * @throws ResponseStatusException If the ID is null or an error occurs during the deletion process.
+     */
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER)")
     @ResponseStatus(HttpStatus.OK)

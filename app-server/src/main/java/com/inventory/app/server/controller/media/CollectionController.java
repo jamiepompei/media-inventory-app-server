@@ -24,6 +24,13 @@ public class CollectionController {
         this.collectionService = collectionService;
     }
 
+    /**
+     * Endpoint to search for collections based on the provided criteria.
+     *
+     * @param searchCollectionRequest The search criteria, including collection title and username.
+     * @return ResponseEntity containing a list of collections matching the criteria.
+     * @throws ResponseStatusException If an error occurs during the search.
+     */
     @GetMapping("/search")
     public ResponseEntity<List<Collection>> searchCollections(@RequestBody SearchCollectionRequest searchCollectionRequest) {
         log.info("Received search request with criteria: {}", searchCollectionRequest);
@@ -37,6 +44,13 @@ public class CollectionController {
         }
     }
 
+    /**
+     * Endpoint to create a new collection.
+     *
+     * @param resource The collection data wrapped in a CollectionMedia object.
+     * @return ResponseEntity containing the created collection.
+     * @throws ResponseStatusException If the request body is invalid or null.
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Collection> createCollection(@RequestBody CollectionMedia resource){
@@ -51,6 +65,13 @@ public class CollectionController {
         }
     }
 
+    /**
+     * Endpoint to update an existing collection.
+     *
+     * @param resource The updated collection data wrapped in a CollectionMedia object.
+     * @return ResponseEntity containing the updated collection.
+     * @throws ResponseStatusException If the request body is invalid or null.
+     */
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Collection> updateCollection(@RequestBody CollectionMedia resource){
