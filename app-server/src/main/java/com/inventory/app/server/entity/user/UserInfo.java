@@ -1,6 +1,5 @@
 package com.inventory.app.server.entity.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,8 +8,6 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -20,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserInfo implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "first_name")
     private String firstName;
@@ -30,9 +27,6 @@ public class UserInfo implements Serializable {
     private String username;
     @Column(name = "created_on")
     private LocalDateTime createdOn;
-    //is this how i want the password??
-    @JsonIgnore
-    private String password;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<UserRole> roles = new HashSet<>();
+//    @ManyToMany(fetch = FetchType.EAGER)
+//    private Set<UserRole> roles = new HashSet<>();
 }

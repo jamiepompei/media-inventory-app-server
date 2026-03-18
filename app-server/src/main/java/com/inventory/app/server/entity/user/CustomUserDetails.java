@@ -1,7 +1,6 @@
 package com.inventory.app.server.entity.user;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -19,12 +18,11 @@ public class CustomUserDetails extends UserInfo implements UserDetails {
 
     public CustomUserDetails(UserInfo byUsername) {
         this.username = byUsername.getUsername();
-        this.password = byUsername.getPassword();
         List<GrantedAuthority> auths = new ArrayList<>();
 
-        for (UserRole role : byUsername.getRoles()) {
-            auths.add(new SimpleGrantedAuthority(role.getName().toUpperCase()));
-        }
+//        for (UserRole role : byUsername.getRoles()) {
+//            auths.add(new SimpleGrantedAuthority(role.getName().toUpperCase()));
+//        }
         this.authorities = auths;
     }
     @Override

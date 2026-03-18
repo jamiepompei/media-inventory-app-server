@@ -13,12 +13,11 @@ public interface UserMapper {
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "username", target = "username")
-    @Mapping(source = "roles", target = "roles")
+   // @Mapping(source = "roles", target = "roles")
     UserResponse mapUserInfoToUserResponse(UserInfo userInfo);
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "password", target = "password")
     @Mapping(source = "username", target = "username")
-    @Mapping(source = "roles", target = "roles")
+   // @Mapping(source = "roles", target = "roles")
     UserInfo mapUserRequestToUserInfo(UserRequest userRequest);
 }

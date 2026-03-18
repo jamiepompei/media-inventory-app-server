@@ -18,7 +18,7 @@ import java.util.Properties;
 @EnableTransactionManagement
 @PropertySource("classpath:application.properties")
 public class AppConfig {
-    @Value("${spring.jpa.generate-ddl}")
+    @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddlAuto;
 
     @Value("${spring.jpa.database-platform}")
@@ -89,6 +89,7 @@ public class AppConfig {
             throw new IllegalArgumentException("Additional database config properties cannot be null.");
         }
        jpaProperties.setProperty("spring.jpa.hibernate.ddl-auto", ddlAuto);
+        jpaProperties.setProperty("orm.hibernate.ddl-auto", "update");
         return jpaProperties;
     }
 

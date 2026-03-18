@@ -26,7 +26,7 @@ public class RefreshToken implements Serializable {
     private Instant expiryDate;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "id", referencedColumnName = "iduser")
     private UserInfo userInfo;
 
     public boolean isExpired() {

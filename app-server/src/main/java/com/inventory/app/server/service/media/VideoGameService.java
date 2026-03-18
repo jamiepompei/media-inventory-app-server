@@ -2,9 +2,12 @@ package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.VideoGame;
 import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
+import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
+import com.inventory.app.server.mapper.VideoGameMapper;
 import com.inventory.app.server.repository.IBaseDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +22,7 @@ import java.util.stream.Collectors;
 import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes.*;
 
 @Service
-public class VideoGameService {
+public class VideoGameService implements BaseService<VideoGame>{
     private IBaseDao<VideoGame> dao;
 
     @Autowired
@@ -28,18 +31,18 @@ public class VideoGameService {
         dao.setClazz(VideoGame.class);
     }
 
-    public List<VideoGame> searchGames(SearchMediaRequest searchMediaRequest) {
+    public List<MediaResponse> search(SearchMediaRequest searchMediaRequest) {
         Optional<Predicate<VideoGame>> searchPredicate = buildSearchPredicate(searchMediaRequest);
         return searchPredicate.map(gamePredicate -> dao.findAll().stream()
                 .filter(gamePredicate)
-                .collect(Collectors.toList())).orElse(Collections.emptyList());
+                .map(VideoGameMapper.INSTANCE::mapVideoGameToMediaResponse)
+                .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     private Optional<Predicate<VideoGame>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
         Predicate<VideoGame> predicate = game -> true; // Defaul Predicate
-        if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
-            predicate = predicate.and(game -> game.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
-        }
+
         if (searchMediaRequest.getTitle() != null && !searchMediaRequest.getTitle().isEmpty()) {
             predicate = predicate.and(game -> game.getTitle().equals(searchMediaRequest.getTitle()));
         }
@@ -69,15 +72,17 @@ public class VideoGameService {
        return game == null ? Optional.empty() : Optional.of(game);
     }
 
-    public VideoGame create(VideoGame game) {
+    public MediaResponse create(UpdateCreateMediaRequest updateCreateMediaRequest) {
+        VideoGame game = VideoGameMapper.INSTANCE.mapMediaRequestToVideoGame(updateCreateMediaRequest);
         Optional<VideoGame> existingGame = getById(game.getId(), game.getCreatedBy());
         if (existingGame.isPresent()) {
             throw new ResourceAlreadyExistsException("Cannot create game because games already exist: " + game);
         }
-        return dao.createOrUpdate(game);
+        return VideoGameMapper.INSTANCE.mapVideoGameToMediaResponse(dao.createOrUpdate(game));
     }
 
-    public VideoGame update(VideoGame updatedGame) {
+    public MediaResponse update(UpdateCreateMediaRequest updateCreateMediaRequest) {
+        VideoGame updatedGame = VideoGameMapper.INSTANCE.mapMediaRequestToVideoGame(updateCreateMediaRequest);
         Optional<VideoGame> existingGame = getById(updatedGame.getId(), updatedGame.getCreatedBy());
 
         if (existingGame.isEmpty()) {
@@ -86,16 +91,16 @@ public class VideoGameService {
         if (verifyIfGameUpdate(existingGame.get(), updatedGame)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Game: " + existingGame + " Update Game: " + updatedGame);
         }
-        return dao.createOrUpdate(updatedGame);
+        return VideoGameMapper.INSTANCE.mapVideoGameToMediaResponse(dao.createOrUpdate(updatedGame));
     }
 
-    public VideoGame deleteById(Long id, String username){
+    public Long deleteById(Long id, String username){
        Optional<VideoGame> game = getById(id, username);
        if (game.isEmpty()) {
            throw new ResourceNotFoundException("Cannot delete game because game does not exist.");
        }
        dao.deleteById(id, username);
-       return game.get();
+       return game.get().getId();
     }
 
     private boolean verifyIfGameUpdate(VideoGame existingGame, VideoGame updatedGame) {

@@ -2,11 +2,15 @@ package com.inventory.app.server.service.media;
 
 import com.inventory.app.server.entity.media.Book;
 import com.inventory.app.server.entity.payload.request.SearchMediaRequest;
+import com.inventory.app.server.entity.payload.request.UpdateCreateMediaRequest;
+import com.inventory.app.server.entity.payload.response.MediaResponse;
 import com.inventory.app.server.error.NoChangesToUpdateException;
 import com.inventory.app.server.error.ResourceAlreadyExistsException;
 import com.inventory.app.server.error.ResourceNotFoundException;
+import com.inventory.app.server.mapper.BookMapper;
 import com.inventory.app.server.repository.IBaseDao;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,7 +25,8 @@ import static com.inventory.app.server.config.MediaInventoryAdditionalAttributes
 
 @Service
 @Transactional
-public class BookService {
+@Slf4j
+public class BookService implements BaseService<Book> {
 
     private IBaseDao<Book> dao;
 
@@ -31,18 +36,18 @@ public class BookService {
         dao.setClazz(Book.class);
     }
 
-   public List<Book> searchBooks(SearchMediaRequest searchRequest) {
+   public List<MediaResponse> search(SearchMediaRequest searchRequest) {
        Optional<Predicate<Book>> searchPredicate = buildSearchPredicate(searchRequest);
        return searchPredicate.map(bookPredicate -> dao.findAll().stream()
                .filter(bookPredicate)
-               .collect(Collectors.toList())).orElse(Collections.emptyList());
+               .map(BookMapper.INSTANCE::mapBookToMediaResponse)
+               .collect(Collectors.toList()))
+               .orElse(Collections.emptyList());
    }
 
     private Optional<Predicate<Book>> buildSearchPredicate(SearchMediaRequest searchMediaRequest) {
         Predicate<Book> predicate = book -> true; // Default Predicate
-        if (searchMediaRequest.getCollectionTitle() != null && !searchMediaRequest.getCollectionTitle().isEmpty()) {
-            predicate = predicate.and(book -> book.getCollectionTitle().equals(searchMediaRequest.getCollectionTitle()));
-        }
+
         if (searchMediaRequest.getTitle() != null && !searchMediaRequest.getTitle().isEmpty()) {
             predicate = predicate.and(book -> book.getTitle().equals(searchMediaRequest.getTitle()));
         }
@@ -75,15 +80,20 @@ public class BookService {
         return book == null ? Optional.empty() : Optional.of(book);
     }
 
-    public Book create(Book book) {
-        Optional<Book> existingBook = getById(book.getId(), book.getCreatedBy());
-        if (existingBook.isPresent()) {
-            throw new ResourceAlreadyExistsException("Cannot create book because book already exists: " + book);
+    public MediaResponse create(UpdateCreateMediaRequest updateCreateMediaRequest) {
+        Book book = BookMapper.INSTANCE.mapMediaRequestToBook(updateCreateMediaRequest);
+        if (book.getId() != null) {
+            Optional<Book> existingBook = getById(book.getId(), book.getCreatedBy());
+            if (existingBook.isPresent()) {
+                throw new ResourceAlreadyExistsException("Cannot create book because book already exists: " + book);
+            }
         }
-        return dao.createOrUpdate(book);
+        log.info("Initiating book POST request. Book to be created: " + book);
+        return BookMapper.INSTANCE.mapBookToMediaResponse(dao.createOrUpdate(book));
     }
 
-    public Book update(Book updatedBook) {
+    public MediaResponse update(UpdateCreateMediaRequest updateCreateMediaRequest) {
+        Book updatedBook = BookMapper.INSTANCE.mapMediaRequestToBook(updateCreateMediaRequest);
         Optional<Book> existingBook = getById(updatedBook.getId(), updatedBook.getCreatedBy());
 
         if (existingBook.isEmpty()) {
@@ -92,16 +102,16 @@ public class BookService {
         if (verifyIfBookUpdated(existingBook.get(), updatedBook)) {
             throw new NoChangesToUpdateException("No updates in book to save. Will not proceed with update. Existing Book: " + existingBook + "Updated Book: " + updatedBook);
         }
-        return dao.createOrUpdate(updatedBook);
+        return BookMapper.INSTANCE.mapBookToMediaResponse(dao.createOrUpdate(updatedBook));
     }
 
-    public Book deleteById(Long id, String username){
+    public Long deleteById(Long id, String username){
         Optional<Book> book = getById(id, username);
         if (book.isEmpty()) {
             throw new ResourceNotFoundException("Cannot delete book because book does not exist.");
         }
         dao.deleteById(id, username);
-        return book.get();
+        return book.get().getId();
     }
 
     private boolean verifyIfBookUpdated(Book existingBook, Book updatedBook){

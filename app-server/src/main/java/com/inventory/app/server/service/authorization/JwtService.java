@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +17,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtService {
 
-    private static final String SECRET = "${SECRET_KEY}";
+    @Value("${SECRET_KEY}")
+    private String secret;
 
     /**
      * Extracts the subject from the token's claim.
@@ -117,7 +121,14 @@ public class JwtService {
      * @return
      */
     private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET);
+        if (secret == null || secret.isEmpty()){
+                throw new IllegalArgumentException("SECRET_KEY must be provided and must be at least 256 bits.");
+            }
+
+        byte[] keyBytes =Decoders.BASE64.decode(secret);
+        if (keyBytes.length < 32) {
+            throw new IllegalArgumentException("SECRET_KEY must be at least 256 bits (32 bytes) for HS256 algorithm. Provided key length: " + keyBytes.length + " bytes");
+        }
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

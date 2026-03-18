@@ -1,5 +1,6 @@
 package com.inventory.app.server.entity.payload.response;
 
+import com.inventory.app.server.entity.collection.Tag;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,18 +31,18 @@ public class MediaResponse {
     private String collectionTitle;
     @NotBlank(message = "Username is mandatory.")
     private String username;
-    @NotBlank(message = "CreatedAsOf is mandatory.")
-    private LocalDateTime createdAsOf;
+    @NotBlank(message = "CreatedOn is mandatory.")
+    private LocalDateTime createdOn;
     @NotBlank(message = "ModifiedBy is mandatory.")
     private String modifiedBy;
-    @NotBlank(message = "ModifiedAsOf is mandatory.")
-    private LocalDateTime modifiedAsOf;
+    @NotBlank(message = "ModifiedOn is mandatory.")
+    private LocalDateTime modifiedOn;
     @NotBlank(message = "Completed is mandatory.")
     private boolean completed;
     @NotBlank(message = "OnLoan is mandatory.")
     private boolean onLoan;
     @NotBlank(message = "Tags are mandatory.")
-    private Set<String> tags;
+    private Set<Tag> tags;
     private Integer reviewRating;
     private String reviewDescription;
     /**

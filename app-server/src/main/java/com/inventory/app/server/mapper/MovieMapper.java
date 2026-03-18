@@ -20,11 +20,16 @@ public interface MovieMapper {
     MovieMapper INSTANCE = Mappers.getMapper(MovieMapper.class);
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "version", target = "version")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionTitle", target = "collectionTitle")
+    @Mapping(source = "username", target = "createdBy")
+    @Mapping(source = "username", target = "modifiedBy")
+    @Mapping(source = "completed", target = "completed")
+    @Mapping(source = "onLoan", target = "onLoan")
+    @Mapping(source = "tags", target = "tags")
+    @Mapping(source = "reviewRating", target = "reviewRating")
+    @Mapping(source = "reviewDescription", target = "reviewDescription")
     @Mapping(source = "additionalAttributes", target = "directors", qualifiedByName = "mapDirectors")
     @Mapping(source = "additionalAttributes", target = "releaseYear", qualifiedByName = "mapReleaseYear")
     Movie mapMediaRequestToMovie(UpdateCreateMediaRequest mediaRequest);
@@ -43,21 +48,23 @@ public interface MovieMapper {
         return additionalAttributes.containsKey(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) ? (Integer) additionalAttributes.get(MediaInventoryAdditionalAttributes.RELEASE_YEAR.getJsonKey()) : null;
     }
 
-    default MediaResponse mapMovieToMediaResponseWithAdditionalAttributes(Movie movie) {
-        MediaResponse mediaResponse = mapMovieIdToMediaId(movie);
-        mediaResponse.setAdditionalAttributes(mapMovieToAdditionalAttributes(movie));
-        return mediaResponse;
-    }
-
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "version", target = "version")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "format", target = "format")
     @Mapping(source = "genre", target = "genre")
-    @Mapping(source = "collectionTitle", target = "collectionTitle")
-    MediaResponse mapMovieIdToMediaId(Movie movie);
+    @Mapping(source = "createdBy", target = "username")
+    @Mapping(source = "createdOn", target = "createdOn")
+    @Mapping(source = "modifiedBy", target = "modifiedBy")
+    @Mapping(source = "modifiedOn", target = "modifiedOn")
+    @Mapping(source = "completed", target = "completed")
+    @Mapping(source = "onLoan", target = "onLoan")
+    @Mapping(source = "tags", target = "tags")
+    @Mapping(source = "reviewRating", target = "reviewRating")
+    @Mapping(source = "reviewDescription", target = "reviewDescription")
+    @Mapping(source = "movie", target = "additionalAttributes", qualifiedByName = "mapMovieToAdditionalAttributes")
+    MediaResponse mapMovieToMediaResponse(Movie movie);
 
-    @Named("mapBookToAdditionalAttributes")
+    @Named("mapMovieToAdditionalAttributes")
     default ConcurrentHashMap<String, Object> mapMovieToAdditionalAttributes(Movie movie) {
         ConcurrentHashMap<String, Object> additionalAttributes = new ConcurrentHashMap<>();
 

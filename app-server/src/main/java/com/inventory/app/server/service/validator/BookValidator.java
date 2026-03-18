@@ -22,9 +22,9 @@ public class BookValidator implements Validator {
         if (checkInputString(book.getGenre())) {
             errors.rejectValue("genre", "genre.empty");
         }
-        if (checkInputString(book.getCollectionTitle())) {
-            errors.rejectValue("collectionName", "collectionName.empty");
-        }
+//        if (checkInputString(book.getCollectionTitle())) {
+//            errors.rejectValue("collectionName", "collectionName.empty");
+//        }
     }
     private boolean checkInputString(String input) {
         return (input == null || input.trim().isEmpty());
