@@ -198,4 +198,25 @@ public class MediaControllerTest {
         assertNull(response);
     }
 
+    @Test
+    public void testDeleteMedia_NullIdException() {
+        // Arrange
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testUser");
+        DeleteMediaRequest deleteRequest = new DeleteMediaRequest();
+        deleteRequest.setEntityType("book");
+
+        // Act
+        ResponseEntity<Long> response = null;
+        try {
+            response = underTest.deleteMedia(userDetails, deleteRequest);
+        } catch (Exception e) {
+            // Assert
+            assertEquals("400 BAD_REQUEST \"Bad Request. Id cannot be null or empty.\"", e.getMessage());
+        }
+
+        verify(baseService, never()).deleteById(anyLong(), anyString());
+        assertNull(response);
+    }
+
 }

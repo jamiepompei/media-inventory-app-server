@@ -119,6 +119,7 @@ public class MediaController<T> {
     public ResponseEntity<Long> deleteMedia(@AuthenticationPrincipal UserDetails userDetails,
                                             @PathVariable("id") final DeleteMediaRequest deleteMediaRequest) {
         if (deleteMediaRequest.getId() == null) {
+            log.warn("Delete request received with null ID for entity type: {} by user: {}", deleteMediaRequest.getEntityType(), userDetails.getUsername());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request. Id cannot be null or empty.");
         }
         log.info("Received delete request for entity type: {} with ID: {} by user: {}", deleteMediaRequest.getEntityType(), deleteMediaRequest.getId(), userDetails.getUsername());
