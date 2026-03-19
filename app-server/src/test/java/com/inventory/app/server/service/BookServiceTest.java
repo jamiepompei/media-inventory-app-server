@@ -64,6 +64,39 @@ public class BookServiceTest {
     }
 
     @Test
+    public void searchBooks_HappyPath() {
+        // GIVEN
+        Book book1 = createBook(1L, Arrays.asList("Author1"), "Book One", username);
+        Book book2 = createBook(2L, Arrays.asList("Author2"), "Book Two", username);
+        searchMediaRequest.setTitle("Book One");
+        when(daoMock.findAll()).thenReturn(Arrays.asList(book1, book2));
+
+        // WHEN
+        List<MediaResponse> results = underTest.search(searchMediaRequest);
+
+        // THEN
+        assertNotNull(results);
+        assertEquals(1, results.size());
+        assertEquals("Book One", results.get(0).getTitle());
+        verify(daoMock, times(1)).findAll();
+    }
+
+    @Test
+    public void searchBooks_NoResults() {
+        // GIVEN
+        searchMediaRequest.setTitle("Nonexistent Book");
+        when(daoMock.findAll()).thenReturn(Collections.emptyList());
+
+        // WHEN
+        List<MediaResponse> results = underTest.search(searchMediaRequest);
+
+        // THEN
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
+        verify(daoMock, times(1)).findAll();
+    }
+
+    @Test
     public void createBook_AlreadyExists() {
         // GIVEN
         Book existingBook = createBook(1L,  Arrays.asList("Author1"), "Existing Book", username);

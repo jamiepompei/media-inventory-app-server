@@ -79,7 +79,7 @@ public class BookService implements BaseService<Book> {
         if (searchMediaRequest.getUsername() != null && !searchMediaRequest.getUsername().isEmpty()) {
             predicate = predicate.and(book -> book.getCreatedBy().equals(searchMediaRequest.getUsername()));
         }
-        log.info("Search predicate: {} built successfully for search criteria: {}", predicate, searchMediaRequest);
+        log.info("Search predicate built successfully for search criteria: {}", searchMediaRequest);
         return Optional.of(predicate);
     }
 
